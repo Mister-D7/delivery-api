@@ -13,6 +13,7 @@ import themesRoutes from './routes/themes.js';
 import bannersRoutes from './routes/banners.js';
 import uploadRoutes from './routes/upload.js';
 import revenueRoutes from './routes/revenue.js';
+import setupRoutes from './routes/setup.js';
 import { startOrderNotifier } from './lib/notifications.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -38,6 +39,7 @@ app.use('/api/delivery/themes', themesRoutes);
 app.use('/api/delivery/banners', bannersRoutes);
 app.use('/api/delivery/upload', uploadRoutes);
 app.use('/api/delivery/revenue', revenueRoutes);
+app.use('/api/delivery/setup', setupRoutes);
 
 app.get('/api/delivery/health', (req, res) => {
   res.json({
