@@ -1,4 +1,25 @@
+# Dependencies
 node_modules/
+web/node_modules/
+
+# Environment
 .env
+.env.example
+
+# Logs
 *.log
+server-err.log
+server.log
+stderr.log
+stdout.log
+
+# Build output
+web/dist/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Project-specific
 .notifier-state.json
+opencode.json

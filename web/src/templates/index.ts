@@ -33,6 +33,10 @@ import nexusGaming from './tech-gaming';
 import vestiaire from './vetement';
 import organicBio from './epicerie-bio';
 import foodBroker from './food-broker';
+import electroTech from './electro-tech';
+import eshopperGeneral from './eshopper-general';
+import ministoreGeneral from './ministore-general';
+import kairaClothes from './kaira-clothes';
 
 let _registry: Template[] = [];
 
@@ -44,6 +48,10 @@ registerTemplate(nexusGaming);
 registerTemplate(vestiaire);
 registerTemplate(organicBio);
 registerTemplate(foodBroker);
+registerTemplate(electroTech);
+registerTemplate(eshopperGeneral);
+registerTemplate(ministoreGeneral);
+registerTemplate(kairaClothes);
 
 export function getTemplates(storeType?: StoreType): Template[] {
   if (!storeType || storeType === 'general') return _registry;
