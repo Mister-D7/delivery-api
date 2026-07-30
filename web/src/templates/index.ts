@@ -42,3 +42,8 @@ export function getTemplates(storeType?: StoreType): Template[] {
 export function getTemplate(id: string): Template | undefined {
   return _registry.find(t => t.id === id);
 }
+
+import './tech-gaming';
+import './vetement';
+import './epicerie-bio';
+import './food-broker';

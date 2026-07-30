@@ -169,13 +169,16 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
       </div>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex items-center justify-center relative" style={{ background: '#f0f0f0' }}>
-          {blobUrl && (
+        <div className="flex-1 relative" style={{ background: '#f0f0f0' }}>
+          {blobUrl ? (
             <iframe ref={iframeRef} src={blobUrl}
-              className="w-full h-full border-0"
-              style={{ maxWidth: 1200, maxHeight: '100%' }}
+              className="absolute inset-0 w-full h-full border-0"
               title="Storefront Preview"
             />
+          ) : (
+            <div className="flex items-center justify-center h-full text-sm" style={{ color: 'var(--admin-muted2)' }}>
+              Aucun template disponible pour ce type de boutique
+            </div>
           )}
         </div>
 
