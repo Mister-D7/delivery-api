@@ -1,0 +1,68 @@
+body { min-width: 960px;}
+.box-1,
+.magnifier { behavior:url(js/PIE.htc); position:relative;}
+
+.img-bord,
+.img-bord .abs,
+.img-bord img,
+/*.img-bord-1,*/
+/*.img-bord-1 .abs,*/
+#contact-form .success-message,
+#contact-form label input,
+	#contact-form label textarea {
+	behavior:url(js/PIE.htc);
+}
+
+
+
+.img-bord { 
+	position: relative;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	-ms-border-radius: 6px;
+	-o-border-radius: 6px;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.img-bord img { position: relative; z-index: 0;}
+.img-bord .abs {
+		box-shadow: none;
+}
+.list_logos li a:hover img { background: #EEEEEE;}
+.list_logos li a:hover img {filter:progid:DXImageTransform.Microsoft.Alpha(opacity=40);}
+.magnifier:hover img {filter:progid:DXImageTransform.Microsoft.Alpha(opacity=40);}
+#contact-form ._placeholder {filter:progid:DXImageTransform.Microsoft.Alpha(opacity=99);}
+#contact-form ._placeholder.focused {filter:progid:DXImageTransform.Microsoft.Alpha(opacity=40);}
+
+
+.img-bord-1 {
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.9975640502598243, M12=-0.06975647374412476, M21=0.06975647374412476, M22=0.9975640502598243, SizingMethod='auto expand')";
+	margin-left: 0px; 
+   margin-top: -5px;
+   position: relative;
+}
+
+.img-bord-1 .abs {
+	   -ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.9993908270190958, M12=0.03489949670250033, M21=-0.03489949670250033, M22=0.9993908270190958, SizingMethod='auto expand')";
+	left: -5px; 
+   top: -3px;
+}
+
+.box-1 { 
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.9975640502598243, M12=-0.06975647374412476, M21=0.06975647374412476, M22=0.9975640502598243, SizingMethod='auto expand')";
+	margin-left: -7px; 
+}
+
+.box-1 .abs { 
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.9961946980917455, M12=-0.08715574274765832, M21=0.08715574274765832, M22=0.9961946980917455, SizingMethod='auto expand')";
+	z-index: 0;
+	left: -8px; 
+   top: -12px;
+}
+
+.sf-menu > li > ul .abs {
+   -ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.9998476951563913, M12=-0.01745240643728445, M21=0.01745240643728445, M22=0.9998476951563913, SizingMethod='auto expand')";
+/*	margin-left: -4px; 
+    margin-top: -4px;*/
+}
