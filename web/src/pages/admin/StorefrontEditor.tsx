@@ -124,7 +124,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     }));
   };
 
-  const allTemplates = useMemo(() => getTemplates(), []);
+  const storeTemplates = useMemo(() => getTemplates(storeType as any), [storeType]);
 
   const orderedProducts = useMemo(() => catalog.filter(p => p.isActive !== false), [catalog]);
 
@@ -190,7 +190,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                 <div>
                   <p className="text-[11px] font-bold tracking-wide mb-3" style={{ color: 'var(--admin-gold)' }}>THÈMES</p>
                   <div className="space-y-1.5 mb-4">
-                    {allTemplates.map(t => (
+                    {storeTemplates.map(t => (
                       <button key={t.id} onClick={() => selectTemplate(t)}
                         className="w-full text-left p-3 rounded-xl transition-all"
                         style={{

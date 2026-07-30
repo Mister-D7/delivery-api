@@ -511,7 +511,7 @@ renderCats(); renderGrid();
 export default {
   id: 'nexus-gaming',
   name: 'NEXUS Gaming',
-  storeType: 'tech' as const,
+  storeType: 'gaming' as const,
   description: 'Dark theme gaming avec configurateur PC — design cyberpunk cyan',
   preview: '',
   theme: {
