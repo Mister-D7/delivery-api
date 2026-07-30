@@ -1,5 +1,3 @@
-import { registerTemplate } from './index';
-
 const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -510,10 +508,10 @@ renderCats(); renderGrid();
 </body>
 </html>`;
 
-registerTemplate({
+export default {
   id: 'nexus-gaming',
   name: 'NEXUS Gaming',
-  storeType: 'tech',
+  storeType: 'tech' as const,
   description: 'Dark theme gaming avec configurateur PC — design cyberpunk cyan',
   preview: '',
   theme: {
@@ -528,4 +526,4 @@ registerTemplate({
     glassEnabled: false,
   },
   html,
-});
+};

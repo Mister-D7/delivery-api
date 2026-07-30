@@ -28,11 +28,21 @@ export const STORE_TYPES: { type: StoreType; label: string; emoji: string }[] = 
   { type: 'general', label: 'Autre / Général', emoji: '📦' },
 ];
 
+import nexusGaming from './tech-gaming';
+import vestiaire from './vetement';
+import organicBio from './epicerie-bio';
+import foodBroker from './food-broker';
+
 let _registry: Template[] = [];
 
-export function registerTemplate(t: Template) {
+function registerTemplate(t: Template) {
   _registry.push(t);
 }
+
+registerTemplate(nexusGaming);
+registerTemplate(vestiaire);
+registerTemplate(organicBio);
+registerTemplate(foodBroker);
 
 export function getTemplates(storeType?: StoreType): Template[] {
   if (!storeType || storeType === 'general') return _registry;
@@ -42,8 +52,3 @@ export function getTemplates(storeType?: StoreType): Template[] {
 export function getTemplate(id: string): Template | undefined {
   return _registry.find(t => t.id === id);
 }
-
-import './tech-gaming';
-import './vetement';
-import './epicerie-bio';
-import './food-broker';

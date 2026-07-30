@@ -1,6 +1,4 @@
-﻿import { registerTemplate } from './index';
-
-const html = `
+﻿const html = `
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1908,10 +1906,10 @@ const html = `
 </html>
 `;
 
-registerTemplate({
+export default {
   id: 'organic-bio',
   name: 'Organic Bio',
-  storeType: 'grocery',
+  storeType: 'grocery' as const,
   description: 'Epicerie bio - design vert, Bootstrap, alimentation naturelle',
   preview: '',
   theme: {
@@ -1926,4 +1924,4 @@ registerTemplate({
     glassEnabled: false,
   },
   html,
-});
+};

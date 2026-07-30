@@ -1,5 +1,3 @@
-import { registerTemplate } from './index';
-
 const html = `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -233,10 +231,10 @@ const html = `<!DOCTYPE html>
 </body>
 </html>`;
 
-registerTemplate({
+export default {
   id: 'food-broker',
   name: 'Food Broker',
-  storeType: 'food',
+  storeType: 'food' as const,
   description: 'Vintage food brokerage template — style classique food industry',
   preview: '',
   theme: {
@@ -251,4 +249,4 @@ registerTemplate({
     glassEnabled: false,
   },
   html,
-});
+};

@@ -1,5 +1,3 @@
-import { registerTemplate } from './index';
-
 const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -506,10 +504,10 @@ renderCats(); renderGrid();
 </body>
 </html>`;
 
-registerTemplate({
+export default {
   id: 'vestiaire',
   name: 'Vestiaire',
-  storeType: 'clothes',
+  storeType: 'clothes' as const,
   description: 'Design épuré mode homme/femme — tons beige et laiton',
   preview: '',
   theme: {
@@ -524,4 +522,4 @@ registerTemplate({
     glassEnabled: false,
   },
   html,
-});
+};
