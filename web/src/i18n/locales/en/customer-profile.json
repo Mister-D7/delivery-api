@@ -1,0 +1,12 @@
+{
+  "title": "My Profile",
+  "name": "Name",
+  "email": "Email",
+  "phone": "Phone",
+  "addresses": "Addresses",
+  "add_address": "Add an Address",
+  "orders": "My Orders",
+  "save": "Save",
+  "saved": "Profile saved!",
+  "logout": "Log Out"
+}

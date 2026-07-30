@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "dashboard": "Commandes",
+    "catalogue": "Catalogue",
+    "boutique": "Boutique",
+    "revenue": "Revenue",
+    "settings": "Settings",
+    "storefront": "Boutique"
+  },
+  "actions": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirm": "Confirmer",
+    "edit": "Modifier",
+    "add": "Ajouter",
+    "close": "Fermer",
+    "back": "Retour",
+    "next": "Suivant",
+    "loading": "Chargement...",
+    "search": "Rechercher...",
+    "refresh": "Actualiser",
+    "export": "Exporter",
+    "import": "Importer",
+    "download": "Télécharger",
+    "upload": "Télécharger",
+    "test": "Tester",
+    "reset": "Réinitialiser"
+  },
+  "status": {
+    "pending": "En attente",
+    "confirmed": "Confirmée",
+    "preparing": "En préparation",
+    "out_for_delivery": "En livraison",
+    "delivered": "Livrée",
+    "cancelled": "Annulée"
+  },
+  "auth": {
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "login": "Se connecter",
+    "logout": "Déconnexion",
+    "logging_in": "Connexion...",
+    "admin": "Admin",
+    "management": "Gestion de la livraison",
+    "invalid_credentials": "Identifiants incorrects"
+  },
+  "currency": {
+    "symbol": "DA",
+    "format": "{{value}} DA"
+  },
+  "errors": {
+    "required": "Ce champ est requis",
+    "network": "Erreur de connexion",
+    "unexpected": "Une erreur inattendue s'est produite",
+    "not_found": "Ressource introuvable"
+  },
+  "time": {
+    "today": "Aujourd'hui",
+    "this_week": "Cette semaine",
+    "this_month": "Ce mois-ci",
+    "yesterday": "Hier"
+  }
+}

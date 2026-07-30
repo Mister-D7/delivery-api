@@ -1,0 +1,36 @@
+{
+  "title": "الإعدادات",
+  "tabs": {
+    "supabase": "Supabase",
+    "github": "GitHub",
+    "render": "Render",
+    "deploy": "نشر على الويب",
+    "backup": "النسخ الاحتياطي"
+  },
+  "supabase": {
+    "title": "إعدادات Supabase",
+    "test": "اختبار الاتصال",
+    "init": "تهيئة قاعدة البيانات",
+    "success": "تم الاتصال بنجاح!",
+    "error": "خطأ في الاتصال"
+  },
+  "github": {
+    "title": "إعدادات GitHub",
+    "test": "اختبار الرمز المميز",
+    "push": "دفع الكود",
+    "token_label": "رمز GitHub"
+  },
+  "render": {
+    "title": "إعدادات Render",
+    "test": "اختبار مفتاح API",
+    "deploy": "نشر",
+    "api_key_label": "مفتاح Render API"
+  },
+  "deploy": {
+    "title": "نشر على الويب",
+    "push_github": "الدفع إلى GitHub",
+    "deploy_render": "النشر على Render",
+    "push": "دفع الكود",
+    "deploy_btn": "نشر"
+  }
+}

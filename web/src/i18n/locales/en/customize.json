@@ -1,0 +1,36 @@
+{
+  "title": "Customize",
+  "tabs": {
+    "products": "Products",
+    "categories": "Categories",
+    "pricing": "Delivery"
+  },
+  "product": {
+    "add": "Add a product",
+    "edit": "Edit product",
+    "name": "Name",
+    "price": "Sale Price (DA)",
+    "cost_price": "Cost Price (DA)",
+    "description": "Description",
+    "specs": "Specifications",
+    "category": "Category",
+    "stock": "Stock",
+    "image": "Image",
+    "barcode": "Barcode",
+    "active": "Active",
+    "add_to_catalog": "Add to Catalog"
+  },
+  "category": {
+    "add": "Add a category",
+    "name": "Name",
+    "image_url": "Image URL (optional)",
+    "seed": "Load default categories"
+  },
+  "pricing": {
+    "title": "Delivery Pricing",
+    "base_fee": "Base Fee (DA)",
+    "per_km": "Per Kilometer (DA)",
+    "free_threshold": "Free Delivery From (DA)",
+    "max_radius": "Maximum Radius (km)"
+  }
+}

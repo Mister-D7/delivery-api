@@ -1,0 +1,94 @@
+its start getting good habibi now i want  aplace exacly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging..... me 
+
+you ....The user wants a page exactly like the Builder (StorefrontBuilder.tsx) - full screen, with GrapesJS, blocks, drag-drop - but integrated as a fullscreen mode within the StorefrontEditor workflow. Essentially, they want to access the Builder's full GrapesJS canvas from within the editor.
+
+Wait, let me re-read: "a place exactly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging"
+
+I think they want: when they click something in the StorefrontEditor (like a "Full Builder" button), it opens the full Builder experience (StorefrontBuilder.tsx) with the GrapesJS canvas, blocks, layers, etc. But the Builder should be linked to the same layout data that the StorefrontEditor uses.
+
+Right now:
+
+StorefrontEditor.tsx (/admin/editor/full) has the live preview + tools
+StorefrontBuilder.tsx (/admin/builder) has the full GrapesJS drag-drop editor
+They want a way to go from the editor to the builder, and the builder should have the same layout as what's in the editor.
+
+Actually, re-reading again: "i want a place exacly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging"
+
+I think they want the StorefrontEditor to have a "Full Builder" mode/button that opens the Builder in fullscreen, and the Builder should take whatever sections are already in the editor's layout and show them in the GrapesJS canvas.
+
+But wait, the Builder already has its own page at /admin/builder. The issue is that the Builder and the Editor use the same localStorage key (delivery_storefront_layout) for the layout, so they already share data.
+
+Actually, I think the user wants this:
+
+In the StorefrontEditor (the page with the live preview), add a button that says "Open Full Builder" or similar
+This button opens the Builder page (StorefrontBuilder.tsx) with the same layout loaded
+The Builder should be fullscreen with all the tools
+When they save in the Builder and go back to the editor, the changes are reflected
+OR they want the Builder to be accessible from within the Editor as a fullscreen mode.
+
+Let me re-read one more time: "a place exacly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging"
+
+I think they mean:
+
+The Builder page is already created (/admin/builder)
+But they want it to be like it was "in the beginning" (the original design) - full screen, with tools
+And they want to be able to access it from the editor
+So the fix is:
+
+Add a "Open Builder" button in the StorefrontEditor's top toolbar
+When clicked, navigate to /admin/builder (the existing Builder page)
+The Builder already uses the same localStorage key, so the layout is shared
+But wait, maybe the user is saying the Builder lost some features or changed and they want it restored to the original full-screen design? Let me re-read...
+
+"make it as builder in the begging" - I think they want the Builder to be accessible from the beginning/initial state of the editor, like a button that says "Open Builder" in the top bar.
+
+Let me just add a button in the StorefrontEditor's toolbar that navigates to the Builder page. And make sure the Builder loads the same layout from localStorage (which it already does).
+
+Actually, I think they want a more seamless integration. Let me add:
+
+A "Builder" button in the StorefrontEditor's top toolbar
+Clicking it opens /admin/builder in fullscreen
+The Builder should feel like a full-screen mode of the editor
+Let me also check if there are any issues with the current Builder. Let me read the current StorefrontBuilder.tsx to see if it's working correctly.
+
+Actually, looking back at the conversation, the user said "so i dont builder but am looking to have all the tools that its in to be in http://localhost:4000/admin/editor/full" — they didn't want the separate Builder page. But now they're saying "i want a place exacly as builder its go in another page we have a full screen the tools and stuff" — they DO want the Builder but as a full-screen tool accessible from the editor.
+
+I think the confusion was that the Builder was standalone and disconnected. Now that I've integrated the sections into the editor, they want the Builder as a "full screen mode" of the editor. The Builder should:
+
+Be accessible from the editor (via a button)
+Show the same layout that's being edited
+Have all the GrapesJS tools in full screen
+Let me add a "Builder" button to the StorefrontEditor's top toolbar and redirect to /admin/builder. The Builder already loads the layout from the same localStorage key.
+
+But also, the Builder needs to be visually consistent and work as expected. Let me also check if the Builder is working correctly with the layout data.
+
+Let me look at the current Builder. Actually, I modified it to add tabs (Layout, Products, Categories, Theme, Delivery). But the user said "dont builder" about that. Let me simplify the Builder back to just the GrapesJS editor (the original design) and add a way to access it from the editor.
+
+Wait, revisiting the conversation:
+
+User said to move all boutique into the Builder → I added tabs to Builder
+User said NO, they want the tools IN the editor page (/admin/editor/full) → I added the Sections tab to the editor
+Now user says "i want a place exactly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging" → They want the Builder as a separate full-screen tool accessible from the editor
+So I need to:
+
+Keep my changes to StorefrontEditor (Sections tab, live preview integration) ✅
+Add a "Builder" button in the StorefrontEditor toolbar that opens /admin/builder
+Clean up the Builder to be its original full-screen GrapesJS experience (remove the extraneous tabs I added)
+Let me clean up the Builder (remove Products, Categories, Theme, Delivery tabs that I added earlier) and add a button in the StorefrontEditor to access it.
+
+Actually wait, let me re-read one more time: "i want a place exacly as builder its go in another page we have a full screen the tools and stuff make it as builder in the begging"
+
+I think "in the begging" means "in the beginning" - like when I first built the Builder. They want the Builder as it was originally designed - full screen GrapesJS with blocks and tools. My extra tabs (Products, Categories, Theme, Delivery) were unnecessary.
+
+So:
+
+Remove the extra tabs I added to StorefrontBuilder.tsx (make it the original full-screen GrapesJS only)
+Add a "Open Builder" button in StorefrontEditor's toolbar
+The Builder opens with the same layout from localStorage
+Let me do this.
+
+I understand now — you want:
+
+The original full-screen GrapesJS Builder (without the extra tabs I added)
+A button in the Editor to open it
+Let me clean up the Builder back to its original design and add the button:

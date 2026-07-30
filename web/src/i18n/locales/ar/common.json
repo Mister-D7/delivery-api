@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "dashboard": "الطلبات",
+    "catalogue": "الكتالوج",
+    "boutique": "المتجر",
+    "revenue": "الإيرادات",
+    "settings": "الإعدادات",
+    "storefront": "المتجر"
+  },
+  "actions": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "confirm": "تأكيد",
+    "edit": "تعديل",
+    "add": "إضافة",
+    "close": "إغلاق",
+    "back": "رجوع",
+    "next": "التالي",
+    "loading": "جاري التحميل...",
+    "search": "بحث...",
+    "refresh": "تحديث",
+    "export": "تصدير",
+    "import": "استيراد",
+    "download": "تحميل",
+    "upload": "رفع",
+    "test": "اختبار",
+    "reset": "إعادة تعيين"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "preparing": "قيد التحضير",
+    "out_for_delivery": "قيد التوصيل",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
+  },
+  "auth": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "logging_in": "جاري تسجيل الدخول...",
+    "admin": "المدير",
+    "management": "إدارة التوصيل",
+    "invalid_credentials": "بيانات الاعتماد غير صحيحة"
+  },
+  "currency": {
+    "symbol": "دج",
+    "format": "{{value}} دج"
+  },
+  "errors": {
+    "required": "هذا الحقل مطلوب",
+    "network": "خطأ في الاتصال",
+    "unexpected": "حدث خطأ غير متوقع",
+    "not_found": "الresource غير موجودة"
+  },
+  "time": {
+    "today": "اليوم",
+    "this_week": "هذا الأسبوع",
+    "this_month": "هذا الشهر",
+    "yesterday": "أمس"
+  }
+}

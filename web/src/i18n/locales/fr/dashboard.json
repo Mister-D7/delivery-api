@@ -1,0 +1,38 @@
+{
+  "title": "Commandes",
+  "filters": {
+    "status": "Statut",
+    "date": "Période",
+    "all": "Tous",
+    "search_placeholder": "Nom, téléphone, #ID..."
+  },
+  "stats": {
+    "total_orders": "Total commandes",
+    "pending": "En attente",
+    "today_revenue": "Revenu du jour",
+    "delivered": "Livrées"
+  },
+  "empty": "Aucune commande",
+  "order": {
+    "customer": "Client",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "items": "Articles",
+    "total": "Total",
+    "status": "Statut",
+    "actions": "Actions",
+    "view": "Voir",
+    "details": "Détails",
+    "chat": "Messages",
+    "delete": "Supprimer",
+    "confirm_delete": "Supprimer cette commande ?",
+    "mark_delivered": "Marquer livrée",
+    "notes": "Notes",
+    "show": "Afficher les détails",
+    "hide": "Masquer les détails"
+  },
+  "pagination": {
+    "previous": "Précédent",
+    "next": "Suivant"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "title": "Sauvegarde",
+  "auto": {
+    "title": "SAUVEGARDE AUTOMATIQUE",
+    "enable": "Backup automatique",
+    "description": "Sauvegarde automatique de toutes les données",
+    "frequency": "Fréquence",
+    "hourly": "Toutes les heures",
+    "daily": "Quotidien",
+    "weekly": "Hebdomadaire",
+    "keep_count": "Conserver les N derniers",
+    "save_settings": "Sauvegarder les paramètres",
+    "last_backup": "Dernier backup"
+  },
+  "manual": {
+    "title": "ACTIONS MANUELLES",
+    "backup_now": "Sauvegarder",
+    "download_json": "Télécharger JSON",
+    "import_json": "Importer JSON",
+    "run_now": "Backup immédiat",
+    "importing": "Import...",
+    "description": "Le fichier JSON contient toutes les données de toutes les tables."
+  },
+  "history": {
+    "title": "HISTORIQUE DES BACKUPS",
+    "empty": "Aucun backup disponible",
+    "auto": "Auto",
+    "manual": "Manuel"
+  }
+}

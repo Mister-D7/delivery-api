@@ -1,0 +1,25 @@
+{
+  "login": {
+    "title": "Connexion",
+    "email": "Adresse e-mail",
+    "password": "Mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion...",
+    "no_account": "Pas encore de compte ?",
+    "register": "S'inscrire",
+    "invalid": "Email ou mot de passe incorrect"
+  },
+  "register": {
+    "title": "Créer un compte",
+    "name": "Nom complet",
+    "email": "Adresse e-mail",
+    "phone": "Téléphone",
+    "password": "Mot de passe",
+    "confirm_password": "Confirmer le mot de passe",
+    "submit": "S'inscrire",
+    "submitting": "Inscription...",
+    "has_account": "Déjà un compte ?",
+    "login": "Se connecter",
+    "password_mismatch": "Les mots de passe ne correspondent pas"
+  }
+}

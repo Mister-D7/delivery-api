@@ -1,0 +1,729 @@
+{
+  "version": "1.0",
+  "app": "mister-dr-delivery",
+  "exportedAt": "2026-07-27T00:34:11.297Z",
+  "tables": {
+    "users": [
+      {
+        "id": "admin-001",
+        "name": "Admin",
+        "email": "admin@mister-dr.shop",
+        "password_hash": "$2b$10$mYSTCetC6ekVDqXPCrZzYe3vKECMY.UeNP/mNckOOOBPzqHM/q.ja",
+        "role": "admin",
+        "created_at": "2026-07-24T01:51:27.933527+00:00"
+      }
+    ],
+    "delivery_customers": [
+      {
+        "id": "693d0dd7-c480-406b-840f-4e9884d652b7",
+        "email": "lololo@gmail.com",
+        "name": "lalali",
+        "password_hash": "$2b$10$ZmquEYQIST/4EShYxZM0H.s3komSLMunofEj/iT0oH54vAeUVTjaG",
+        "phone": "0555445522",
+        "addresses": [],
+        "created_at": "2026-07-24T02:44:39.482628+00:00"
+      },
+      {
+        "id": "126412f4-bbec-4547-a166-d9678e1d55a8",
+        "email": "ara@gml.com",
+        "name": "said aouaou",
+        "password_hash": "$2b$10$L.fa0YyO42Fintx5eIJavuiDJ.ft3V.tLk49NwVSZpF.SXDaqe6My",
+        "phone": "0655112233",
+        "addresses": [],
+        "created_at": "2026-07-25T16:37:30.580921+00:00"
+      },
+      {
+        "id": "5c3a38ff-3ec8-4d84-a65c-85dc66dbd634",
+        "email": "admin@mister-dr.shop",
+        "name": "Faycel Djellali",
+        "password_hash": "$2b$10$pOULbEOoQGJ5eLSiOl7WXubt.XNDT04km0DjqIDNNO7MmFDZhTxCa",
+        "phone": "0540277744",
+        "addresses": [],
+        "created_at": "2026-07-27T00:31:56.953908+00:00"
+      }
+    ],
+    "delivery_categories": [
+      {
+        "id": "439c2714-94ba-4a3f-9ef7-271ec4252037",
+        "name": "Alimentaire",
+        "image_url": null,
+        "sort_order": 0,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "8a606ea0-7948-4d70-9892-fc2087b50692",
+        "name": "Boissons",
+        "image_url": null,
+        "sort_order": 1,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "1ea58644-3efa-48c3-ae3e-5344858f2964",
+        "name": "Fruits & Légumes",
+        "image_url": null,
+        "sort_order": 2,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "3f55d6d2-7f8c-44ef-a9e0-f5cbeb912d15",
+        "name": "Produits Laitiers",
+        "image_url": null,
+        "sort_order": 3,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "8cd2f5a0-b194-4f0a-a8dc-96a7a387d443",
+        "name": "Boulangerie",
+        "image_url": null,
+        "sort_order": 4,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "9a7c2242-c557-4183-9d03-75c12fc28294",
+        "name": "Épicerie",
+        "image_url": null,
+        "sort_order": 5,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "207e1181-be0c-48d4-ba43-979d7a53aec8",
+        "name": "Hygiène",
+        "image_url": null,
+        "sort_order": 6,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "c3aba122-c1af-49d0-b9db-d7f9b16e7139",
+        "name": "Entretien",
+        "image_url": null,
+        "sort_order": 7,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "d27e9b42-f0b9-450c-8069-a48a2ec95e08",
+        "name": "Bébé",
+        "image_url": null,
+        "sort_order": 8,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "1984e8eb-b3e0-4882-8608-9d10721dbec0",
+        "name": "Animalerie",
+        "image_url": null,
+        "sort_order": 9,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "70240e96-fdc1-4bfc-9fc9-64c23a2851df",
+        "name": "Surgelés",
+        "image_url": null,
+        "sort_order": 10,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "1e9e53d3-4192-4d28-beff-b9779606e68c",
+        "name": "Conserves",
+        "image_url": null,
+        "sort_order": 11,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "975deb1e-7367-43a9-855a-fbed9feeb411",
+        "name": "Épices & Condiments",
+        "image_url": null,
+        "sort_order": 12,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "a1490166-04ef-4ef1-b3c4-398b1cbc6cfb",
+        "name": "Huiles & Vinaigres",
+        "image_url": null,
+        "sort_order": 13,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "cb1da4c5-f4b8-470e-a388-8aa9d58e6a23",
+        "name": "Pâtes & Riz",
+        "image_url": null,
+        "sort_order": 14,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "f6b37d73-acbe-4920-a6b1-99d58a071088",
+        "name": "Céréales",
+        "image_url": null,
+        "sort_order": 15,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "f007f44d-3c87-4cbb-8058-6c498a39efca",
+        "name": "Snacks",
+        "image_url": null,
+        "sort_order": 16,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "78f4d7d2-b5ad-4dcd-b00f-946902713acd",
+        "name": "Confiserie",
+        "image_url": null,
+        "sort_order": 17,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "37036396-0f28-46c2-b64f-3927734dfeff",
+        "name": "Boissons Gazeuses",
+        "image_url": null,
+        "sort_order": 18,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "ecd4ebf6-7634-4650-b49e-bf245b197dcd",
+        "name": "Jus & Nectars",
+        "image_url": null,
+        "sort_order": 19,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "d3579b58-93da-44a7-a064-e7aad12f9e2a",
+        "name": "Café & Thé",
+        "image_url": null,
+        "sort_order": 20,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "651484ea-0dbd-4144-bebd-fc9fe7dbb928",
+        "name": "Lait & Yaourts",
+        "image_url": null,
+        "sort_order": 21,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "9e64abb4-2fa4-45a7-a62f-0b299719eb74",
+        "name": "Fromages",
+        "image_url": null,
+        "sort_order": 22,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "fd1a3dbc-d6df-4541-a7ec-088ae7054412",
+        "name": "Viandes",
+        "image_url": null,
+        "sort_order": 23,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "48c4d7f5-cede-4638-b6cc-b605dee3a5ec",
+        "name": "Poissons",
+        "image_url": null,
+        "sort_order": 24,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "284f6d92-8551-4d81-abb6-37d6b4da44be",
+        "name": "Pain & Viennoiseries",
+        "image_url": null,
+        "sort_order": 25,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "b2756117-585e-4839-b23d-44a0b44120a3",
+        "name": "Pâtisseries",
+        "image_url": null,
+        "sort_order": 26,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "ad7b1d72-dcf7-4f81-9586-a23cc7c8fbe5",
+        "name": "Glaces",
+        "image_url": null,
+        "sort_order": 27,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "31bc8fba-4da1-41a1-867a-80b50e58adcc",
+        "name": "Eaux",
+        "image_url": null,
+        "sort_order": 28,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      },
+      {
+        "id": "f237dd62-6b15-4181-84f5-bf8a90a2bb29",
+        "name": "Sucs",
+        "image_url": null,
+        "sort_order": 29,
+        "is_active": true,
+        "created_at": "2026-07-24T20:18:32.454525+00:00"
+      }
+    ],
+    "delivery_products": [
+      {
+        "id": "2120fc49-4951-4916-b9d4-74b75a34626b",
+        "catalog_id": null,
+        "erp_product_id": null,
+        "name": "El mordjene",
+        "description": null,
+        "specs": null,
+        "image_url": "https://bmeqkyqsmolsuuuseqsu.supabase.co/storage/v1/object/public/delivery/products/1785106254454-178637432.jpg",
+        "sale_price": 550,
+        "promo_price": null,
+        "stock_qty": 150,
+        "category_id": "3f55d6d2-7f8c-44ef-a9e0-f5cbeb912d15",
+        "is_active": true,
+        "is_custom": true,
+        "product_order": 0,
+        "created_at": "2026-07-26T22:50:13.870743+00:00",
+        "is_flash_sale": false,
+        "flash_sale_price": null,
+        "flash_sale_end_date": null,
+        "promo_end_date": null,
+        "flash_sale_starts": null,
+        "cost_price": 0
+      },
+      {
+        "id": "4bd85770-d430-4efc-93a2-eafd135b227b",
+        "catalog_id": null,
+        "erp_product_id": null,
+        "name": "condia choco",
+        "description": null,
+        "specs": "Candy Choco 1L de Candia est une boisson lactée chocolatée, prête à consommer. Elle est formulée à base de lait partiellement écrémé et de poudre de cacao",
+        "image_url": "https://bmeqkyqsmolsuuuseqsu.supabase.co/storage/v1/object/public/delivery/products/1784946877075-932088746.jpg",
+        "sale_price": 180,
+        "promo_price": 150,
+        "stock_qty": 150,
+        "category_id": "3f55d6d2-7f8c-44ef-a9e0-f5cbeb912d15",
+        "is_active": true,
+        "is_custom": true,
+        "product_order": 0,
+        "created_at": "2026-07-25T02:33:38.992824+00:00",
+        "is_flash_sale": false,
+        "flash_sale_price": null,
+        "flash_sale_end_date": null,
+        "promo_end_date": null,
+        "flash_sale_starts": null,
+        "cost_price": 150
+      }
+    ],
+    "delivery_orders": [
+      {
+        "id": "2206527c-9d5f-4fc9-b5d1-45c17bec3f63",
+        "secure_token": "9B64F9979B59",
+        "customer_id": null,
+        "customer_name": "Test",
+        "phone": "0555",
+        "address": "123 Main St",
+        "latitude": null,
+        "longitude": null,
+        "total": 1000,
+        "delivery_fee": 0,
+        "status": "PENDING",
+        "voice_url": null,
+        "notes": null,
+        "created_at": "2026-07-25T01:45:23.782903+00:00",
+        "updated_at": "2026-07-25T01:45:23.782903+00:00",
+        "cancelled_at": null,
+        "delivered_at": null
+      },
+      {
+        "id": "4211c936-27f9-434b-8173-d2705125152f",
+        "secure_token": "7A9425A43063",
+        "customer_id": "693d0dd7-c480-406b-840f-4e9884d652b7",
+        "customer_name": "lalali",
+        "phone": "0555445522",
+        "address": "m'chedallah",
+        "latitude": null,
+        "longitude": null,
+        "total": 150,
+        "delivery_fee": 0,
+        "status": "ON_THE_WAY",
+        "voice_url": null,
+        "notes": null,
+        "created_at": "2026-07-25T03:23:56.545327+00:00",
+        "updated_at": "2026-07-25T03:26:27.275+00:00",
+        "cancelled_at": null,
+        "delivered_at": null
+      },
+      {
+        "id": "ad8bb6a6-577d-424a-aafa-53e0abd5fecf",
+        "secure_token": "F06F831F8515",
+        "customer_id": null,
+        "customer_name": "Test User",
+        "phone": "0555123456",
+        "address": "123 Test Street",
+        "latitude": null,
+        "longitude": null,
+        "total": 1000,
+        "delivery_fee": 0,
+        "status": "DELIVERED",
+        "voice_url": null,
+        "notes": null,
+        "created_at": "2026-07-25T01:40:57.199145+00:00",
+        "updated_at": "2026-07-25T18:20:06.695+00:00",
+        "cancelled_at": null,
+        "delivered_at": "2026-07-25T18:20:06.155045+00:00"
+      },
+      {
+        "id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "secure_token": "2D2127C27C48",
+        "customer_id": null,
+        "customer_name": "Verify",
+        "phone": "0555",
+        "address": "test",
+        "latitude": null,
+        "longitude": null,
+        "total": 100,
+        "delivery_fee": 0,
+        "status": "PREPARING",
+        "voice_url": null,
+        "notes": null,
+        "created_at": "2026-07-25T01:43:25.411235+00:00",
+        "updated_at": "2026-07-25T18:20:48.518+00:00",
+        "cancelled_at": null,
+        "delivered_at": null
+      }
+    ],
+    "delivery_order_items": [
+      {
+        "id": "ab004003-e63c-4a2e-8e63-574a11c5d6d6",
+        "order_id": "ad8bb6a6-577d-424a-aafa-53e0abd5fecf",
+        "product_id": null,
+        "catalog_item_id": null,
+        "name": "Coca Cola 33cl",
+        "quantity": 2,
+        "unit_price": 500,
+        "image_url": null,
+        "custom_name": null,
+        "custom_price": null
+      },
+      {
+        "id": "a0489c21-ea31-41f7-b86e-d0454d128b60",
+        "order_id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "product_id": null,
+        "catalog_item_id": null,
+        "name": "Test",
+        "quantity": 1,
+        "unit_price": 100,
+        "image_url": null,
+        "custom_name": null,
+        "custom_price": null
+      },
+      {
+        "id": "7703eda5-c45b-45fd-aaa5-2f3aa85db199",
+        "order_id": "2206527c-9d5f-4fc9-b5d1-45c17bec3f63",
+        "product_id": null,
+        "catalog_item_id": null,
+        "name": "Coca Cola",
+        "quantity": 2,
+        "unit_price": 500,
+        "image_url": null,
+        "custom_name": null,
+        "custom_price": null
+      },
+      {
+        "id": "be377508-cfeb-4a94-b60d-a1e10f85e6f5",
+        "order_id": "4211c936-27f9-434b-8173-d2705125152f",
+        "product_id": "4bd85770-d430-4efc-93a2-eafd135b227b",
+        "catalog_item_id": "4bd85770-d430-4efc-93a2-eafd135b227b",
+        "name": "Item",
+        "quantity": 1,
+        "unit_price": 150,
+        "image_url": null,
+        "custom_name": null,
+        "custom_price": null
+      }
+    ],
+    "delivery_order_status_history": [
+      {
+        "id": "db3d3904-84e0-41cc-8db6-4dcfa947e42e",
+        "order_id": "ad8bb6a6-577d-424a-aafa-53e0abd5fecf",
+        "status": "PENDING",
+        "note": "Order placed",
+        "created_at": "2026-07-25T01:40:57.431616+00:00"
+      },
+      {
+        "id": "148daabd-7f96-4094-a26a-e306879db2f3",
+        "order_id": "ad8bb6a6-577d-424a-aafa-53e0abd5fecf",
+        "status": "CONFIRMED",
+        "note": null,
+        "created_at": "2026-07-25T01:40:57.801953+00:00"
+      },
+      {
+        "id": "c12aac0b-a419-479e-bd98-b77022655dad",
+        "order_id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "status": "PENDING",
+        "note": "Order placed",
+        "created_at": "2026-07-25T01:43:25.597022+00:00"
+      },
+      {
+        "id": "808ab201-7c4b-4f13-a23f-3ded7f0ef8b4",
+        "order_id": "2206527c-9d5f-4fc9-b5d1-45c17bec3f63",
+        "status": "PENDING",
+        "note": "Order placed",
+        "created_at": "2026-07-25T01:45:24.205148+00:00"
+      },
+      {
+        "id": "fdbbca19-a781-4c55-bbdb-d187437d0307",
+        "order_id": "4211c936-27f9-434b-8173-d2705125152f",
+        "status": "PENDING",
+        "note": "Order placed",
+        "created_at": "2026-07-25T03:23:56.712768+00:00"
+      },
+      {
+        "id": "741134a2-561f-43be-9a97-0fdd68355a91",
+        "order_id": "4211c936-27f9-434b-8173-d2705125152f",
+        "status": "CONFIRMED",
+        "note": null,
+        "created_at": "2026-07-25T03:25:46.943711+00:00"
+      },
+      {
+        "id": "153d363e-9c84-44d9-979f-e245b15a47d7",
+        "order_id": "4211c936-27f9-434b-8173-d2705125152f",
+        "status": "ON_THE_WAY",
+        "note": null,
+        "created_at": "2026-07-25T03:26:27.238429+00:00"
+      },
+      {
+        "id": "6160ed2f-b2d2-4cc5-b222-ae9cefd88cc4",
+        "order_id": "ad8bb6a6-577d-424a-aafa-53e0abd5fecf",
+        "status": "DELIVERED",
+        "note": null,
+        "created_at": "2026-07-25T18:20:06.278511+00:00"
+      },
+      {
+        "id": "b98875fa-7b08-4ee0-a515-bccd5ea1da45",
+        "order_id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "status": "PREPARING",
+        "note": null,
+        "created_at": "2026-07-25T18:20:44.763523+00:00"
+      },
+      {
+        "id": "11a7413f-7cd8-43ef-a66e-93a0a4d22b2c",
+        "order_id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "status": "PENDING",
+        "note": null,
+        "created_at": "2026-07-25T18:20:46.71204+00:00"
+      },
+      {
+        "id": "f21ff3ec-d07e-4033-949e-547dd9aad535",
+        "order_id": "de265d14-cd60-4fb9-98a8-b2091241fac1",
+        "status": "PREPARING",
+        "note": null,
+        "created_at": "2026-07-25T18:20:48.006988+00:00"
+      }
+    ],
+    "delivery_order_messages": [],
+    "delivery_settings": [
+      {
+        "key": "delivery_pricing",
+        "value": {
+          "perKm": 30,
+          "baseFee": 200,
+          "shopLat": 36.7538,
+          "shopLng": 3.0588,
+          "shopName": "MISTER-DR",
+          "maxRadius": 30,
+          "freeThreshold": 3000
+        },
+        "updated_at": "2026-07-24T01:51:27.933527+00:00"
+      },
+      {
+        "key": "main",
+        "value": {
+          "main": {
+            "main": {
+              "main": {
+                "main": {
+                  "main": {
+                    "logoUrl": "",
+                    "shopName": "MISTER-DR",
+                    "bannerUrl": "",
+                    "fontFamily": "Inter",
+                    "accentColor": "#ffffff",
+                    "primaryColor": "#D4A843",
+                    "productOrder": [],
+                    "categoryOrder": [],
+                    "secondaryColor": "#1a1a1a"
+                  },
+                  "bgColor": "#0a0a0a",
+                  "tagline": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+                  "glowColor": "#bfa24e",
+                  "heroImage": "",
+                  "storeName": "MISTER-DR",
+                  "textColor": "#f5f1e8",
+                  "bannerText": "Commandez, on vous livre",
+                  "fontFamily": "'Unbounded', sans-serif",
+                  "accentColor": "#bfa24e",
+                  "glowEnabled": true,
+                  "productOrder": [],
+                  "surfaceColor": "#141414",
+                  "categoryOrder": [],
+                  "animationEnabled": true,
+                  "delivery_pricing": {
+                    "perKm": 30,
+                    "baseFee": 200,
+                    "shopLat": 36.7538,
+                    "shopLng": 3.0588,
+                    "shopName": "MISTER-DR",
+                    "maxRadius": 30,
+                    "freeThreshold": 3000
+                  }
+                },
+                "bgColor": "#0a0a0a",
+                "tagline": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+                "glowColor": "#bfa24e",
+                "heroImage": "",
+                "storeName": "MISTER-DR",
+                "textColor": "#f5f1e8",
+                "bannerText": "Commandez, on vous livre",
+                "fontFamily": "'Unbounded', sans-serif",
+                "accentColor": "#bfa24e",
+                "glowEnabled": true,
+                "productOrder": [],
+                "surfaceColor": "#141414",
+                "categoryOrder": [],
+                "animationEnabled": true,
+                "delivery_pricing": {
+                  "perKm": 30,
+                  "baseFee": 200,
+                  "shopLat": 36.7538,
+                  "shopLng": 3.0588,
+                  "shopName": "MISTER-DR",
+                  "maxRadius": 30,
+                  "freeThreshold": 3000
+                }
+              },
+              "bgColor": "#0a0f1a",
+              "tagline": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+              "glowColor": "#3b82f6",
+              "heroImage": "",
+              "storeName": "MISTER-DR",
+              "textColor": "#e2e8f0",
+              "bannerText": "Commandez, on vous livre",
+              "fontFamily": "'Unbounded', sans-serif",
+              "accentColor": "#3b82f6",
+              "glowEnabled": true,
+              "productOrder": [],
+              "surfaceColor": "#111827",
+              "categoryOrder": [],
+              "animationEnabled": true,
+              "delivery_pricing": {
+                "perKm": 30,
+                "baseFee": 200,
+                "shopLat": 36.7538,
+                "shopLng": 3.0588,
+                "shopName": "MISTER-DR",
+                "maxRadius": 30,
+                "freeThreshold": 3000
+              }
+            },
+            "bgColor": "#0a0f1a",
+            "tagline": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+            "glowColor": "#3b82f6",
+            "heroImage": "",
+            "storeName": "MISTER-DR",
+            "textColor": "#e2e8f0",
+            "bannerText": "Commandez, on vous livre",
+            "fontFamily": "'Unbounded', sans-serif",
+            "accentColor": "#3b82f6",
+            "glowEnabled": true,
+            "productOrder": [],
+            "surfaceColor": "#111827",
+            "categoryOrder": [],
+            "backgroundType": "color",
+            "backgroundImage": "",
+            "animationEnabled": true,
+            "delivery_pricing": {
+              "perKm": 30,
+              "baseFee": 200,
+              "shopLat": 36.7538,
+              "shopLng": 3.0588,
+              "shopName": "MISTER-DR",
+              "maxRadius": 30,
+              "freeThreshold": 3000
+            }
+          },
+          "bgColor": "#0a0a0a",
+          "tagline": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+          "glowColor": "#bfa24e",
+          "heroImage": "",
+          "storeName": "MISTER-DR",
+          "textColor": "#f5f1e8",
+          "bannerText": "Commandez, on vous livre",
+          "fontFamily": "'Unbounded', sans-serif",
+          "accentColor": "#bfa24e",
+          "glowEnabled": false,
+          "productOrder": [],
+          "surfaceColor": "#141414",
+          "categoryOrder": [],
+          "backgroundType": "image",
+          "backgroundImage": "/uploads/images/1785107913790-721389138.jpg",
+          "animationEnabled": false,
+          "delivery_pricing": {
+            "perKm": 30,
+            "baseFee": 200,
+            "shopLat": 36.7538,
+            "shopLng": 3.0588,
+            "shopName": "MISTER-DR",
+            "maxRadius": 30,
+            "freeThreshold": 3000
+          }
+        },
+        "updated_at": "2026-07-24T01:51:27.933527+00:00"
+      },
+      {
+        "key": "backup_settings",
+        "value": {
+          "frequency": "daily",
+          "keepCount": 10,
+          "autoBackup": false,
+          "lastBackupAt": "2026-07-27T00:33:47.669Z"
+        },
+        "updated_at": "2026-07-27T00:33:20.913198+00:00"
+      }
+    ],
+    "delivery_themes": [],
+    "delivery_banners": []
+  },
+  "rowCounts": {
+    "users": 1,
+    "delivery_customers": 3,
+    "delivery_categories": 30,
+    "delivery_products": 2,
+    "delivery_orders": 4,
+    "delivery_order_items": 4,
+    "delivery_order_status_history": 11,
+    "delivery_order_messages": 0,
+    "delivery_settings": 3,
+    "delivery_themes": 0,
+    "delivery_banners": 0
+  },
+  "checksum": "279c01235756a1d1c42fc6d8a89f3e772cf83dcffdfff4328bfcd83eda01079e"
+}

@@ -1,9 +1,64 @@
 import { Router } from 'express';
 import supabase from '../lib/supabase.js';
 import { signToken, hashPassword, comparePassword } from '../lib/auth.js';
-import { customerAuth } from '../middleware/auth.js';
+import { customerAuth, adminAuth } from '../middleware/auth.js';
+import { getAuthUrl } from '../lib/cloud.js';
 
 const router = Router();
+
+// GET /auth/google — get Google login URL (admin)
+router.get('/google', (req, res) => {
+  try {
+    const { url } = getAuthUrl('google_drive', 'auth');
+    res.json({ url });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// GET /auth/google/customer — get Google login URL (customer)
+router.get('/google/customer', (req, res) => {
+  try {
+    const { url } = getAuthUrl('google_drive', 'auth-customer');
+    res.json({ url });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
+});
+
+// GET /auth/me — get current user info (admin or customer)
+router.get('/me', async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.status(401).json({ error: 'No token' });
+
+    const token = authHeader.replace('Bearer ', '');
+    const { verifyToken } = await import('../lib/auth.js');
+    const decoded = verifyToken(token);
+
+    // Try admin first
+    const { data: admin } = await supabase
+      .from('users')
+      .select('id, name, email, role, avatar_url')
+      .eq('email', decoded.email)
+      .maybeSingle();
+
+    if (admin) return res.json({ user: { id: admin.id, name: admin.name, email: admin.email, role: admin.role || 'admin', avatarUrl: admin.avatar_url } });
+
+    // Try customer
+    const { data: customer } = await supabase
+      .from('delivery_customers')
+      .select('id, name, email, phone, addresses')
+      .eq('email', decoded.email)
+      .maybeSingle();
+
+    if (customer) return res.json({ user: { ...customer, role: 'customer' } });
+
+    res.status(401).json({ error: 'User not found' });
+  } catch (err) {
+    res.status(401).json({ error: 'Invalid token' });
+  }
+});
 
 // POST /auth/login — admin or customer
 router.post('/login', async (req, res) => {
@@ -87,6 +142,11 @@ router.put('/profile', customerAuth, async (req, res) => {
   }
 });
 
+function mapOrder(o) {
+  if (!o) return o;
+  return { ...o, createdAt: o.created_at, updatedAt: o.updated_at, secureToken: o.secure_token, customerId: o.customer_id, customerName: o.customer_name, deliveryFee: o.delivery_fee, voiceOrderUrl: o.voice_order_url, items: o.delivery_order_items || o.items || [] };
+}
+
 // GET /auth/my-orders — customer
 router.get('/my-orders', customerAuth, async (req, res) => {
   try {
@@ -96,7 +156,7 @@ router.get('/my-orders', customerAuth, async (req, res) => {
       .eq('customer_id', req.customer.id)
       .order('created_at', { ascending: false });
 
-    res.json(orders || []);
+    res.json((orders || []).map(mapOrder));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

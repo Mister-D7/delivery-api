@@ -1,0 +1,47 @@
+{
+  "title": "الإيرادات",
+  "tabs": {
+    "overview": "نظرة عامة",
+    "products": "المنتجات",
+    "reports": "التقارير"
+  },
+  "overview": {
+    "total_revenue": "إجمالي الإيرادات",
+    "total_orders": "إجمالي الطلبات",
+    "avg_order": "متوسط قيمة الطلب",
+    "profit": "الأرباح",
+    "top_products": "أفضل المنتجات",
+    "units_sold": "مباع"
+  },
+  "cards": {
+    "delivered_orders": "الطلبات المسلّمة",
+    "cancelled_orders": "الطلبات الملغاة",
+    "loss_cancelled": "خسائر الإلغاء",
+    "net_profit": "صافي الربح"
+  },
+  "products": {
+    "title": "تكاليف المنتجات",
+    "name": "المنتج",
+    "sale_price": "سعر البيع",
+    "cost_price": "سعر الشراء",
+    "margin": "هامش الربح",
+    "margin_percent": "نسبة الربح %",
+    "edit": "تعديل",
+    "save": "حفظ"
+  },
+  "reports": {
+    "export_csv": "تصدير CSV",
+    "print": "طباعة",
+    "delivery_rate": "نسبة التوصيل",
+    "detail": "التفاصيل المالية",
+    "gross_revenue": "الإيرادات الإجمالية (التوصيلات)",
+    "cost_of_goods": "تكلفة البضائع",
+    "gross_margin": "الهامش الإجمالي",
+    "cancelled_loss": "خسائر الطلبات الملغاة"
+  },
+  "date_range": {
+    "from": "من",
+    "to": "إلى",
+    "apply": "تطبيق"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "title": "Revenue",
+  "tabs": {
+    "overview": "Overview",
+    "products": "Products",
+    "reports": "Reports"
+  },
+  "overview": {
+    "total_revenue": "Total Revenue",
+    "total_orders": "Total Orders",
+    "avg_order": "Average Order",
+    "profit": "Profit",
+    "top_products": "Top Products",
+    "units_sold": "sold"
+  },
+  "cards": {
+    "delivered_orders": "Delivered Orders",
+    "cancelled_orders": "Cancelled Orders",
+    "loss_cancelled": "Cancelled Loss",
+    "net_profit": "Net Profit"
+  },
+  "products": {
+    "title": "Product Costs",
+    "name": "Product",
+    "sale_price": "Sale Price",
+    "cost_price": "Cost Price",
+    "margin": "Margin",
+    "margin_percent": "Margin %",
+    "edit": "Edit",
+    "save": "Save"
+  },
+  "reports": {
+    "export_csv": "Export CSV",
+    "print": "Print",
+    "delivery_rate": "Delivery Rate",
+    "detail": "Financial Detail",
+    "gross_revenue": "Gross Revenue (Deliveries)",
+    "cost_of_goods": "Cost of Goods",
+    "gross_margin": "Gross Margin",
+    "cancelled_loss": "Cancelled Order Losses"
+  },
+  "date_range": {
+    "from": "From",
+    "to": "To",
+    "apply": "Apply"
+  }
+}

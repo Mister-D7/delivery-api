@@ -1,0 +1,14 @@
+{
+  "receipt": "إيصال",
+  "order_id": "رقم الطلب",
+  "date": "التاريخ",
+  "customer": "العميل",
+  "phone": "الهاتف",
+  "address": "العنوان",
+  "items": "المنتجات",
+  "subtotal": "المجموع الفرعي",
+  "delivery_fee": "التوصيل",
+  "total": "المجموع",
+  "thank_you": "شكراً لطلبك!",
+  "powered_by": "MISTER-DR"
+}

@@ -194,7 +194,7 @@ async function setupSupabase(url, serviceKey) {
   try {
     await supabase.from('delivery_settings').upsert([
       { key: 'main', value: { shopName: 'MISTER-DR', accentColor: '#ffffff', primaryColor: '#D4A843', secondaryColor: '#1a1a1a', fontFamily: 'Inter' } },
-      { key: 'delivery_pricing', value: { baseFee: 200, perKm: 30, freeThreshold: 3000, maxRadius: 30, shopName: 'MISTER-DR', shopLat: 36.7538, shopLng: 3.0588 } },
+      { key: 'delivery_pricing', value: { baseFee: 200, baseKm: 5, extraPerKm: 50, freeThreshold: 3000, maxRadius: 30, shopName: 'MISTER-DR', shopLat: 36.7538, shopLng: 3.0588 } },
     ], { onConflict: 'key' });
     printGreen('  ✓ Default settings seeded');
   } catch {

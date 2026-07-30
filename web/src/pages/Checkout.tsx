@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { motion } from 'framer-motion';
@@ -13,6 +13,8 @@ import { useCart } from '../context/CartContext';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 import api from '../services/api';
 import { getDeliveryPricing, calcDeliveryFee, DeliveryPricing } from '../services/deliveryPricing';
+import { useTranslation } from 'react-i18next';
+import { WILAYAS, getCommunesByWilaya, getWilayaByCode, getCommuneCoords } from '../data/algeria';
 
 const goldIcon = new L.DivIcon({
   className: '',
@@ -26,28 +28,52 @@ function LocationPicker({ position, onPick }: { position: [number, number]; onPi
   return <Marker position={position} icon={goldIcon} />;
 }
 
-function DeliveryMap({ onLocationChange }: { onLocationChange: (pos: [number, number]) => void }) {
+function MapCenterUpdater({ center }: { center: [number, number] }) {
+  const map = useMap();
+  map.setView(center, 16);
+  return null;
+}
+
+function DeliveryMap({ position: externalPos, onLocationChange }: { position?: [number, number]; onLocationChange: (pos: [number, number]) => void }) {
   const [position, setPosition] = useState<[number, number]>([36.7525, 3.042]);
+  const [satellite, setSatellite] = useState(true);
+  const [locating, setLocating] = useState(false);
+  // Sync from external position (commune/wilaya selection)
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        res => { const p: [number, number] = [res.coords.latitude, res.coords.longitude]; setPosition(p); onLocationChange(p); },
-        () => {},
-        { timeout: 4000 }
-      );
-    }
-  }, []);
+    if (externalPos) setPosition(externalPos);
+  }, [externalPos]);
+  const locate = () => {
+    if (!navigator.geolocation) return toast.error('Géolocalisation non disponible');
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      res => { const p: [number, number] = [res.coords.latitude, res.coords.longitude]; setPosition(p); onLocationChange(p); setLocating(false); },
+      () => { toast.error('Impossible de vous localiser'); setLocating(false); },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  };
+  const streetUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const satUrl = 'https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
   return (
-    <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(191,162,78,0.12)', height: 200 }}>
-      <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OSM' />
+    <div className="rounded-xl overflow-hidden relative" style={{ border: '1px solid rgba(191,162,78,0.12)', height: 200 }}>
+      <MapContainer center={position} zoom={16} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+        <TileLayer url={satellite ? satUrl : streetUrl} attribution={satellite ? '&copy; Google' : '&copy; OSM'} />
+        {externalPos && <MapCenterUpdater center={externalPos} />}
         <LocationPicker position={position} onPick={p => { setPosition(p); onLocationChange(p); }} />
       </MapContainer>
+      <div className="absolute top-2 right-2 z-[1000] flex flex-col gap-1.5">
+        <button onClick={() => setSatellite(!satellite)} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ background: 'rgba(0,0,0,0.7)', color: satellite ? '#4ade80' : '#bfa24e', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {satellite ? '🛰 Satellite' : '🗺 Plan'}
+        </button>
+        <button onClick={locate} disabled={locating} className="px-2.5 py-1 rounded-lg text-[10px] font-bold" style={{ background: 'rgba(0,0,0,0.7)', color: '#60a5fa', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          {locating ? '📍...' : '📍 Me localiser'}
+        </button>
+      </div>
     </div>
   );
 }
 
 function VoiceRecorder({ onVoiceReady }: { onVoiceReady: (blob: Blob | null) => void }) {
+  const { t } = useTranslation('checkout');
   const [recording, setRecording] = useState(false);
   const [seconds, setSeconds] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -74,7 +100,7 @@ function VoiceRecorder({ onVoiceReady }: { onVoiceReady: (blob: Blob | null) => 
       setRecording(true);
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000);
-    } catch { toast.error("Micro non disponible"); }
+    } catch { toast.error(t('form.voice_note')); }
   };
 
   const stopRecording = () => {
@@ -93,7 +119,7 @@ function VoiceRecorder({ onVoiceReady }: { onVoiceReady: (blob: Blob | null) => 
             {recording ? <Square size={16} /> : <Mic size={17} />}
           </button>
           <div className="text-xs" style={{ color: '#8c8578' }}>
-            {recording ? <span style={{ color: '#d9603b' }} className="font-semibold">● Enregistrement... {fmt(seconds)}</span> : 'Appuyez pour enregistrer une note vocale'}
+            {recording ? <span style={{ color: '#d9603b' }} className="font-semibold">● {t('form.voice_note')} {fmt(seconds)}</span> : t('form.voice_record')}
           </div>
         </>
       ) : (
@@ -102,7 +128,7 @@ function VoiceRecorder({ onVoiceReady }: { onVoiceReady: (blob: Blob | null) => 
             {playing ? <Pause size={16} /> : <Play size={16} />}
           </button>
           <audio ref={audioRef} src={audioUrl} onEnded={() => setPlaying(false)} className="hidden" />
-          <span className="text-xs flex-1" style={{ color: '#8c8578' }}>Note vocale · {fmt(seconds)}</span>
+          <span className="text-xs flex-1" style={{ color: '#8c8578' }}>{t('form.voice_note')} · {fmt(seconds)}</span>
           <button onClick={() => { setAudioUrl(null); onVoiceReady(null); setSeconds(0); }}><Trash2 size={16} style={{ color: '#d9603b' }} /></button>
         </>
       )}
@@ -111,12 +137,15 @@ function VoiceRecorder({ onVoiceReady }: { onVoiceReady: (blob: Blob | null) => 
 }
 
 export default function Checkout() {
+  const { t } = useTranslation('checkout');
   const { items, updateQty, removeItem, total, clearCart } = useCart();
   const { customer, token } = useCustomerAuth();
   const navigate = useNavigate();
   const [name, setName] = useState(customer?.name || '');
   const [phone, setPhone] = useState(customer?.phone || '');
   const [address, setAddress] = useState('');
+  const [wilayaCode, setWilayaCode] = useState<number | null>(null);
+  const [communeName, setCommuneName] = useState('');
   const [gps, setGps] = useState<[number, number] | null>(null);
   const [noteType, setNoteType] = useState<'text' | 'voice'>('text');
   const [textNote, setTextNote] = useState('');
@@ -126,6 +155,56 @@ export default function Checkout() {
   const [deliveryFee, setDeliveryFee] = useState<number | null>(null);
   const [deliveryDistance, setDeliveryDistance] = useState<number | null>(null);
   const [outOfRange, setOutOfRange] = useState(false);
+  const [selectedAddrId, setSelectedAddrId] = useState<string | null>(null);
+
+  // Sync from profile when customer data loads
+  useEffect(() => {
+    if (customer) {
+      setName(customer.name || '');
+      setPhone(customer.phone || '');
+    }
+  }, [customer]);
+
+  const setGpsFromCommune = (wCode: number | null, cName: string) => {
+    if (wCode && cName) {
+      const coords = getCommuneCoords(wCode, cName);
+      if (coords) setGps(coords);
+    } else if (wCode && !cName) {
+      const w = getWilayaByCode(wCode);
+      if (w) setGps([w.lat, w.lng]);
+    }
+  };
+
+  const savedAddresses: { id: string; label: string; address: string; wilayaCode?: number; commune?: string }[] =
+    customer?.addresses && Array.isArray(customer.addresses) ? customer.addresses : [];
+
+  const selectAddress = (a: { id: string; label: string; address: string; wilayaCode?: number; commune?: string }) => {
+    setSelectedAddrId(a.id);
+    setAddress(a.address);
+    if (a.wilayaCode) setWilayaCode(a.wilayaCode);
+    if (a.commune) setCommuneName(a.commune);
+    setGpsFromCommune(a.wilayaCode ?? null, a.commune ?? '');
+  };
+
+  const useCustomAddress = () => {
+    setSelectedAddrId(null);
+    setAddress('');
+    setWilayaCode(null);
+    setCommuneName('');
+    setGps(null);
+  };
+
+  const communes = wilayaCode ? getCommunesByWilaya(wilayaCode) : [];
+
+  const formatFullAddress = () => {
+    const parts = [address];
+    if (communeName) parts.push(communeName);
+    if (wilayaCode) {
+      const w = getWilayaByCode(wilayaCode);
+      if (w) parts.push(w.name);
+    }
+    return parts.filter(Boolean).join(', ');
+  };
 
   useEffect(() => {
     getDeliveryPricing().then(setPricing);
@@ -134,7 +213,7 @@ export default function Checkout() {
   useEffect(() => {
     if (!pricing || !gps) { setDeliveryFee(null); setDeliveryDistance(null); setOutOfRange(false); return; }
     const result = calcDeliveryFee(pricing, total, gps[0], gps[1]);
-    if (result.超出) { setOutOfRange(true); setDeliveryFee(null); setDeliveryDistance(result.distance); }
+    if (result.outOfRange) { setOutOfRange(true); setDeliveryFee(null); setDeliveryDistance(result.distance); }
     else { setOutOfRange(false); setDeliveryFee(result.fee); setDeliveryDistance(result.distance); }
   }, [pricing, gps, total]);
 
@@ -147,9 +226,10 @@ export default function Checkout() {
     });
 
   const submitOrder = async () => {
-    if (!name.trim() || !phone.trim()) { toast.error('Remplissez le nom et le téléphone.'); return; }
-    if (items.length === 0) { toast.error('Votre panier est vide.'); return; }
-    if (outOfRange) { toast.error('Votre adresse est hors de la zone de livraison.'); return; }
+    if (!name.trim() || !phone.trim()) { toast.error(t('form.name')); return; }
+    if (!address.trim() && !communeName) { toast.error(t('form.address_placeholder')); return; }
+    if (items.length === 0) { toast.error(t('form.submit')); return; }
+    if (outOfRange) { toast.error(t('form.address')); return; }
     setSubmitting(true);
     try {
       const payload: any = {
@@ -158,13 +238,15 @@ export default function Checkout() {
           productId: i.erpProductId || null,
           quantity: i.qty,
           unitPrice: Number(i.promoPrice ?? i.price),
+          name: i.name || undefined,
           customName: i.customName || undefined,
           customPrice: i.customPrice || undefined,
+          imageUrl: i.imageUrl || undefined,
         })),
         total,
         customerName: name,
         phone,
-        address,
+        address: formatFullAddress(),
         latitude: gps ? gps[0] : null,
         longitude: gps ? gps[1] : null,
         customerId: customer?.id || undefined,
@@ -175,17 +257,28 @@ export default function Checkout() {
       const secureToken = res.data.secureToken;
 
       if (noteType === 'voice' && voiceBlob) {
-        const fd = new FormData();
-        fd.append('audio', voiceBlob, 'voice.webm');
-        fd.append('orderId', orderId);
-        await api.post('/upload/voice/public', fd);
+        try {
+          const fd = new FormData();
+          fd.append('audio', voiceBlob, 'voice.webm');
+          const upRes = await api.post('/upload/voice/public', fd);
+          const audioUrl = upRes.data?.url;
+          if (audioUrl && secureToken) {
+            await api.post(`/orders/token/${secureToken}/messages`, { text: null, sender: 'customer', audioUrl });
+          }
+        } catch {}
+      } else if (noteType === 'text' && textNote.trim()) {
+        try {
+          if (secureToken) {
+            await api.post(`/orders/token/${secureToken}/messages`, { text: textNote.trim(), sender: 'customer' });
+          }
+        } catch {}
       }
 
       clearCart();
-      toast.success('Commande envoyée !');
+      toast.success(t('success.title'));
       if (secureToken) navigate(`/track/${secureToken}`);
     } catch (err: any) {
-      toast.error(err.response?.data?.message || "Erreur lors de l'envoi");
+      toast.error(err.response?.data?.error || err.response?.data?.message || t('form.submitting'));
     } finally { setSubmitting(false); }
   };
 
@@ -194,10 +287,10 @@ export default function Checkout() {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: '#0a0a0a' }}>
         <div className="text-center">
           <ShoppingBag size={48} className="mx-auto mb-4" style={{ color: '#333' }} />
-          <h2 className="text-lg font-bold mb-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>Panier vide</h2>
-          <p className="text-sm mb-6" style={{ color: '#8c8578' }}>Ajoutez des produits avant de commander.</p>
+          <h2 className="text-lg font-bold mb-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>{t('form.submit')}</h2>
+          <p className="text-sm mb-6" style={{ color: '#8c8578' }}>{t('form.address_placeholder')}</p>
           <button onClick={() => navigate('/')} className="gold-btn px-6 py-3 text-sm font-bold rounded-full flex items-center gap-2 mx-auto">
-            Retour à la boutique <ArrowRight size={14} />
+            {t('form.location')} <ArrowRight size={14} />
           </button>
         </div>
       </div>
@@ -210,17 +303,17 @@ export default function Checkout() {
         {/* Left: form */}
         <div>
           <p className="text-xs tracking-[0.25em] font-semibold mb-2" style={{ color: '#bfa24e', fontFamily: "'IBM Plex Mono', monospace" }}>CHECKOUT</p>
-          <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>Finaliser la commande</h1>
+          <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>{t('title')}</h1>
 
           <div className="surface-card p-5 mb-4">
-            <p className="text-xs font-bold tracking-wide mb-3" style={{ color: '#8c8578' }}>COORDONNÉES</p>
+            <p className="text-xs font-bold tracking-wide mb-3" style={{ color: '#8c8578' }}>{t('form.name')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>Nom complet</label>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>{t('form.name')}</label>
                 <input value={name} onChange={e => setName(e.target.value)} placeholder="Ex: Ahmed Benali" className="input-field" />
               </div>
               <div>
-                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>Numéro de téléphone</label>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>{t('form.phone')}</label>
                 <input value={phone} onChange={e => setPhone(e.target.value)} placeholder="Ex: 0555 12 34 56" className="input-field" />
               </div>
             </div>
@@ -228,25 +321,59 @@ export default function Checkout() {
 
           <div className="surface-card p-5 mb-4">
             <p className="text-xs font-bold tracking-wide mb-3 flex items-center gap-1.5" style={{ color: '#8c8578' }}>
-              <MapPin size={13} /> LOCALISATION DE LIVRAISON
+              <MapPin size={13} /> {t('form.location')}
             </p>
-            <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Adresse (rue, ville...)" className="input-field mb-3" />
-            <DeliveryMap onLocationChange={setGps} />
+            {savedAddresses.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {savedAddresses.map(a => (
+                  <button key={a.id} onClick={() => selectAddress(a)}
+                    className="px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all"
+                    style={{ background: selectedAddrId === a.id ? 'linear-gradient(135deg, #d4b96a 0%, #9c7a3f 100%)' : '#1a1a1a', color: selectedAddrId === a.id ? '#0a0a0a' : '#8c8578', border: selectedAddrId === a.id ? 'none' : '1px solid rgba(191,162,78,0.12)' }}>
+                    {a.label}
+                  </button>
+                ))}
+                <button onClick={useCustomAddress}
+                  className="px-3 py-1.5 rounded-full text-[11px] font-semibold"
+                  style={{ background: selectedAddrId === null ? 'rgba(191,162,78,0.15)' : '#1a1a1a', color: selectedAddrId === null ? '#bfa24e' : '#8c8578', border: '1px solid rgba(191,162,78,0.12)' }}>
+                  Autre adresse
+                </button>
+              </div>
+            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-3">
+              <div>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>Wilaya</label>
+                <select value={wilayaCode ?? ''} onChange={e => { const v = Number(e.target.value) || null; setWilayaCode(v); setCommuneName(''); setGpsFromCommune(v, ''); }}
+                  className="input-field text-xs">
+                  <option value="">Sélectionnez une wilaya</option>
+                  {WILAYAS.map(w => <option key={w.code} value={w.code}>{w.code} - {w.name}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>Commune</label>
+                <select value={communeName} onChange={e => { const v = e.target.value; setCommuneName(v); setGpsFromCommune(wilayaCode, v); }}
+                  className="input-field text-xs" disabled={!wilayaCode}>
+                  <option value="">Sélectionnez une commune</option>
+                  {communes.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
+                </select>
+              </div>
+            </div>
+            <input value={address} onChange={e => setAddress(e.target.value)} placeholder="Rue, cité, numéro..." className="input-field mb-3" />
+            <DeliveryMap position={gps ?? undefined} onLocationChange={setGps} />
             {gps && <p className="text-[11px] mt-2" style={{ color: '#8c8578', fontFamily: "'IBM Plex Mono', monospace" }}>GPS: {gps[0].toFixed(5)}, {gps[1].toFixed(5)}</p>}
           </div>
 
           <div className="surface-card p-5">
-            <p className="text-xs font-bold tracking-wide mb-3" style={{ color: '#8c8578' }}>NOTE DE COMMANDE</p>
+            <p className="text-xs font-bold tracking-wide mb-3" style={{ color: '#8c8578' }}>{t('form.voice_note')}</p>
             <div className="flex gap-2 mb-3">
               <button onClick={() => setNoteType('text')} className="flex-1 py-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: noteType === 'text' ? 'linear-gradient(135deg, #d4b96a 0%, #9c7a3f 100%)' : '#1a1a1a', color: noteType === 'text' ? '#0a0a0a' : '#8c8578' }}>
-                <Type size={13} /> Texte
+                <Type size={13} /> {t('form.voice_record')}
               </button>
               <button onClick={() => setNoteType('voice')} className="flex-1 py-2 rounded-full text-xs font-semibold flex items-center justify-center gap-1.5" style={{ background: noteType === 'voice' ? 'linear-gradient(135deg, #d4b96a 0%, #9c7a3f 100%)' : '#1a1a1a', color: noteType === 'voice' ? '#0a0a0a' : '#8c8578' }}>
-                <Mic size={13} /> Vocal
+                <Mic size={13} /> {t('form.voice_stop')}
               </button>
             </div>
             {noteType === 'text' ? (
-              <textarea value={textNote} onChange={e => setTextNote(e.target.value)} placeholder="Instructions pour la livraison..." rows={3} className="input-field resize-none" />
+              <textarea value={textNote} onChange={e => setTextNote(e.target.value)} placeholder={t('form.address_placeholder')} rows={3} className="input-field resize-none" />
             ) : (
               <VoiceRecorder onVoiceReady={setVoiceBlob} />
             )}
@@ -256,7 +383,7 @@ export default function Checkout() {
         {/* Right: summary */}
         <div className="surface-card p-5 h-fit sticky top-20">
           <p className="text-xs font-bold tracking-wide mb-4 flex items-center gap-1.5" style={{ color: '#8c8578' }}>
-            <ShoppingBag size={13} /> VOTRE PANIER
+            <ShoppingBag size={13} /> {t('success.track')}
           </p>
           <div className="space-y-3 mb-4 max-h-64 overflow-auto">
             {items.map(item => (
@@ -278,16 +405,17 @@ export default function Checkout() {
           </div>
           <div className="py-3 mb-2 space-y-2" style={{ borderTop: '1px solid rgba(191,162,78,0.12)' }}>
             <div className="flex justify-between items-center">
-              <span className="text-xs" style={{ color: '#8c8578' }}>Sous-total</span>
+              <span className="text-xs" style={{ color: '#8c8578' }}>Total des produits</span>
               <span className="text-sm font-semibold">{total} DA</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-xs flex items-center gap-1" style={{ color: '#8c8578' }}>
-                <Truck size={12} /> Livraison
+                <Truck size={12} /> {t('form.delivery_fee')}
                 {deliveryDistance !== null && <span className="text-[10px]" style={{ color: '#555' }}>({deliveryDistance.toFixed(1)} km)</span>}
               </span>
-              <span className="text-sm font-semibold" style={{ color: deliveryFee === 0 ? '#4ade80' : '#bfa24e' }}>
-                {deliveryFee === null ? '—' : deliveryFee === 0 ? 'Gratuit' : `${deliveryFee} DA`}
+              <span className="text-sm font-semibold flex items-center gap-1.5" style={{ color: deliveryFee === 0 ? '#4ade80' : '#bfa24e' }}>
+                {deliveryFee === null ? '—' : deliveryFee === 0 ? t('form.use_my_location') : `${deliveryFee} DA`}
+                {deliveryFee !== null && deliveryFee > 0 && <span className="text-[9px] font-normal px-1 py-0.5 rounded" style={{ background: 'rgba(191,162,78,0.12)', color: '#8c8578' }}>estimation</span>}
               </span>
             </div>
             {outOfRange && (
@@ -297,15 +425,15 @@ export default function Checkout() {
               </div>
             )}
             {pricing && pricing.freeThreshold > 0 && deliveryFee === 0 && total < pricing.freeThreshold && (
-              <p className="text-[10px]" style={{ color: '#4ade80' }}>Livraison gratuite!</p>
+              <p className="text-[10px]" style={{ color: '#4ade80' }}>{t('form.total')}</p>
             )}
           </div>
           <div className="flex justify-between items-center py-3 mb-4" style={{ borderTop: '1px solid rgba(191,162,78,0.12)' }}>
-            <span className="text-sm font-bold">Total</span>
+            <span className="text-sm font-bold">{t('form.total')}</span>
             <span className="text-lg font-bold" style={{ color: '#bfa24e' }}>{total + (deliveryFee || 0)} DA</span>
           </div>
           <button onClick={submitOrder} disabled={submitting || outOfRange} className="gold-btn w-full py-3.5 text-sm flex items-center justify-center gap-2 disabled:opacity-40">
-            <Send size={15} /> {submitting ? 'Envoi...' : 'Confirmer la commande'}
+            <Send size={15} /> {submitting ? t('form.submitting') : t('form.submit')}
           </button>
         </div>
       </div>

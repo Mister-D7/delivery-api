@@ -3,105 +3,145 @@ import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
-import { v4 as uuidv4 } from 'uuid';
-import supabase from '../lib/supabase.js';
 import { adminAuth } from '../middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
 
-// Temp dir for multer before uploading to Supabase
-const tmpDir = path.join(__dirname, '..', '..', 'uploads', 'tmp');
-fs.mkdirSync(tmpDir, { recursive: true });
+// Ensure directories exist
+fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
+fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
+fs.mkdirSync(path.join(uploadsDir, 'voice'), { recursive: true });
+fs.mkdirSync(path.join(uploadsDir, 'background'), { recursive: true });
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, tmpDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${uuidv4().slice(0, 8)}${ext}`);
+// --- Multer instances ---
+
+const imageUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, path.join(uploadsDir, 'images')),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 230 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (['.jpg', '.jpeg', '.png', '.webp', '.gif', '.svg'].includes(ext)) cb(null, true);
+    else cb(new Error('Seules les images .jpg, .png, .webp, .gif, .svg sont acceptées'));
   },
 });
 
-const imageUpload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, path.join(uploadsDir, 'videos')),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 230 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    const ext = path.extname(file.originalname).toLowerCase();
-    if (['.jpg', '.jpeg', '.png', '.webp'].includes(ext)) cb(null, true);
-    else cb(new Error('Only .jpg, .png, .webp images accepted'));
+    cb(null, true);
   },
 });
 
 const voiceUpload = multer({
-  storage,
-  limits: { fileSize: 10 * 1024 * 1024 },
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, path.join(uploadsDir, 'voice')),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 230 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (file.mimetype.startsWith('audio/') || ['.mp3', '.wav', '.ogg', '.webm', '.m4a'].includes(path.extname(file.originalname).toLowerCase())) {
       cb(null, true);
     } else {
-      cb(new Error('Only audio files accepted'));
+      cb(new Error('Seuls les fichiers audio sont acceptés'));
     }
   },
 });
 
-async function uploadToStorage(filePath, bucket, upsertPath) {
-  const fileBuffer = fs.readFileSync(filePath);
-  const { data, error } = await supabase.storage
-    .from(bucket)
-    .upload(upsertPath, fileBuffer, {
-      contentType: getContentType(filePath),
-      upsert: true,
-    });
-  // Clean up temp file
-  fs.unlinkSync(filePath);
-  if (error) throw error;
-  // Return public URL
-  const { data: urlData } = supabase.storage.from(bucket).getPublicUrl(upsertPath);
-  return urlData.publicUrl;
-}
+const bgUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, path.join(uploadsDir, 'background')),
+    filename: (_req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      cb(null, `bg-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 230 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/') || file.mimetype.startsWith('video/')) cb(null, true);
+    else cb(new Error('Seules les images et vidéos sont acceptées'));
+  },
+});
 
-function getContentType(filePath) {
-  const ext = path.extname(filePath).toLowerCase();
-  const types = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.webm': 'audio/webm', '.m4a': 'audio/mp4' };
-  return types[ext] || 'application/octet-stream';
-}
+// --- Routes ---
 
 const router = Router();
 
-// POST /upload/image — admin, upload image to Supabase Storage
-router.post('/image', adminAuth, imageUpload.single('image'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'No image file' });
-    const upsertPath = `images/${req.file.filename}`;
-    const publicUrl = await uploadToStorage(req.file.path, 'delivery', upsertPath);
-    res.json({ url: publicUrl });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// POST /upload/image
+router.post('/image', adminAuth, (req, res, next) => {
+  imageUpload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Image]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucune image' });
+    res.json({ url: `/uploads/images/${req.file.filename}` });
+  });
 });
 
-// POST /upload/voice — admin, upload voice to Supabase Storage
-router.post('/voice', adminAuth, voiceUpload.single('audio'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'No audio file' });
-    const upsertPath = `voice/${req.file.filename}`;
-    const publicUrl = await uploadToStorage(req.file.path, 'delivery', upsertPath);
-    res.json({ url: publicUrl });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// POST /upload/video
+router.post('/video', adminAuth, (req, res, next) => {
+  videoUpload.single('video')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Video]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucune vidéo' });
+    res.json({ url: `/uploads/videos/${req.file.filename}` });
+  });
 });
 
-// POST /upload/voice/public — public voice upload
-router.post('/voice/public', voiceUpload.single('audio'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'No audio file' });
-    const upsertPath = `voice/${req.file.filename}`;
-    const publicUrl = await uploadToStorage(req.file.path, 'delivery', upsertPath);
-    res.json({ url: publicUrl });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// POST /upload/background
+router.post('/background', adminAuth, (req, res, next) => {
+  bgUpload.single('image')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Background]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucun fichier' });
+    res.json({ url: `/uploads/background/${req.file.filename}` });
+  });
+});
+
+// POST /upload/voice
+router.post('/voice', adminAuth, (req, res, next) => {
+  voiceUpload.single('audio')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Voice]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucun audio' });
+    res.json({ url: `/uploads/voice/${req.file.filename}` });
+  });
+});
+
+// POST /upload/voice/public
+router.post('/voice/public', (req, res, next) => {
+  voiceUpload.single('audio')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Voice Public]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucun audio' });
+    res.json({ url: `/uploads/voice/${req.file.filename}` });
+  });
 });
 
 export default router;

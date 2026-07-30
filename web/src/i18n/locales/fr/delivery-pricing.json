@@ -1,0 +1,12 @@
+{
+  "title": "Tarification de livraison",
+  "shop_location": "Position du magasin",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "base_fee": "Frais de base (DA)",
+  "per_km": "Par kilomètre (DA)",
+  "free_threshold": "Livraison gratuite à partir de (DA)",
+  "max_radius": "Rayon maximum (km)",
+  "save": "Enregistrer les tarifs",
+  "saved": "Tarifs enregistrés !"
+}

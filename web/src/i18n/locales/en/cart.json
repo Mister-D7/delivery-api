@@ -1,0 +1,11 @@
+{
+  "title": "Cart",
+  "empty": "Your cart is empty",
+  "subtotal": "Subtotal",
+  "delivery_fee": "Delivery",
+  "total": "Total",
+  "checkout": "Checkout",
+  "remove": "Remove",
+  "quantity": "Quantity",
+  "free": "Free"
+}

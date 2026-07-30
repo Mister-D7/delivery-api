@@ -1,0 +1,36 @@
+{
+  "title": "Personnaliser",
+  "tabs": {
+    "products": "Produits",
+    "categories": "Catégories",
+    "pricing": "Livraison"
+  },
+  "product": {
+    "add": "Ajouter un produit",
+    "edit": "Modifier le produit",
+    "name": "Nom",
+    "price": "Prix de vente (DA)",
+    "cost_price": "Prix d'achat (DA)",
+    "description": "Description",
+    "specs": "Spécifications",
+    "category": "Catégorie",
+    "stock": "Stock",
+    "image": "Image",
+    "barcode": "Code-barres",
+    "active": "Actif",
+    "add_to_catalog": "Ajouter au catalogue"
+  },
+  "category": {
+    "add": "Ajouter une catégorie",
+    "name": "Nom",
+    "image_url": "URL image (optionnel)",
+    "seed": "Charger les catégories par défaut"
+  },
+  "pricing": {
+    "title": "Tarification de livraison",
+    "base_fee": "Frais de base (DA)",
+    "per_km": "Par kilomètre (DA)",
+    "free_threshold": "Livraison gratuite à partir de (DA)",
+    "max_radius": "Rayon maximum (km)"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "bell": {
+    "title": "Notifications",
+    "empty": "Aucune notification",
+    "mark_all_read": "Tout lu",
+    "new_order": "Nouvelle commande",
+    "from": "De",
+    "delete": "Supprimer"
+  },
+  "chat": {
+    "placeholder": "Écrire un message...",
+    "send": "Envoyer"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "title": "الطلبات",
+  "filters": {
+    "status": "الحالة",
+    "date": "الفترة",
+    "all": "الكل",
+    "search_placeholder": "الاسم، الهاتف، رقم الطلب..."
+  },
+  "stats": {
+    "total_orders": "إجمالي الطلبات",
+    "pending": "قيد الانتظار",
+    "today_revenue": "إيرادات اليوم",
+    "delivered": "تم التوصيل"
+  },
+  "empty": "لا توجد طلبات",
+  "order": {
+    "customer": "العميل",
+    "phone": "الهاتف",
+    "address": "العنوان",
+    "items": "المنتجات",
+    "total": "المجموع",
+    "status": "الحالة",
+    "actions": "الإجراءات",
+    "view": "عرض",
+    "details": "التفاصيل",
+    "chat": "الرسائل",
+    "delete": "حذف",
+    "confirm_delete": "هل تريد حذف هذا الطلب؟",
+    "mark_delivered": "تعليم كتم التوصيل",
+    "notes": "ملاحظات",
+    "show": "عرض التفاصيل",
+    "hide": "إخفاء التفاصيل"
+  },
+  "pagination": {
+    "previous": "السابق",
+    "next": "التالي"
+  }
+}

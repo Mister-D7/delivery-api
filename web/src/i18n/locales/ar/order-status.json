@@ -1,0 +1,8 @@
+{
+  "pending": "قيد الانتظار",
+  "confirmed": "مؤكد",
+  "preparing": "قيد التحضير",
+  "out_for_delivery": "قيد التوصيل",
+  "delivered": "تم التوصيل",
+  "cancelled": "ملغي"
+}

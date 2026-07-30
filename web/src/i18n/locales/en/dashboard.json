@@ -1,0 +1,38 @@
+{
+  "title": "Orders",
+  "filters": {
+    "status": "Status",
+    "date": "Period",
+    "all": "All",
+    "search_placeholder": "Name, phone, #ID..."
+  },
+  "stats": {
+    "total_orders": "Total orders",
+    "pending": "Pending",
+    "today_revenue": "Today's revenue",
+    "delivered": "Delivered"
+  },
+  "empty": "No orders",
+  "order": {
+    "customer": "Customer",
+    "phone": "Phone",
+    "address": "Address",
+    "items": "Items",
+    "total": "Total",
+    "status": "Status",
+    "actions": "Actions",
+    "view": "View",
+    "details": "Details",
+    "chat": "Messages",
+    "delete": "Delete",
+    "confirm_delete": "Delete this order?",
+    "mark_delivered": "Mark as delivered",
+    "notes": "Notes",
+    "show": "Show details",
+    "hide": "Hide details"
+  },
+  "pagination": {
+    "previous": "Previous",
+    "next": "Next"
+  }
+}

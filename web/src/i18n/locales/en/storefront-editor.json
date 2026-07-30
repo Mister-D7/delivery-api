@@ -1,0 +1,46 @@
+{
+  "title": "Storefront",
+  "editor": "Editor",
+  "preview": "Preview",
+  "save": "Save",
+  "zoom_in": "Zoom +",
+  "zoom_out": "Zoom -",
+  "reset_zoom": "Reset",
+  "left_panel": "Left Panel",
+  "right_panel": "Properties Panel",
+  "tabs": {
+    "products": "Products",
+    "categories": "Categories",
+    "theme": "Theme"
+  },
+  "theme": {
+    "quick_themes": "QUICK THEMES",
+    "colors": "COLORS",
+    "font": "FONT",
+    "glow": "Glow",
+    "animations": "Animations",
+    "bg": "Background",
+    "surface": "Cards",
+    "text": "Text",
+    "accent": "Accent",
+    "glow_color": "Glow"
+  },
+  "hero": {
+    "tagline_label": "Tagline",
+    "title_label": "Main Title",
+    "subtitle_label": "Description"
+  },
+  "product_form": {
+    "name": "Product Name",
+    "price": "Sale Price (DA)",
+    "cost_price": "Cost Price (DA)",
+    "description": "Description (optional)",
+    "specs": "Specifications",
+    "specs_placeholder": "E.g.: Intel Core i5 13th Gen, 4.5GHz, 16GB DDR5 RAM...",
+    "image": "Add an Image",
+    "image_selected": "Image Selected",
+    "category": "Category (optional)",
+    "stock": "Stock",
+    "add_to_store": "Add to Store"
+  }
+}

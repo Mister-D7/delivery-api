@@ -13,8 +13,14 @@ export interface RenderState {
   categories: { id: string; name: string; imageUrl?: string }[];
 }
 
-export function renderTemplate(template: Template, state: RenderState): string {
+export function renderTemplate(template: Template, state: RenderState, baseUrl?: string): string {
   let html = template.html;
+
+  /* ── Inject <base> tag so relative asset paths resolve from blob: URLs ── */
+  if (baseUrl) {
+    const baseTag = `<base href="${baseUrl.replace(/\/+$/, '')}/">`;
+    html = html.replace('<head>', '<head>' + baseTag);
+  }
 
   /* ── Text placeholders ── */
   html = html.replace(/\{\{STORE_NAME\}\}/g, state.storeName || 'Ma Boutique');

@@ -1,0 +1,46 @@
+{
+  "title": "المتجر",
+  "editor": "المحرر",
+  "preview": "معاينة",
+  "save": "حفظ",
+  "zoom_in": "تكبير",
+  "zoom_out": "تصغير",
+  "reset_zoom": "إعادة تعيين",
+  "left_panel": "اللوحة اليسرى",
+  "right_panel": "لوحة الخصائص",
+  "tabs": {
+    "products": "المنتجات",
+    "categories": "الفئات",
+    "theme": "المظهر"
+  },
+  "theme": {
+    "quick_themes": "المواضيع السريعة",
+    "colors": "الألوان",
+    "font": "الخط",
+    "glow": "التوهج",
+    "animations": "الحركات",
+    "bg": "الخلفية",
+    "surface": "البطاقات",
+    "text": "النص",
+    "accent": "لون التمييز",
+    "glow_color": "لون التوهج"
+  },
+  "hero": {
+    "tagline_label": "العنوان الفرعي",
+    "title_label": "العنوان الرئيسي",
+    "subtitle_label": "الوصف"
+  },
+  "product_form": {
+    "name": "اسم المنتج",
+    "price": "سعر البيع (دج)",
+    "cost_price": "سعر الشراء (دج)",
+    "description": "الوصف (اختياري)",
+    "specs": "المواصفات",
+    "specs_placeholder": "مثال: معالج Intel Core i5 الجيل الثالث عشر، 4.5GHz، 16GB RAM DDR5...",
+    "image": "إضافة صورة",
+    "image_selected": "تم اختيار الصورة",
+    "category": "الفئة (اختياري)",
+    "stock": "المخزون",
+    "add_to_store": "إضافة إلى المتجر"
+  }
+}

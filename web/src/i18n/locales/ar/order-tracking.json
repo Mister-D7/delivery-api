@@ -1,0 +1,19 @@
+{
+  "title": "تتبع الطلب",
+  "search": {
+    "placeholder": "أدخل رمز التتبع الخاص بك",
+    "button": "تتبع"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "confirmed": "مؤكد",
+    "preparing": "قيد التحضير",
+    "out_for_delivery": "قيد التوصيل",
+    "delivered": "تم التوصيل",
+    "cancelled": "ملغي"
+  },
+  "timeline": "الجدول الزمني",
+  "messages": "الرسائل",
+  "chat_placeholder": "اكتب رسالة...",
+  "send": "إرسال"
+}

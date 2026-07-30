@@ -22,8 +22,21 @@ export function CustomerAuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const saved = localStorage.getItem('delivery_customer');
     const savedToken = localStorage.getItem('delivery_customer_token');
-    if (saved && savedToken) {
-      try { setCustomer(JSON.parse(saved)); setToken(savedToken); } catch {}
+    if (savedToken) {
+      setToken(savedToken);
+      if (saved) {
+        try { setCustomer(JSON.parse(saved)); } catch {}
+      }
+      // Fetch profile if token exists but no cached customer (e.g., Google login)
+      if (!saved) {
+        api.get('/auth/me').then(res => {
+          const c = res.data.user;
+          if (c.role === 'customer') {
+            setCustomer(c);
+            localStorage.setItem('delivery_customer', JSON.stringify(c));
+          }
+        }).catch(() => {});
+      }
     }
     setLoading(false);
   }, []);

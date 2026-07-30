@@ -1,0 +1,46 @@
+{
+  "title": "Boutique",
+  "editor": "Éditeur",
+  "preview": "Aperçu",
+  "save": "Sauvegarder",
+  "zoom_in": "Zoom +",
+  "zoom_out": "Zoom -",
+  "reset_zoom": "Réinitialiser",
+  "left_panel": "Panneau gauche",
+  "right_panel": "Panneau propriétés",
+  "tabs": {
+    "products": "Produits",
+    "categories": "Catégories",
+    "theme": "Thème"
+  },
+  "theme": {
+    "quick_themes": "THÈMES RAPIDES",
+    "colors": "COULEURS",
+    "font": "POLICE",
+    "glow": "Glow",
+    "animations": "Animations",
+    "bg": "Fond",
+    "surface": "Cartes",
+    "text": "Texte",
+    "accent": "Accent",
+    "glow_color": "Glow"
+  },
+  "hero": {
+    "tagline_label": "Sous-titre",
+    "title_label": "Titre principal",
+    "subtitle_label": "Description"
+  },
+  "product_form": {
+    "name": "Nom du produit",
+    "price": "Prix vente (DA)",
+    "cost_price": "Prix achat (DA)",
+    "description": "Description (optionnel)",
+    "specs": "Spécifications",
+    "specs_placeholder": "Ex: Intel Core i5 13ème Gen, 4.5GHz, 16GB RAM DDR5...",
+    "image": "Ajouter une image",
+    "image_selected": "Image sélectionnée",
+    "category": "Catégorie (optionnel)",
+    "stock": "Stock",
+    "add_to_store": "Ajouter à la boutique"
+  }
+}

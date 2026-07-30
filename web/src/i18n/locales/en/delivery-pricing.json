@@ -1,0 +1,12 @@
+{
+  "title": "Delivery Pricing",
+  "shop_location": "Store Location",
+  "latitude": "Latitude",
+  "longitude": "Longitude",
+  "base_fee": "Base Fee (DA)",
+  "per_km": "Per Kilometer (DA)",
+  "free_threshold": "Free Delivery From (DA)",
+  "max_radius": "Maximum Radius (km)",
+  "save": "Save Pricing",
+  "saved": "Pricing saved!"
+}

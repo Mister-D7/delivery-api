@@ -1,0 +1,64 @@
+{
+  "nav": {
+    "dashboard": "Orders",
+    "catalogue": "Catalog",
+    "boutique": "Store",
+    "revenue": "Revenue",
+    "settings": "Settings",
+    "storefront": "Storefront"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "add": "Add",
+    "close": "Close",
+    "back": "Back",
+    "next": "Next",
+    "loading": "Loading...",
+    "search": "Search...",
+    "refresh": "Refresh",
+    "export": "Export",
+    "import": "Import",
+    "download": "Download",
+    "upload": "Upload",
+    "test": "Test",
+    "reset": "Reset"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "out_for_delivery": "Out for Delivery",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "auth": {
+    "email": "Email Address",
+    "password": "Password",
+    "login": "Log In",
+    "logout": "Log Out",
+    "logging_in": "Logging in...",
+    "admin": "Admin",
+    "management": "Delivery Management",
+    "invalid_credentials": "Invalid credentials"
+  },
+  "currency": {
+    "symbol": "DA",
+    "format": "{{value}} DA"
+  },
+  "errors": {
+    "required": "This field is required",
+    "network": "Connection error",
+    "unexpected": "An unexpected error occurred",
+    "not_found": "Resource not found"
+  },
+  "time": {
+    "today": "Today",
+    "this_week": "This week",
+    "this_month": "This month",
+    "yesterday": "Yesterday"
+  }
+}

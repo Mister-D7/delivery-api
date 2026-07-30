@@ -1,0 +1,12 @@
+{
+  "title": "Mon Profil",
+  "name": "Nom",
+  "email": "E-mail",
+  "phone": "Téléphone",
+  "addresses": "Adresses",
+  "add_address": "Ajouter une adresse",
+  "orders": "Mes commandes",
+  "save": "Enregistrer",
+  "saved": "Profil enregistré !",
+  "logout": "Déconnexion"
+}

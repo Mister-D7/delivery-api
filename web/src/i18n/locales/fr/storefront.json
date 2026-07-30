@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "tagline": "LIVRAISON RAPIDE",
+    "title": "Commandez, on vous livre",
+    "subtitle": "Parcourez notre catalogue et recevez vos produits directement chez vous.",
+    "see_products": "Voir le produit"
+  },
+  "categories": {
+    "all": "Tout"
+  },
+  "products": {
+    "empty": "Aucun produit disponible.",
+    "empty_search": "Aucun produit trouvé pour cette recherche.",
+    "add_to_cart": "Ajouter au panier",
+    "out_of_stock": "Rupture de stock",
+    "specs": "SPECIFICATIONS",
+    "results": "resultat(s)",
+    "clear_search": "Effacer la recherche"
+  },
+  "context": {
+    "share": "Partager",
+    "copy_link": "Copier le lien",
+    "filter_by": "Filtrer: {{name}}"
+  },
+  "search": {
+    "placeholder": "Rechercher un produit..."
+  },
+  "cart": {
+    "fab": "Panier"
+  }
+}

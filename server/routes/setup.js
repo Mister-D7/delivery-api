@@ -270,7 +270,7 @@ INSERT INTO delivery_settings (key, value) VALUES
   ('store_subtitle', '"Livraison rapide et fiable"'),
   ('contact_phone', '""'),
   ('whatsapp_number', '""'),
-  ('delivery_pricing', '{"shopLat":36.7538,"shopLng":3.0588,"baseFee":200,"perKm":30,"freeThreshold":3000,"maxRadius":30,"shopName":"MISTER-DR"}')
+  ('delivery_pricing', '{"shopLat":36.7538,"shopLng":3.0588,"baseFee":200,"baseKm":5,"extraPerKm":50,"freeThreshold":3000,"maxRadius":30,"shopName":"MISTER-DR"}')
 ON CONFLICT (key) DO NOTHING;
 `;
 

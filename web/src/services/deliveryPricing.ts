@@ -4,7 +4,8 @@ export type DeliveryPricing = {
   shopLat: number;
   shopLng: number;
   baseFee: number;
-  perKm: number;
+  baseKm: number;
+  extraPerKm: number;
   freeThreshold: number;
   maxRadius: number;
   shopName: string;
@@ -14,7 +15,8 @@ const DEFAULT_PRICING: DeliveryPricing = {
   shopLat: 36.7538,
   shopLng: 3.0588,
   baseFee: 200,
-  perKm: 30,
+  baseKm: 5,
+  extraPerKm: 50,
   freeThreshold: 3000,
   maxRadius: 30,
   shopName: 'Mon Magasin',
@@ -43,13 +45,18 @@ export async function getDeliveryPricing(): Promise<DeliveryPricing> {
   return cachedPricing!;
 }
 
-export function calcDeliveryFee(pricing: DeliveryPricing, orderTotal: number, destLat: number, destLng: number): { fee: number; distance: number;超出: boolean } {
-  if (orderTotal >= pricing.freeThreshold) return { fee: 0, distance: 0, 超出: false };
+export function calcDeliveryFee(pricing: DeliveryPricing, orderTotal: number, destLat: number, destLng: number): { fee: number; distance: number; outOfRange: boolean } {
+  if (orderTotal >= pricing.freeThreshold) return { fee: 0, distance: 0, outOfRange: false };
 
   const distance = haversine(pricing.shopLat, pricing.shopLng, destLat, destLng);
 
-  if (distance > pricing.maxRadius) return { fee: -1, distance, 超出: true };
+  if (distance > pricing.maxRadius) return { fee: -1, distance, outOfRange: true };
 
-  const fee = Math.round(pricing.baseFee + pricing.perKm * distance);
-  return { fee, distance, 超出: false };
+  let fee: number;
+  if (distance <= pricing.baseKm) {
+    fee = pricing.baseFee;
+  } else {
+    fee = Math.round(pricing.baseFee + pricing.extraPerKm * (distance - pricing.baseKm));
+  }
+  return { fee, distance, outOfRange: false };
 }

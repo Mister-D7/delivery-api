@@ -1,0 +1,19 @@
+{
+  "title": "Suivi de commande",
+  "search": {
+    "placeholder": "Entrez votre code de suivi",
+    "button": "Suivre"
+  },
+  "status": {
+    "pending": "En attente",
+    "confirmed": "Confirmée",
+    "preparing": "En préparation",
+    "out_for_delivery": "En livraison",
+    "delivered": "Livrée",
+    "cancelled": "Annulée"
+  },
+  "timeline": "Chronologie",
+  "messages": "Messages",
+  "chat_placeholder": "Écrire un message...",
+  "send": "Envoyer"
+}

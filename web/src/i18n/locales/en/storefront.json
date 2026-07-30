@@ -1,0 +1,31 @@
+{
+  "hero": {
+    "tagline": "FAST DELIVERY",
+    "title": "Order it, we deliver it",
+    "subtitle": "Browse our catalog and receive your products straight to your door.",
+    "see_products": "View Product"
+  },
+  "categories": {
+    "all": "All"
+  },
+  "products": {
+    "empty": "No products available.",
+    "empty_search": "No products found for this search.",
+    "add_to_cart": "Add to Cart",
+    "out_of_stock": "Out of Stock",
+    "specs": "SPECS",
+    "results": "result(s)",
+    "clear_search": "Clear Search"
+  },
+  "context": {
+    "share": "Share",
+    "copy_link": "Copy Link",
+    "filter_by": "Filter: {{name}}"
+  },
+  "search": {
+    "placeholder": "Search products..."
+  },
+  "cart": {
+    "fab": "Cart"
+  }
+}

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { ShoppingBag, Plus } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   id: string;
@@ -16,10 +17,13 @@ type Props = {
   specs?: string | null;
   index?: number;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
+  glass?: boolean;
 };
 
-export default function ProductCard({ id, catalogId, erpProductId, customName, customPrice, name, price, promoPrice, imageUrl, stockQty, specs, index = 0, onClick }: Props) {
+export default function ProductCard({ id, catalogId, erpProductId, customName, customPrice, name, price, promoPrice, imageUrl, stockQty, specs, index = 0, onClick, onContextMenu, glass }: Props) {
   const { addItem } = useCart();
+  const { t } = useTranslation('product-card');
   const finalPrice = promoPrice ?? price;
   const hasDiscount = promoPrice != null && promoPrice < price;
   const inStock = stockQty == null || stockQty > 0;
@@ -37,11 +41,12 @@ export default function ProductCard({ id, catalogId, erpProductId, customName, c
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.04 }}
-      className="surface-card overflow-hidden flex flex-col group cursor-pointer"
+      className={`surface-card overflow-hidden flex flex-col group cursor-pointer${glass ? ' storefront-card-glass' : ''}`}
       style={{ transition: 'border-color 0.2s, transform 0.2s' }}
       onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(191,162,78,0.4)'; e.currentTarget.style.transform = 'translateY(-3px)'; }}
       onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(191,162,78,0.16)'; e.currentTarget.style.transform = 'none'; }}
       onClick={onClick}
+      onContextMenu={onContextMenu}
     >
       <div className="relative aspect-square flex items-center justify-center overflow-hidden" style={{ background: '#0e0e0e' }}>
         {imageUrl ? (
@@ -56,7 +61,7 @@ export default function ProductCard({ id, catalogId, erpProductId, customName, c
         )}
         {!inStock && (
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(10,10,10,0.7)' }}>
-            <span className="text-xs font-semibold" style={{ color: '#d9603b' }}>Rupture de stock</span>
+            <span className="text-xs font-semibold" style={{ color: '#d9603b' }}>{t('out_of_stock')}</span>
           </div>
         )}
       </div>

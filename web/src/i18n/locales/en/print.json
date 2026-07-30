@@ -1,0 +1,14 @@
+{
+  "receipt": "RECEIPT",
+  "order_id": "Order",
+  "date": "Date",
+  "customer": "Customer",
+  "phone": "Phone",
+  "address": "Address",
+  "items": "Items",
+  "subtotal": "Subtotal",
+  "delivery_fee": "Delivery",
+  "total": "TOTAL",
+  "thank_you": "Thank you for your order!",
+  "powered_by": "MISTER-DR"
+}

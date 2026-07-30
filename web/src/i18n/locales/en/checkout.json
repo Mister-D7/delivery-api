@@ -1,0 +1,23 @@
+{
+  "title": "Checkout",
+  "form": {
+    "name": "Full Name",
+    "phone": "Phone",
+    "address": "Delivery Address",
+    "address_placeholder": "Enter your full address",
+    "voice_note": "Voice Note",
+    "voice_record": "Record",
+    "voice_stop": "Stop",
+    "submit": "Place Order",
+    "submitting": "Placing order...",
+    "delivery_fee": "Delivery Fee",
+    "total": "Total to Pay",
+    "location": "Location on Map",
+    "use_my_location": "Use My Location"
+  },
+  "success": {
+    "title": "Order Placed!",
+    "track": "Track My Order",
+    "token": "Your tracking code"
+  }
+}

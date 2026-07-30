@@ -1,0 +1,23 @@
+{
+  "title": "Commander",
+  "form": {
+    "name": "Nom complet",
+    "phone": "Téléphone",
+    "address": "Adresse de livraison",
+    "address_placeholder": "Entrez votre adresse complète",
+    "voice_note": "Note vocale",
+    "voice_record": "Enregistrer",
+    "voice_stop": "Arrêter",
+    "submit": "Passer la commande",
+    "submitting": "Enregistrement...",
+    "delivery_fee": "Frais de livraison",
+    "total": "Total à payer",
+    "location": "Position sur la carte",
+    "use_my_location": "Utiliser ma position"
+  },
+  "success": {
+    "title": "Commande enregistrée !",
+    "track": "Suivre ma commande",
+    "token": "Votre code de suivi"
+  }
+}

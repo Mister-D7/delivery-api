@@ -1,0 +1,11 @@
+{
+  "title": "Panier",
+  "empty": "Votre panier est vide",
+  "subtotal": "Sous-total",
+  "delivery_fee": "Livraison",
+  "total": "Total",
+  "checkout": "Commander",
+  "remove": "Retirer",
+  "quantity": "Quantité",
+  "free": "Gratuit"
+}

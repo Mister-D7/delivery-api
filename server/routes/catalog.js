@@ -82,6 +82,7 @@ router.get('/catalog', async (req, res) => {
         description: p.description,
         specs: p.specs,
         salePrice: p.sale_price,
+        costPrice: p.cost_price,
         promoPrice: p.promo_price,
         flashSalePrice: isFlashSale ? p.flash_sale_price : null,
         flashSaleEnds: isFlashSale ? p.flash_sale_end_date : null,

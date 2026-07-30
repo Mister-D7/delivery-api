@@ -1,0 +1,25 @@
+{
+  "login": {
+    "title": "Log In",
+    "email": "Email Address",
+    "password": "Password",
+    "submit": "Log In",
+    "submitting": "Logging in...",
+    "no_account": "Don't have an account?",
+    "register": "Sign Up",
+    "invalid": "Invalid email or password"
+  },
+  "register": {
+    "title": "Create Account",
+    "name": "Full Name",
+    "email": "Email Address",
+    "phone": "Phone",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "submit": "Sign Up",
+    "submitting": "Signing up...",
+    "has_account": "Already have an account?",
+    "login": "Log In",
+    "password_mismatch": "Passwords do not match"
+  }
+}

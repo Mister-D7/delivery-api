@@ -1,4 +1,4 @@
-import { execSync } from 'child_process';
+import { execSync, exec } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 const STATE_FILE = path.join(__dirname, '..', '..', '.notifier-state.json');
 
 let knownOrderIds = [];
+let knownStatuses = {};
 let pollInterval = null;
 
 function loadState() {
@@ -16,13 +17,14 @@ function loadState() {
     if (fs.existsSync(STATE_FILE)) {
       const data = JSON.parse(fs.readFileSync(STATE_FILE, 'utf-8'));
       knownOrderIds = data.knownOrderIds || [];
+      knownStatuses = data.knownStatuses || {};
     }
   } catch { knownOrderIds = []; }
 }
 
 function saveState() {
   try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify({ knownOrderIds, lastCheck: new Date().toISOString() }, null, 2));
+      fs.writeFileSync(STATE_FILE, JSON.stringify({ knownOrderIds, knownStatuses, lastCheck: new Date().toISOString() }, null, 2));
   } catch {}
 }
 
@@ -32,24 +34,58 @@ function showNotification(title, body) {
     return;
   }
   try {
-    const psScript = [
-      'Add-Type -AssemblyName System.Windows.Forms',
-      '$n = New-Object System.Windows.Forms.NotifyIcon',
-      '$n.Icon = [System.Drawing.SystemIcons]::Information',
-      `$n.BalloonTipTitle = "${title.replace(/"/g, '""')}"`,
-      `$n.BalloonTipText = "${body.replace(/"/g, '""').replace(/\n/g, ' ')}"`,
-      '$n.Visible = $true',
-      '$n.ShowBalloonTip(8000)',
-      'Start-Sleep -Seconds 3',
-      '$n.Dispose()',
-    ].join('; ');
-    execSync(`powershell -NoProfile -Command "${psScript}"`, { timeout: 10000, stdio: 'ignore' });
+    const safeTitle = title.replace(/'/g, "''");
+    const safeBody = body.replace(/'/g, "''").replace(/\n/g, ' ');
+    const psScript = `
+[Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime] | Out-Null
+[Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime] | Out-Null
+$xml = @"
+<toast>
+  <visual>
+    <binding template="ToastGeneric">
+      <text>${safeTitle}</text>
+      <text>${safeBody}</text>
+    </binding>
+  </visual>
+</toast>
+"@
+$doc = New-Object Windows.Data.Xml.Dom.XmlDocument
+$doc.LoadXml($xml)
+$toast = [Windows.UI.Notifications.ToastNotification]::new($doc)
+[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier("MISTER-DR").Show($toast)`;
+    exec(`powershell -NoProfile -ExecutionPolicy Bypass -Command "${psScript}"`, { timeout: 10000 });
   } catch {}
 }
 
 function playBeep() {
   try {
-    execSync('powershell -NoProfile -Command "[Console]::Beep(800,300); Start-Sleep -Milliseconds 200; [Console]::Beep(1000,300)"', { timeout: 5000, stdio: 'ignore' });
+    const psScript = `
+Add-Type -AssemblyName System.Windows.Forms
+$player = New-Object System.Media.SoundPlayer
+$bytes = [System.IO.MemoryStream]::new()
+$writer = New-Object System.IO.BinaryWriter($bytes)
+function WriteShort($v) { $writer.Write([System.BitConverter]::GetBytes([System.Int16]$v)) }
+function WriteInt($v) { $writer.Write([System.BitConverter]::GetBytes([System.Int32]$v)) }
+function WriteShortAt($pos,$v) { $pos2=$writer.BaseStream.Position; $writer.BaseStream.Position=$pos; WriteShort $v; $writer.BaseStream.Position=$pos2 }
+$sr=44100; $dur=0.5; $freq1=880; $freq2=1100
+$ns=[int]($sr*$dur)
+$writer.Write([System.Text.Encoding]::ASCII.GetBytes("RIFF"))
+WriteInt (36+$ns*2)
+$writer.Write([System.Text.Encoding]::ASCII.GetBytes("WAVEfmt "))
+WriteInt 16; WriteShort 1; WriteShort 1; WriteInt $sr; WriteInt ($sr*2); WriteShort 2; WriteShort 16
+$writer.Write([System.Text.Encoding]::ASCII.GetBytes("data"))
+WriteInt ($ns*2)
+$half=$ns/2
+for($i=0;$i -lt $ns;$i++){
+  $t=$i/$sr
+  $env=[Math]::Exp(-$t*8)
+  if($i -lt $half){ $sig=[Math]::Sin(2*[Math]::PI*$freq1*$t)*$env } else { $sig=[Math]::Sin(2*[Math]::PI*$freq2*$t)*$env }
+  WriteShort ([int]([Math]::Max(-32768,[Math]::Min(32767,$sig*20000))))
+}
+$writer.Flush(); $bytes.Position=0
+$player.Stream=$bytes; $player.PlaySync()
+$bytes.Dispose(); $writer.Dispose()`;
+    exec(`powershell -NoProfile -ExecutionPolicy Bypass -Command "${psScript.replace(/"/g, '""')}"`, { timeout: 8000 });
   } catch {}
 }
 
@@ -71,7 +107,19 @@ async function checkNewOrders() {
     const currentIds = orders.map(o => o.id);
 
     if (knownOrderIds.length === 0) {
-      knownOrderIds = currentIds;
+    for (const order of orders) {
+      const prevStatus = knownStatuses[order.id];
+      if (prevStatus && prevStatus !== order.status) {
+        const statusLabels = { PENDING: 'En attente', CONFIRMED: 'Confirmée', PREPARING: 'En préparation', ON_THE_WAY: 'En route', DELIVERED: 'Livrée', CANCELLED: 'Annulée' };
+        const title = `📦 COMMANDE #${order.secure_token}`;
+        const body = `${order.customer_name} — ${statusLabels[order.status] || order.status}`;
+        showNotification(title, body);
+        playBeep();
+      }
+      knownStatuses[order.id] = order.status;
+    }
+
+    knownOrderIds = currentIds;
       saveState();
       console.log(`  📋 Tracking ${orders.length} existing orders`);
       return;

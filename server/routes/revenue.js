@@ -64,19 +64,22 @@ router.get('/', adminAuth, async (req, res) => {
       }
     }
 
-    // RTO / refused (ON_THE_WAY that got cancelled = refused)
-    // For now, cancelled before delivery counts as loss
-    const rtoLoss = cancelledLoss;
+    // RTO / refused
+    const rtoLoss = 0;
 
-    // Damaged/lost = we'll track as 0 for now (manual input later)
+    // Damaged/lost
     const damagedLoss = 0;
+
+    // Revenue lost from cancelled orders
+    const revenueLossCancelled = cancelledLoss;
+
+    // Net profit = revenue from delivered - cost of those goods
+    const netProfit = totalRevenue - totalCostOfGoods;
 
     // Top selling products
     const topProducts = Object.values(productSales)
       .sort((a, b) => b.quantity - a.quantity)
       .slice(0, 10);
-
-    const netProfit = totalRevenue - totalCostOfGoods - rtoLoss - damagedLoss;
 
     res.json({
       overview: {
@@ -88,6 +91,7 @@ router.get('/', adminAuth, async (req, res) => {
         rtoLoss,
         damagedLoss,
         totalCostOfGoods,
+        revenueLossCancelled,
         netProfit,
         totalOrders: orders.length,
         deliveredOrders: delivered.length,
@@ -115,7 +119,7 @@ router.get('/products', adminAuth, async (req, res) => {
       salePrice: p.sale_price || 0,
       costPrice: p.cost_price || 0,
       margin: (p.sale_price || 0) - (p.cost_price || 0),
-      marginPercent: p.sale_price > 0 ? Math.round(((p.sale_price - (p.cost_price || 0)) / p.sale_price) * 100) : 0,
+      marginPercent: p.cost_price > 0 ? Math.round(((p.sale_price - (p.cost_price || 0)) / (p.cost_price || 1)) * 100) : 0,
       stockQty: p.stock_qty || 0,
       imageUrl: p.image_url,
     }));

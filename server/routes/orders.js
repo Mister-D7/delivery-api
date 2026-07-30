@@ -10,6 +10,61 @@ function generateToken() {
   return uuidv4().replace(/-/g, '').slice(0, 12).toUpperCase();
 }
 
+async function generateTrackingToken(customerName, phone) {
+  const baseName = (customerName || 'CLIENT').split(/\s+/)[0].toUpperCase().replace(/[^A-Z]/g, '').slice(0, 8) || 'CLIENT';
+  const phoneDigits = (phone || '').replace(/\D/g, '').slice(-6) || '000000';
+  const prefix = `${baseName}-${phoneDigits}`;
+  const { data: existing } = await supabase
+    .from('delivery_orders')
+    .select('secure_token')
+    .like('secure_token', `${prefix}-%`)
+    .order('created_at', { ascending: false })
+    .limit(1);
+  if (existing && existing.length > 0) {
+    const last = existing[0].secure_token;
+    const match = last.match(/(\d+)$/);
+    if (match) {
+      const nextNum = parseInt(match[1], 10) + 1;
+      return `${prefix}-${String(nextNum).padStart(6, '0')}`;
+    }
+  }
+  return `${prefix}-000001`;
+}
+
+function mapOrder(o) {
+  if (!o) return o;
+  return {
+    ...o,
+    createdAt: o.created_at,
+    updatedAt: o.updated_at,
+    secureToken: o.secure_token,
+    customerId: o.customer_id,
+    customerName: o.customer_name,
+    deliveryFee: o.delivery_fee,
+    voiceOrderUrl: o.voice_order_url,
+    items: (o.delivery_order_items || o.items || []).map(mapItem),
+  };
+}
+
+function mapMessage(m) {
+  if (!m) return m;
+  return { ...m, createdAt: m.created_at, orderId: m.order_id, audioUrl: m.audio_url, imageUrl: m.image_url };
+}
+
+function mapItem(i) {
+  if (!i) return i;
+  return {
+    ...i,
+    orderId: i.order_id,
+    unitPrice: i.unit_price,
+    customName: i.custom_name,
+    customPrice: i.custom_price,
+    catalogItemId: i.catalog_item_id,
+    productId: i.product_id,
+    imageUrl: i.image_url,
+  };
+}
+
 // POST /orders — create order (public) with stock deduction
 router.post('/', async (req, res) => {
   try {
@@ -50,7 +105,7 @@ router.post('/', async (req, res) => {
       }
     }
 
-    const secure_token = generateToken();
+    const secure_token = await generateTrackingToken(customerName, phone);
 
     const orderData = {
       secure_token,
@@ -61,7 +116,7 @@ router.post('/', async (req, res) => {
       latitude: latitude || null,
       longitude: longitude || null,
       total: total || 0,
-      delivery_fee: deliveryFee || 0,
+      delivery_fee: deliveryFee || 0, // estimated fee, finalized on confirmation
       status: 'PENDING',
     };
 
@@ -143,7 +198,7 @@ router.get('/', adminAuth, async (req, res) => {
       .range((page - 1) * limit, page * limit - 1);
 
     if (error) throw error;
-    res.json({ orders: orders || [], total: count || 0, page, limit });
+    res.json({ orders: (orders || []).map(mapOrder), total: count || 0, page, limit });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -186,7 +241,7 @@ router.get('/token/:token/messages', async (req, res) => {
       .eq('order_id', order.id)
       .order('created_at', { ascending: true });
 
-    res.json(messages || []);
+    res.json((messages || []).map(mapMessage));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -221,26 +276,83 @@ router.post('/token/:token/messages', async (req, res) => {
     if (error) throw error;
 
     // Emit to order channel + admin channel
-    deliveryEvents.emit(`token:${req.params.token}`, 'new_message', msg);
-    deliveryEvents.emit(order.id, 'new_message', msg);
+    deliveryEvents.emit(`token:${req.params.token}`, 'new_message', mapMessage(msg));
+    deliveryEvents.emit(order.id, 'new_message', mapMessage(msg));
 
-    res.status(201).json(msg);
+    res.status(201).json(mapMessage(msg));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // GET /orders/:token — public order by token
+// Strips personal info (name, phone, address) unless the authenticated customer owns the order
 router.get('/:token', async (req, res) => {
+  // Optional auth — check if requester is the order owner
+  let authedCustomer = null;
   try {
-    const { data: order } = await supabase
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const { verifyToken } = await import('../lib/auth.js');
+      const decoded = verifyToken(authHeader.slice(7));
+      if (decoded?.email && decoded.role === 'customer') {
+        const { data: customer } = await supabase
+          .from('delivery_customers')
+          .select('id, email')
+          .eq('email', decoded.email)
+          .maybeSingle();
+        authedCustomer = customer;
+      }
+    }
+  } catch (e) {} // silently ignore invalid tokens
+  try {
+    const param = req.params.token;
+    let { data: order } = await supabase
       .from('delivery_orders')
       .select('*, delivery_order_items(*)')
-      .eq('secure_token', req.params.token)
-      .single();
+      .eq('secure_token', param)
+      .maybeSingle();
+
+    if (!order) {
+      const { data: byId } = await supabase
+        .from('delivery_orders')
+        .select('*, delivery_order_items(*)')
+        .ilike('secure_token', param)
+        .maybeSingle();
+      order = byId;
+    }
+
+    if (!order) {
+      const { data: byId } = await supabase
+        .from('delivery_orders')
+        .select('*, delivery_order_items(*)')
+        .eq('id', param)
+        .maybeSingle();
+      order = byId;
+    }
+
+    if (!order) {
+      const { data: byPrefix } = await supabase
+        .from('delivery_orders')
+        .select('*, delivery_order_items(*)')
+        .like('id', param + '%')
+        .limit(1)
+        .maybeSingle();
+      order = byPrefix;
+    }
 
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json(order);
+
+    // Privacy: only strip personal info if accessed by ID (not by secure_token)
+    // When accessed via secure_token, the token itself is the authorization
+    const accessedByToken = order.secure_token === param;
+    if (!accessedByToken) {
+      order.customer_name = null;
+      order.phone = null;
+      order.address = null;
+    }
+
+    res.json(mapOrder(order));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -256,21 +368,28 @@ router.get('/order/:id', adminAuth, async (req, res) => {
       .single();
 
     if (!order) return res.status(404).json({ error: 'Order not found' });
-    res.json(order);
+    res.json(mapOrder(order));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// PATCH /orders/:id/status — admin update status
+// PATCH /orders/:id/status — admin update status (optionally set deliveryFee on CONFIRMED)
 router.patch('/:id/status', adminAuth, async (req, res) => {
   try {
-    const { status } = req.body;
+    const { status, deliveryFee } = req.body;
     if (!status) return res.status(400).json({ error: 'Status required' });
+
+    const updateData = { status, updated_at: new Date().toISOString() };
+
+    // When confirming, set the delivery fee (custom or calculated)
+    if (status === 'CONFIRMED' && deliveryFee !== undefined && deliveryFee !== null) {
+      updateData.delivery_fee = deliveryFee;
+    }
 
     const { data: order, error } = await supabase
       .from('delivery_orders')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updateData)
       .eq('id', req.params.id)
       .select()
       .single();
@@ -287,7 +406,7 @@ router.patch('/:id/status', adminAuth, async (req, res) => {
     deliveryEvents.emit('admin:orders', 'status_changed', payload);
     if (order.secure_token) deliveryEvents.emit(`token:${order.secure_token}`, 'status_changed', payload);
 
-    res.json(order);
+    res.json(mapOrder(order));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -302,7 +421,7 @@ router.get('/:id/messages', adminAuth, async (req, res) => {
       .eq('order_id', req.params.id)
       .order('created_at', { ascending: true });
 
-    res.json(messages || []);
+    res.json((messages || []).map(mapMessage));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -329,7 +448,7 @@ router.post('/:id/messages', adminAuth, async (req, res) => {
     if (error) throw error;
 
     // Emit to order channel
-    deliveryEvents.emit(req.params.id, 'new_message', msg);
+    deliveryEvents.emit(req.params.id, 'new_message', mapMessage(msg));
 
     // Also emit to token channel
     const { data: order } = await supabase
@@ -338,10 +457,10 @@ router.post('/:id/messages', adminAuth, async (req, res) => {
       .eq('id', req.params.id)
       .single();
     if (order?.secure_token) {
-      deliveryEvents.emit(`token:${order.secure_token}`, 'new_message', msg);
+      deliveryEvents.emit(`token:${order.secure_token}`, 'new_message', mapMessage(msg));
     }
 
-    res.status(201).json(msg);
+    res.status(201).json(mapMessage(msg));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

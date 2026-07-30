@@ -2,12 +2,14 @@ import { X, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 type Props = { open: boolean; onClose: () => void };
 
 export default function CartSheet({ open, onClose }: Props) {
   const { items, updateQty, removeItem, total, count } = useCart();
   const navigate = useNavigate();
+  const { t } = useTranslation('cart');
 
   return (
     <AnimatePresence>
@@ -25,7 +27,7 @@ export default function CartSheet({ open, onClose }: Props) {
             <div className="flex items-center justify-between p-4 border-b" style={{ borderColor: 'rgba(191,162,78,0.12)' }}>
               <div className="flex items-center gap-2">
                 <ShoppingBag size={18} style={{ color: '#bfa24e' }} />
-                <span className="text-sm font-bold">Panier ({count})</span>
+                <span className="text-sm font-bold">{t('title')} ({count})</span>
               </div>
               <button onClick={onClose} className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: '#1a1a1a' }}>
                 <X size={14} />
@@ -36,7 +38,7 @@ export default function CartSheet({ open, onClose }: Props) {
               {items.length === 0 && (
                 <div className="text-center py-12" style={{ color: '#8c8578' }}>
                   <ShoppingBag size={32} className="mx-auto mb-3" style={{ opacity: 0.3 }} />
-                  <p className="text-sm">Votre panier est vide</p>
+                  <p className="text-sm">{t('empty')}</p>
                 </div>
               )}
               {items.map(item => (
@@ -61,11 +63,11 @@ export default function CartSheet({ open, onClose }: Props) {
             {items.length > 0 && (
               <div className="p-4 border-t" style={{ borderColor: 'rgba(191,162,78,0.12)' }}>
                 <div className="flex justify-between mb-4">
-                  <span className="text-sm font-semibold">Total</span>
+                  <span className="text-sm font-semibold">{t('total')}</span>
                   <span className="text-lg font-bold" style={{ color: '#bfa24e' }}>{total} DA</span>
                 </div>
                 <button onClick={() => { onClose(); navigate('/checkout'); }} className="gold-btn w-full py-3 text-sm">
-                  Commander
+                  {t('checkout')}
                 </button>
               </div>
             )}

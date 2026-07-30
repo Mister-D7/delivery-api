@@ -1,0 +1,19 @@
+{
+  "title": "Order Tracking",
+  "search": {
+    "placeholder": "Enter your tracking code",
+    "button": "Track"
+  },
+  "status": {
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "preparing": "Preparing",
+    "out_for_delivery": "Out for Delivery",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled"
+  },
+  "timeline": "Timeline",
+  "messages": "Messages",
+  "chat_placeholder": "Type a message...",
+  "send": "Send"
+}

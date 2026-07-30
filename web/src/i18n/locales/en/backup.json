@@ -1,0 +1,30 @@
+{
+  "title": "Backup",
+  "auto": {
+    "title": "AUTO BACKUP",
+    "enable": "Automatic Backup",
+    "description": "Automatically backup all data",
+    "frequency": "Frequency",
+    "hourly": "Hourly",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "keep_count": "Keep last N backups",
+    "save_settings": "Save Settings",
+    "last_backup": "Last Backup"
+  },
+  "manual": {
+    "title": "MANUAL ACTIONS",
+    "backup_now": "Backup Now",
+    "download_json": "Download JSON",
+    "import_json": "Import JSON",
+    "run_now": "Backup Now",
+    "importing": "Importing...",
+    "description": "The JSON file contains all data from all tables."
+  },
+  "history": {
+    "title": "BACKUP HISTORY",
+    "empty": "No backups available",
+    "auto": "Auto",
+    "manual": "Manual"
+  }
+}

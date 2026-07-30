@@ -95,7 +95,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
 
   useEffect(() => {
     if (!template) return;
-    const html = renderTemplate(template, renderState);
+    const html = renderTemplate(template, renderState, window.location.origin + '/');
     const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     setBlobUrl(prev => { if (prev) URL.revokeObjectURL(prev); return url; });

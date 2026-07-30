@@ -1,0 +1,36 @@
+{
+  "title": "Settings",
+  "tabs": {
+    "supabase": "Supabase",
+    "github": "GitHub",
+    "render": "Render",
+    "deploy": "Push to Web",
+    "backup": "Backup"
+  },
+  "supabase": {
+    "title": "Supabase Configuration",
+    "test": "Test Connection",
+    "init": "Initialize Database",
+    "success": "Connection successful!",
+    "error": "Connection error"
+  },
+  "github": {
+    "title": "GitHub Configuration",
+    "test": "Test Token",
+    "push": "Push Code",
+    "token_label": "GitHub Token"
+  },
+  "render": {
+    "title": "Render Configuration",
+    "test": "Test API Key",
+    "deploy": "Deploy",
+    "api_key_label": "Render API Key"
+  },
+  "deploy": {
+    "title": "Deploy to Web",
+    "push_github": "Push to GitHub",
+    "deploy_render": "Deploy to Render",
+    "push": "Push Code",
+    "deploy_btn": "Deploy"
+  }
+}
