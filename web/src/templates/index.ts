@@ -1,4 +1,4 @@
-export type StoreType = 'tech' | 'clothes' | 'grocery' | 'food' | 'general';
+export type StoreType = 'tech' | 'gaming' | 'clothes' | 'grocery' | 'food' | 'general';
 
 export interface Template {
   id: string;
@@ -21,7 +21,8 @@ export interface Template {
 }
 
 export const STORE_TYPES: { type: StoreType; label: string; emoji: string }[] = [
-  { type: 'tech', label: 'Gaming & Tech', emoji: '🎮' },
+  { type: 'tech', label: 'Tech', emoji: '🖥️' },
+  { type: 'gaming', label: 'Gaming', emoji: '🎮' },
   { type: 'clothes', label: 'Vêtements & Mode', emoji: '👔' },
   { type: 'grocery', label: 'Épicerie & Bio', emoji: '🛒' },
   { type: 'food', label: 'Food & Agro', emoji: '🍽️' },

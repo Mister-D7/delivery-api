@@ -9,7 +9,8 @@ import RenderTab from './settings/RenderTab';
 import BackupTab from './settings/BackupTab';
 
 const STORE_TYPE_OPTIONS = [
-  { type: 'tech', label: 'Tech & Gaming', emoji: '🎮', desc: 'Design sombre cybersport' },
+  { type: 'tech', label: 'Tech', emoji: '🖥️', desc: 'Design tech professionnel' },
+  { type: 'gaming', label: 'Gaming', emoji: '🎮', desc: 'Design sombre cybersport' },
   { type: 'clothes', label: 'Vêtements & Mode', emoji: '👔', desc: 'Élégance beige & laiton' },
   { type: 'grocery', label: 'Épicerie & Bio', emoji: '🛒', desc: 'Vert nature, Bootstrap' },
   { type: 'food', label: 'Food & Agro', emoji: '🍽️', desc: 'Style vintage food broker' },
@@ -195,7 +196,7 @@ export default function AdminSettings() {
           <Store size={14} style={{ color: 'var(--admin-gold)' }} />
           <span className="text-[11px] font-bold tracking-wide" style={{ color: 'var(--admin-gold)' }}>TYPE DE BOUTIQUE</span>
         </div>
-        <div className="grid grid-cols-5 gap-2">
+        <div className="grid grid-cols-3 gap-2">
           {STORE_TYPE_OPTIONS.map(opt => (
             <button key={opt.type} onClick={() => setStoreType(opt.type)}
               className="flex flex-col items-center gap-1 p-3 rounded-xl text-center transition-all"
