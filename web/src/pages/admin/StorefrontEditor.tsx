@@ -36,13 +36,14 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
   }, []);
 
   const template = useMemo(() => {
-    const templates = getTemplates(storeType as any);
     const saved = localStorage.getItem('delivery_selected_template');
     if (saved) {
       const t = getTemplate(saved);
       if (t) return t;
     }
-    return templates[0] || null;
+    const all = getTemplates();
+    const matching = all.filter(t => t.storeType === storeType);
+    return matching[0] || all[0] || null;
   }, [storeType]);
 
   const loadAll = useCallback(async () => {
@@ -123,7 +124,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     }));
   };
 
-  const availableTemplates = useMemo(() => getTemplates(storeType as any), [storeType]);
+  const allTemplates = useMemo(() => getTemplates(), []);
 
   const orderedProducts = useMemo(() => catalog.filter(p => p.isActive !== false), [catalog]);
 
@@ -189,7 +190,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                 <div>
                   <p className="text-[11px] font-bold tracking-wide mb-3" style={{ color: 'var(--admin-gold)' }}>THÈMES</p>
                   <div className="space-y-1.5 mb-4">
-                    {availableTemplates.map(t => (
+                    {allTemplates.map(t => (
                       <button key={t.id} onClick={() => selectTemplate(t)}
                         className="w-full text-left p-3 rounded-xl transition-all"
                         style={{
