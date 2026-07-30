@@ -16,27 +16,32 @@ A template preset system with **8 type-safe Bootstrap templates** for a storefro
 - `web/src/pages/admin/StorefrontEditor.tsx` — iframe preview using Blob URL
 
 ## The 8 templates
-| File | Name | Store Type |
-|------|------|-----------|
-| `electro-tech.ts` | Electro Tech | tech |
-| `tech-gaming.ts` | NEXUS Gaming | gaming |
-| `vetement.ts` | Vestiaire | clothes |
-| `kaira-clothes.ts` | Kaira | clothes |
-| `epicerie-bio.ts` | Organic Bio | grocery |
-| `food-broker.ts` | Food Broker | food |
-| `eshopper-general.ts` | EShopper | general |
-| `ministore-general.ts` | MiniStore | general |
+| File | Name | Store Type | Source |
+|------|------|-----------|--------|
+| `electro-tech.ts` | Electro Tech | tech | HTML Codex (CC BY 4.0) |
+| `tech-gaming.ts` | NEXUS Gaming | gaming | Start Bootstrap (MIT) |
+| `vetement.ts` | Vestiaire | clothes | TemplateMo (free) |
+| `kaira-clothes.ts` | Kaira | clothes | ThemeWagon (MIT) |
+| `epicerie-bio.ts` | Organic Bio | grocery | TemplateMo (free) |
+| `foodmart.ts` | FoodMart | food | ThemeWagon (MIT) |
+| `ashion.ts` | Ashion | general | Colorlib (CC BY 3.0) |
+| `coloshop.ts` | ColoShop | general | Colorlib (free) |
 
 ## What was fixed
-Templates rendered as "big blocks of writing" because `blob:` iframe URLs block all relative asset paths (`/templates/*/css/style.css` etc.). Fix: `<base href="{origin}/">` injected at render time in `utils.ts:20-23`.
+- `<base href="{origin}/">` injected at render time in `utils.ts:20-23` so `blob:` iframes load relative asset paths
 
-## Template assets (downloaded ZIPs → extracted)
+## Template assets
 - `web/public/templates/electro/` — CSS, JS, images, libs
-- `web/public/templates/eshopper/` — CSS, JS, images, libs
-- `web/public/templates/ministore/` — CSS, JS, images
 - `web/public/templates/kaira/` — CSS, JS, images
 - `web/public/templates/epicerie-bio/` — CSS, JS, images
-- `web/public/templates/food-broker/` — CSS, JS, images
+- `web/public/templates/foodmart/` — CSS, JS, images (replaces old food-broker)
+- `web/public/templates/ashion/` — CSS, JS, images, fonts (replaces old MiniStore)
+- `web/public/templates/coloshop/` — CSS, JS, plugins, images (replaces old EShopper)
+
+## Retired templates (replaced)
+- `food-broker.ts` → FoodMart (modern Bootstrap 5 food/grocery)
+- `ministore-general.ts` → Ashion (Colorlib fashion/general)
+- `eshopper-general.ts` → ColoShop (Colorlib general eCommerce)
 
 ## How to run
 ```powershell
@@ -47,6 +52,7 @@ Opens on `http://localhost:3001`. API server on port 4000.
 
 ## Git log (recent)
 ```
+d873e9b docs: add SESSION.md for session resume
 a8f625d fix(templates): inject base tag so blob: iframe loads CSS/images correctly
 ae25bdd feat(templates): add 4 new Bootstrap templates (Electro, EShopper, MiniStore, Kaira)
 52a6e52 fix: assign NEXUS Gaming to gaming store type + filter Thèmes by store type
@@ -55,6 +61,6 @@ a65bd3d fix: show all 4 templates in Thèmes panel regardless of store type
 ```
 
 ## What remains / future work
-1. Templates need **visual refinement** — user said most look "big block of writing, no design, no life". Only Kaira looks ok. The `<base>` fix should make CSS load properly now.
-2. Search for better/more stunning Bootstrap 5 templates if needed.
-3. `epicerie-bio.ts` is **very large** (all SVG icons inline) — could be optimized.
+1. **Verify new templates** — run `npm run dev` in `web/`, check all 8 templates render properly with CSS/images
+2. **Visual refinement** — even new templates may need CSS tweaks to look perfect in the iframe
+3. **Optimize** `epicerie-bio.ts` — huge inline SVG icons could be moved to external files

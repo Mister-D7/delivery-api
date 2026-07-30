@@ -55,9 +55,20 @@ Extracted zips are at `C:\Users\KeepCool\AppData\Local\Temp\opencode\templates-d
 
 ---
 
+## Template Swap: Session 2
+
+We replaced 3 weak templates with modern Bootstrap alternatives:
+
+| Replaced | With | Type |
+|----------|------|------|
+| Food Broker (old 960gs) | FoodMart (Bootstrap 5) | food |
+| MiniStore (basic B5) | Ashion (Bootstrap 4) | general |
+| EShopper (Bootstrap 4) | ColoShop (Bootstrap 4) | general |
+
+Assets extracted to `web/public/templates/{foodmart,ashion,coloshop}/`.
+
 ## Next Steps
 
-1. **Integrate Electro template** — copy assets from the GitHub mirror into `web/public/templates/electro/`, create `web/src/templates/electro.ts` for `storeType: 'tech'`
-2. **Integrate EShopper template** — same process for `storeType: 'general'`
-3. **Register both** in `web/src/templates/index.ts`
-4. Verify with `npm run dev` in `web/`
+1. **Verify new templates** — run `npm run dev` in `web/`, check all 8 templates render with proper CSS/images
+2. **Visual refinement** — tweak template CSS if needed for iframe preview
+3. **Optimize** `epicerie-bio.ts` — huge inline SVG icons could be moved to external files

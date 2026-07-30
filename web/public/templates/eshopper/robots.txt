@@ -1,8 +1,0 @@
-User-agent: *
-Allow: /
-
-# Contact
-# Support / Licensing / Custom Dev: help@rskworld.in | +91 9330539277 | https://rskworld.in
-
-Sitemap: https://rskworld.in/sitemap.xml
-

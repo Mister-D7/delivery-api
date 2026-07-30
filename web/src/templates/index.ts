@@ -32,11 +32,11 @@ export const STORE_TYPES: { type: StoreType; label: string; emoji: string }[] = 
 import nexusGaming from './tech-gaming';
 import vestiaire from './vetement';
 import organicBio from './epicerie-bio';
-import foodBroker from './food-broker';
 import electroTech from './electro-tech';
-import eshopperGeneral from './eshopper-general';
-import ministoreGeneral from './ministore-general';
 import kairaClothes from './kaira-clothes';
+import foodmart from './foodmart';
+import ashion from './ashion';
+import coloshop from './coloshop';
 
 let _registry: Template[] = [];
 
@@ -47,11 +47,11 @@ function registerTemplate(t: Template) {
 registerTemplate(nexusGaming);
 registerTemplate(vestiaire);
 registerTemplate(organicBio);
-registerTemplate(foodBroker);
 registerTemplate(electroTech);
-registerTemplate(eshopperGeneral);
-registerTemplate(ministoreGeneral);
 registerTemplate(kairaClothes);
+registerTemplate(foodmart);
+registerTemplate(ashion);
+registerTemplate(coloshop);
 
 export function getTemplates(storeType?: StoreType): Template[] {
   if (!storeType || storeType === 'general') return _registry;
