@@ -149,6 +149,11 @@ async function ensureStorageBucket() {
 }
 
 const webDist = path.join(__dirname, '..', 'web', 'dist');
+const storefrontDist = path.join(__dirname, '..', 'web', 'storefront', 'dist');
+app.use('/_assets', express.static(path.join(storefrontDist, '_assets')));
+app.get('/', (req, res) => {
+  res.sendFile(path.join(storefrontDist, 'index.html'));
+});
 app.use(express.static(webDist));
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });

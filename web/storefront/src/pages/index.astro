@@ -1,0 +1,863 @@
+---
+import ProductGrid from '../components/ProductGrid';
+import CartButton from '../components/CartButton';
+import CartDrawer from '../components/CartDrawer';
+import ProductModal from '../components/ProductModal';
+import Brand from '../components/Brand';
+import HeroText from '../components/HeroText';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS — PC Gaming assemblés &amp; testés</title>
+<style>
+  :root{
+    --bg:#0a0a0c;
+    --surface:#131316;
+    --surface-2:#1c1c20;
+    --surface-3:#232328;
+    --border:rgba(255,255,255,.08);
+    --border-strong:rgba(255,255,255,.16);
+    --text:#f5f5f7;
+    --muted:#8a8a92;
+    --muted-2:#5c5c63;
+    --red:#ff3b30;
+    --red-dim:#c92a20;
+    --red-glow:rgba(255,59,48,.35);
+    --lumen:#ff6a3d;
+
+    --font-display:'Unbounded','Arial Black',system-ui,-apple-system,sans-serif;
+    --font-body:'Space Grotesk','Segoe UI',system-ui,-apple-system,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Consolas,monospace;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--font-body);
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  img,svg{display:block; max-width:100%;}
+  a{color:inherit; text-decoration:none;}
+  button{font-family:inherit; cursor:pointer;}
+  ul{list-style:none;}
+  .wrap{max-width:1280px; margin:0 auto; padding:0 32px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+
+  ::selection{background:var(--red); color:#fff;}
+
+  :focus-visible{outline:2px solid var(--red); outline-offset:3px;}
+
+  /* ---------- utility ---------- */
+  .eyebrow{
+    font-family:var(--font-mono);
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--red);
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:6px; height:6px;
+    background:var(--red);
+    border-radius:1px;
+    box-shadow:0 0 8px var(--red-glow);
+  }
+  .btn{
+    font-family:var(--font-body);
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:15px 26px;
+    border-radius:2px;
+    border:1px solid transparent;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .btn-solid{
+    background:var(--red);
+    color:#fff;
+    box-shadow:0 8px 24px -8px var(--red-glow);
+  }
+  .btn-solid:hover{ transform:translateY(-2px); box-shadow:0 14px 32px -8px var(--red-glow);}
+  .btn-outline{
+    background:transparent;
+    color:var(--text);
+    border-color:var(--border-strong);
+  }
+  .btn-outline:hover{ border-color:var(--text); transform:translateY(-2px);}
+  .btn-block{width:100%;}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,10,12,.82);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);
+  }
+  .header-row{
+    display:flex; align-items:center; justify-content:space-between;
+    height:76px;
+  }
+  .brand{
+    display:flex; align-items:center; gap:11px;
+    font-family:var(--font-display);
+    font-size:19px;
+    font-weight:700;
+    letter-spacing:.04em;
+  }
+  .brand-mark{
+    width:26px; height:26px;
+    background:var(--red);
+    position:relative;
+    box-shadow:0 0 18px var(--red-glow);
+    flex-shrink:0;
+  }
+  .brand-mark::after{
+    content:"";
+    position:absolute; inset:6px;
+    background:var(--bg);
+  }
+  nav{display:flex; gap:38px;}
+  nav a{
+    font-size:13px;
+    font-weight:500;
+    color:var(--muted);
+    letter-spacing:.02em;
+    position:relative;
+    padding:6px 0;
+    transition:color .15s ease;
+  }
+  nav a:hover{color:var(--text);}
+  nav a::after{
+    content:""; position:absolute; left:0; bottom:0;
+    width:0; height:1px; background:var(--red);
+    transition:width .2s ease;
+  }
+  nav a:hover::after{width:100%;}
+  .header-actions{display:flex; align-items:center; gap:14px;}
+  .cart-btn{
+    display:flex; align-items:center; gap:9px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    padding:10px 16px;
+    border-radius:2px;
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .cart-btn:hover{ border-color:var(--border-strong); background:var(--surface-3);}
+  .cart-count{
+    background:var(--red);
+    color:#fff;
+    font-size:10px;
+    font-family:var(--font-mono);
+    padding:1px 6px;
+    border-radius:10px;
+  }
+  .burger{display:none; background:none; border:none; color:var(--text); padding:6px;}
+  .burger svg{width:22px; height:22px;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:96px 0 84px;
+    overflow:hidden;
+    border-bottom:1px solid var(--border);
+  }
+  .hero::before{
+    content:"";
+    position:absolute; top:-30%; right:-10%;
+    width:640px; height:640px;
+    background:radial-gradient(circle, var(--red-glow) 0%, transparent 68%);
+    filter:blur(10px);
+    pointer-events:none;
+  }
+  .hero-grid{
+    display:grid;
+    grid-template-columns:1.05fr .95fr;
+    gap:64px;
+    align-items:center;
+    position:relative;
+  }
+  .hero-title{
+    font-family:var(--font-display);
+    font-size:clamp(40px,5.4vw,72px);
+    line-height:1.02;
+    text-transform:uppercase;
+    letter-spacing:-.01em;
+    margin:22px 0 22px;
+  }
+  .hero-title span{color:var(--red);}
+  .hero-sub{
+    font-size:16px;
+    color:var(--muted);
+    max-width:480px;
+    line-height:1.7;
+    margin-bottom:36px;
+  }
+  .hero-ctas{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:44px;}
+  .hero-meta{
+    display:flex; gap:32px;
+    font-family:var(--font-mono);
+    font-size:11px;
+    color:var(--muted-2);
+    letter-spacing:.04em;
+    text-transform:uppercase;
+  }
+  .hero-meta b{color:var(--text); font-size:15px; display:block; font-family:var(--font-display); margin-bottom:2px;}
+
+  .hero-visual{
+    position:relative;
+    aspect-ratio:1/1.05;
+    border:1px solid var(--border-strong);
+    border-radius:4px;
+    background:
+      linear-gradient(160deg, var(--surface-2) 0%, var(--surface) 55%, #0d0d0f 100%);
+    overflow:hidden;
+  }
+  .hero-visual::before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 30% 20%, var(--red-glow), transparent 45%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.025) 0 2px, transparent 2px 26px);
+  }
+  .hero-visual::after{
+    content:"";
+    position:absolute;
+    width:70%; height:70%;
+    right:-15%; bottom:-15%;
+    background:radial-gradient(circle, var(--red) 0%, transparent 70%);
+    opacity:.25;
+    filter:blur(30px);
+  }
+  .rig-core{
+    position:absolute; inset:14%;
+    border:1px solid var(--border-strong);
+    background:linear-gradient(135deg, rgba(255,59,48,.08), rgba(255,255,255,.02));
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:22px;
+  }
+  .rig-core .chip-row{display:flex; flex-wrap:wrap; gap:8px;}
+  .gchip{
+    font-family:var(--font-mono);
+    font-size:10px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    padding:6px 10px;
+    border:1px solid var(--border-strong);
+    background:rgba(10,10,12,.55);
+    color:var(--muted);
+  }
+  .gchip.on{ color:var(--red); border-color:rgba(255,59,48,.4);}
+  .rig-core .fan{
+    width:64px; height:64px;
+    border-radius:50%;
+    border:1px solid var(--border-strong);
+    position:relative;
+    align-self:flex-end;
+  }
+  .rig-core .fan::before,.rig-core .fan::after{
+    content:""; position:absolute; inset:8px;
+    border:1px solid rgba(255,59,48,.35);
+    border-radius:50%;
+  }
+  .rig-core .fan::after{ inset:20px; border-color:var(--border-strong);}
+
+  /* ---------- marquee ---------- */
+  .marquee{
+    border-bottom:1px solid var(--border);
+    background:var(--surface);
+    overflow:hidden;
+    padding:14px 0;
+  }
+  .marquee-track{
+    display:flex; gap:56px; white-space:nowrap;
+    animation:scroll 26s linear infinite;
+    width:max-content;
+  }
+  @keyframes scroll{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+  .marquee-track span{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    display:flex; align-items:center; gap:10px;
+  }
+  .marquee-track span::before{ content:"◆"; color:var(--red); font-size:8px;}
+
+  /* ---------- section shell ---------- */
+  section{padding:88px 0;}
+  .section-head{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    margin-bottom:44px; gap:24px; flex-wrap:wrap;
+  }
+  .section-title{
+    font-family:var(--font-display);
+    font-size:clamp(28px,3.4vw,42px);
+    text-transform:uppercase;
+    line-height:1.05;
+    margin-top:14px;
+  }
+  .section-title .accent{color:var(--red);}
+  .section-desc{ color:var(--muted); font-size:14px; max-width:420px;}
+
+  /* ---------- pills ---------- */
+  .pills{
+    display:flex; gap:10px; flex-wrap:wrap;
+    padding:36px 0 0;
+  }
+  .pill{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    padding:10px 20px;
+    border:1px solid var(--border);
+    border-radius:30px;
+    color:var(--muted);
+    transition:all .15s ease;
+    background:var(--surface);
+  }
+  .pill.active{ background:var(--red); border-color:var(--red); color:#fff;}
+  .pill:hover:not(.active){ border-color:var(--border-strong); color:var(--text);}
+
+  /* ---------- product grid ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:4px;
+    overflow:hidden;
+    display:flex; flex-direction:column;
+    transition:border-color .2s ease, transform .2s ease;
+  }
+  .card:hover{ border-color:var(--border-strong); transform:translateY(-3px);}
+  .card-media{
+    position:relative;
+    aspect-ratio:16/9;
+    background:linear-gradient(135deg, var(--surface-3) 0%, #0d0d10 70%);
+    overflow:hidden;
+  }
+  .card-media img{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    z-index:1;
+  }
+  .card-media::before{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(circle at 70% 30%, var(--red-glow), transparent 55%);
+    opacity:.55;
+  }
+  .card-media::after{
+    content:"";
+    position:absolute; left:0; right:0; bottom:0; height:40%;
+    background:repeating-linear-gradient(100deg, rgba(255,255,255,.03) 0 2px, transparent 2px 22px);
+  }
+  .card.lumen .card-media::before{ background:radial-gradient(circle at 30% 70%, rgba(255,106,61,.4), transparent 55%);}
+  .badge{
+    position:absolute; top:12px; left:12px;
+    background:var(--red); color:#fff;
+    font-family:var(--font-mono);
+    font-size:10px; letter-spacing:.06em; text-transform:uppercase;
+    padding:5px 10px; border-radius:2px; z-index:2;
+  }
+  .card.lumen .badge{ background:var(--lumen);}
+  .card-body{ padding:20px; display:flex; flex-direction:column; gap:14px; flex:1;}
+  .card-name{
+    font-family:var(--font-display);
+    font-size:16px;
+    text-transform:uppercase;
+    letter-spacing:.01em;
+  }
+  .spec-chips{ display:flex; flex-wrap:wrap; gap:6px;}
+  .spec-chip{
+    font-family:var(--font-mono);
+    font-size:10px;
+    color:var(--muted);
+    border:1px solid var(--border);
+    padding:4px 8px;
+    border-radius:2px;
+    letter-spacing:.02em;
+  }
+  .spec-chip b{color:var(--text); font-weight:600;}
+  .price-block{ margin-top:auto;}
+  .price-label{ font-size:11px; color:var(--muted-2); font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.05em;}
+  .price-row{ display:flex; align-items:baseline; gap:10px; margin:4px 0 2px;}
+  .price-now{ font-family:var(--font-display); font-size:20px; color:var(--text);}
+  .price-old{ font-size:13px; color:var(--muted-2); text-decoration:line-through;}
+  .price-month{ font-size:12px; color:var(--muted); font-family:var(--font-mono);}
+  .card-actions{ display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .card-actions .btn{width:100%; padding:13px;}
+  .details-link{
+    text-align:center; font-size:12px; color:var(--muted);
+    letter-spacing:.03em; padding:4px;
+    border-bottom:1px solid transparent;
+  }
+  .details-link:hover{ color:var(--text); border-color:var(--border-strong);}
+
+  /* ---------- promo banner ---------- */
+  .promo{
+    border-radius:6px;
+    background:
+      radial-gradient(circle at 15% 30%, rgba(255,59,48,.28), transparent 55%),
+      linear-gradient(120deg, var(--surface-2), #0d0d10 75%);
+    border:1px solid var(--border-strong);
+    padding:64px 56px;
+    display:flex; align-items:center; justify-content:space-between;
+    gap:32px; flex-wrap:wrap;
+    position:relative;
+    overflow:hidden;
+  }
+  .promo::after{
+    content:"";
+    position:absolute; right:-6%; top:-30%;
+    width:340px; height:340px;
+    background:radial-gradient(circle, var(--red-glow), transparent 70%);
+  }
+  .promo-title{
+    font-family:var(--font-display);
+    font-size:clamp(26px,3.4vw,40px);
+    text-transform:uppercase;
+    line-height:1.1;
+    max-width:560px;
+    position:relative;
+  }
+  .promo-sub{
+    font-family:var(--font-mono);
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--red);
+    margin-top:14px;
+    display:block;
+  }
+
+  /* ---------- consultation ---------- */
+  .consult{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:64px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:64px;
+  }
+  .consult-bullets{ margin-top:28px; display:flex; flex-direction:column; gap:18px;}
+  .consult-bullets li{
+    display:flex; gap:14px; align-items:flex-start;
+    font-size:14px; color:var(--muted);
+  }
+  .bullet-mark{
+    width:20px; height:20px; flex-shrink:0;
+    border:1px solid var(--red);
+    color:var(--red);
+    display:flex; align-items:center; justify-content:center;
+    font-size:11px; font-family:var(--font-mono); margin-top:2px;
+  }
+  .form-field{ margin-bottom:18px;}
+  .form-field label{
+    display:block; font-family:var(--font-mono); font-size:11px;
+    letter-spacing:.05em; text-transform:uppercase; color:var(--muted);
+    margin-bottom:8px;
+  }
+  .form-field input, .form-field select{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:14px 16px;
+    font-family:var(--font-body);
+    font-size:14px;
+    border-radius:2px;
+    transition:border-color .15s ease;
+  }
+  .form-field input:focus, .form-field select:focus{ border-color:var(--red); outline:none;}
+  .form-field select{ appearance:none; -webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8a92'/></svg>");
+    background-repeat:no-repeat; background-position:right 16px center;
+  }
+
+  /* ---------- stats ---------- */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    border-top:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .stat{
+    padding:44px 24px; text-align:center;
+    border-right:1px solid var(--border);
+  }
+  .stat:last-child{ border-right:none;}
+  .stat-num{
+    font-family:var(--font-display); font-size:clamp(30px,3.8vw,44px);
+    color:var(--red);
+  }
+  .stat-label{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.06em;
+    text-transform:uppercase; color:var(--muted); margin-top:8px;
+  }
+
+  /* ---------- newsletter ---------- */
+  .newsletter{
+    text-align:center;
+    padding:96px 0;
+  }
+  .newsletter h2{
+    font-family:var(--font-display);
+    font-size:clamp(28px,4vw,48px);
+    text-transform:uppercase;
+  }
+  .newsletter p{ color:var(--muted); margin:16px 0 32px;}
+  .newsletter-form{
+    display:flex; gap:10px; max-width:440px; margin:0 auto;
+  }
+  .newsletter-form input{
+    flex:1;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:15px 18px;
+    border-radius:2px;
+    font-size:14px;
+  }
+  .newsletter-form input:focus{ outline:none; border-color:var(--red);}
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--border);
+    padding:72px 0 32px;
+    background:var(--surface);
+  }
+  .footer-grid{
+    display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr;
+    gap:40px;
+    padding-bottom:48px;
+    border-bottom:1px solid var(--border);
+  }
+  .footer-col h4{
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted-2); margin-bottom:18px;
+  }
+  .footer-col ul{ display:flex; flex-direction:column; gap:11px;}
+  .footer-col a{ font-size:13px; color:var(--muted); transition:color .15s ease;}
+  .footer-col a:hover{ color:var(--text);}
+  .footer-brand p{ color:var(--muted); font-size:13px; max-width:280px; margin-top:14px;}
+  .footer-bottom{
+    display:flex; justify-content:space-between; align-items:center;
+    padding-top:28px; flex-wrap:wrap; gap:12px;
+  }
+  .footer-bottom span{ font-size:12px; color:var(--muted-2); font-family:var(--font-mono);}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .hero-grid{ grid-template-columns:1fr;}
+    .hero-visual{ max-width:440px; margin:0 auto; width:100%;}
+    .grid{ grid-template-columns:repeat(2,1fr);}
+    .consult{ grid-template-columns:1fr; padding:40px;}
+    .stats{ grid-template-columns:repeat(2,1fr);}
+    .stat:nth-child(2){ border-right:none;}
+    .footer-grid{ grid-template-columns:1fr 1fr;}
+  }
+  @media (max-width:720px){
+    nav{
+      position:fixed; top:76px; left:0; right:0; bottom:0;
+      background:var(--bg);
+      flex-direction:column; gap:0;
+      padding:8px 24px 24px;
+      transform:translateY(-110%);
+      opacity:0;
+      transition:transform .25s ease, opacity .25s ease;
+      z-index:90;
+    }
+    nav.open{ transform:translateY(0); opacity:1;}
+    nav a{ padding:16px 0; border-bottom:1px solid var(--border); width:100%;}
+    .burger{ display:flex;}
+    .grid{ grid-template-columns:1fr;}
+    .promo{ padding:40px 28px; flex-direction:column; align-items:flex-start;}
+    .footer-grid{ grid-template-columns:1fr;}
+    .wrap{ padding:0 20px;}
+    .stats{ grid-template-columns:1fr 1fr;}
+    .newsletter-form{ flex-direction:column;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-row">
+    <a href="#" class="brand">
+      <Brand client:load />
+    </a>
+    <nav id="mainNav">
+      <a href="#play">Séries PLAY</a>
+      <a href="#lumen">Séries LUMEN</a>
+      <a href="#promo">Promos</a>
+      <a href="#tracking">Suivi de commande</a>
+    </nav>
+    <div class="header-actions">
+      <CartButton client:load />
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="eyebrow">Assemblé &amp; testé — En stock</span>
+      <HeroText client:load />
+      <div class="hero-ctas">
+        <a href="#play" class="btn btn-solid">Configurer mon PC</a>
+        <a href="#lumen" class="btn btn-outline">Découvrir LUMEN</a>
+      </div>
+      <div class="hero-meta">
+        <div><b>48h</b>Test de charge</div>
+        <div><b>1200+</b>Rigs livrés</div>
+        <div><b>4.9/5</b>Satisfaction</div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="rig-core">
+        <div class="chip-row">
+          <span class="gchip on">RTX Série</span>
+          <span class="gchip">DDR5</span>
+          <span class="gchip on">NVMe</span>
+          <span class="gchip">RGB</span>
+        </div>
+        <div class="fan"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track" id="marqueeTrack">
+    <span>Paiement à la livraison</span>
+    <span>Livraison 24/48h</span>
+    <span>Support 7/7</span>
+    <span>Garantie 12 mois</span>
+    <span>Retour sous 14 jours</span>
+    <span>Paiement à la livraison</span>
+    <span>Livraison 24/48h</span>
+    <span>Support 7/7</span>
+    <span>Garantie 12 mois</span>
+    <span>Retour sous 14 jours</span>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="pills">
+    <button class="pill active" data-filter="all">Tous</button>
+    <button class="pill" data-filter="play">PLAY</button>
+    <button class="pill" data-filter="lumen">LUMEN</button>
+    <button class="pill" data-filter="promo">Promos</button>
+  </div>
+</div>
+
+<section id="play">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Série PLAY</span>
+        <h2 class="section-title">Le socle de <span class="accent">tout setup gagnant</span></h2>
+      </div>
+      <p class="section-desc">Des configurations équilibrées pour le 1080p et le 1440p compétitif, pensées pour durer plusieurs générations de jeux.</p>
+    </div>
+
+    <div class="grid">
+      <ProductGrid client:visible sectionTitle="play" />
+    </div>
+  </div>
+</section>
+
+<section id="lumen">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Série LUMEN</span>
+        <h2 class="section-title">Aussi <span class="accent">spectaculaires</span> que puissants</h2>
+      </div>
+      <p class="section-desc">Boîtiers vitrés, RGB synchronisé et composants haut de gamme — la série LUMEN est faite pour être vue autant que jouée.</p>
+    </div>
+
+    <div class="grid">
+      <ProductGrid client:visible sectionTitle="lumen" />
+    </div>
+  </div>
+</section>
+
+<div class="wrap" id="promo">
+  <div class="promo">
+    <div>
+      <span class="eyebrow">Offre limitée</span>
+      <h2 class="promo-title">Jusqu'à -20% sur les configs PLAY</h2>
+      <span class="promo-sub">Stock limité</span>
+    </div>
+    <a href="#play" class="btn btn-solid">Voir les promos</a>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="consult">
+      <div>
+        <span class="eyebrow">Sur mesure</span>
+        <h2 class="section-title">Une idée,<br>pas un projet ?</h2>
+        <ul class="consult-bullets">
+          <li><span class="bullet-mark">1</span>Réponse sous 24h par un conseiller technique</li>
+          <li><span class="bullet-mark">2</span>Configuration sur mesure selon votre budget et vos jeux</li>
+          <li><span class="bullet-mark">3</span>Installation, câblage propre et garantie incluse</li>
+        </ul>
+      </div>
+      <form onsubmit="event.preventDefault(); this.querySelector('.btn').textContent='Demande envoyée';">
+        <div class="form-field">
+          <label for="fname">Nom complet</label>
+          <input type="text" id="fname" placeholder="Votre nom et prénom" required>
+        </div>
+        <div class="form-field">
+          <label for="fphone">Téléphone</label>
+          <input type="tel" id="fphone" placeholder="05 XX XX XX XX" required>
+        </div>
+        <div class="form-field">
+          <label for="fbudget">Budget</label>
+          <select id="fbudget">
+            <option>Moins de 250 000 DA</option>
+            <option>250 000 – 400 000 DA</option>
+            <option>400 000 – 600 000 DA</option>
+            <option>Plus de 600 000 DA</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-solid btn-block">Demander un devis</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Configs livrées</div></div>
+  <div class="stat"><div class="stat-num">4.9/5</div><div class="stat-label">Note clients</div></div>
+  <div class="stat"><div class="stat-num">24/48h</div><div class="stat-label">Livraison</div></div>
+  <div class="stat"><div class="stat-num">12 mois</div><div class="stat-label">Garantie</div></div>
+</div>
+
+<section class="newsletter">
+  <div class="wrap">
+    <span class="eyebrow">Newsletter</span>
+    <h2>Ne ratez aucun drop</h2>
+    <p>Nouvelles séries, promos et stocks limités — directement dans votre boîte mail.</p>
+    <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Inscrit ✓';">
+      <input type="email" placeholder="Votre adresse email" required>
+      <button type="submit" class="btn btn-solid">S'inscrire</button>
+    </form>
+  </div>
+</section>
+
+<footer id="tracking">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <a href="#" class="brand">
+          <Brand client:load />
+        </a>
+        <p>PC gaming assemblés et testés en atelier. Performance vérifiée, garantie sans compromis.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul>
+          <li><a href="#play">Série PLAY</a></li>
+          <li><a href="#lumen">Série LUMEN</a></li>
+          <li><a href="#promo">Promos</a></li>
+          <li><a href="#">Configurateur</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul>
+          <li><a href="#">Suivi de commande</a></li>
+          <li><a href="#">Garantie 12 mois</a></li>
+          <li><a href="#">Retours &amp; échanges</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Entreprise</h4>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Atelier &amp; tests</a></li>
+          <li><a href="#">Mentions légales</a></li>
+          <li><a href="#">CGV</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 NEXUS. Tous droits réservés.</span>
+      <span>Assemblé &amp; testé en Algérie</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // mobile nav toggle
+  const burger = document.getElementById('burgerBtn');
+  const nav = document.getElementById('mainNav');
+  burger.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+
+  // category pill filter
+  const pills = document.querySelectorAll('.pill');
+  const playSection = document.getElementById('play');
+  const lumenSection = document.getElementById('lumen');
+  const promoBlock = document.getElementById('promo');
+
+  pills.forEach(p => {
+    p.addEventListener('click', () => {
+      pills.forEach(x => x.classList.remove('active'));
+      p.classList.add('active');
+      const f = p.dataset.filter;
+      playSection.style.display = (f === 'all' || f === 'play') ? '' : 'none';
+      lumenSection.style.display = (f === 'all' || f === 'lumen') ? '' : 'none';
+      promoBlock.style.display = (f === 'all' || f === 'promo') ? '' : 'none';
+      if(f !== 'all'){
+        document.getElementById(f === 'promo' ? 'promo' : f).scrollIntoView({behavior:'smooth', block:'start'});
+      }
+    });
+  });
+</script>
+
+<CartDrawer client:load />
+<ProductModal client:load />
+
+</body>
+</html>

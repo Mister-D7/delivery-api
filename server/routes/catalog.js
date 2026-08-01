@@ -51,10 +51,48 @@ function getContentType(filePath) {
 
 const router = Router();
 
+// ── Store-type ↔ category mapping (stored in delivery_settings to avoid schema migrations) ──
+const STORE_TYPE_SETTINGS_KEY = 'category_store_types';
+
+async function getCategoryStoreTypes() {
+  const { data, error } = await supabase
+    .from('delivery_settings')
+    .select('value')
+    .eq('key', STORE_TYPE_SETTINGS_KEY)
+    .single();
+  if (error) return {};
+  try { return typeof data?.value === 'object' && data.value ? data.value : (JSON.parse(data.value || '{}')); }
+  catch { return {}; }
+}
+
+async function setCategoryStoreType(categoryId, storeType) {
+  const map = await getCategoryStoreTypes();
+  if (storeType && storeType !== 'general') map[categoryId] = storeType;
+  else delete map[categoryId];
+  const { error } = await supabase
+    .from('delivery_settings')
+    .upsert({ key: STORE_TYPE_SETTINGS_KEY, value: map }, { onConflict: 'key' });
+  return error;
+}
+
+async function deleteCategoryStoreType(categoryId) {
+  const map = await getCategoryStoreTypes();
+  delete map[categoryId];
+  await supabase
+    .from('delivery_settings')
+    .upsert({ key: STORE_TYPE_SETTINGS_KEY, value: map }, { onConflict: 'key' });
+}
+
+function categoryStoreType(c, map) {
+  return map[c.id] || 'general';
+}
+
+
 // GET /catalog — public, active products with category + flash sales
 router.get('/catalog', async (req, res) => {
   try {
     const now = new Date().toISOString();
+    const catMap = await getCategoryStoreTypes();
 
     const { data: products } = await supabase
       .from('delivery_products')
@@ -97,6 +135,7 @@ router.get('/catalog', async (req, res) => {
           imageUrl: p.delivery_categories.image_url,
           sortOrder: p.delivery_categories.sort_order,
         } : null,
+        storeType: p.delivery_categories ? (catMap[p.delivery_categories.id] || 'general') : 'general',
       };
     });
 
@@ -106,30 +145,42 @@ router.get('/catalog', async (req, res) => {
   }
 });
 
-// GET /categories/public — public active categories
+// GET /categories/public — public active categories, optionally filtered by store type
 router.get('/categories/public', async (req, res) => {
   try {
+    const storeType = req.query.storeType;
     const { data } = await supabase
       .from('delivery_categories')
       .select('*')
       .eq('is_active', true)
       .order('sort_order', { ascending: true });
 
-    res.json(data || []);
+    let list = data || [];
+    if (storeType) {
+      const map = await getCategoryStoreTypes();
+      list = list.filter(c => categoryStoreType(c, map) === storeType);
+    }
+
+    res.json(list);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// GET /categories — admin, all categories
+// GET /categories — admin, all categories (with storeType attached)
 router.get('/categories', adminAuth, async (req, res) => {
   try {
+    const storeType = req.query.storeType;
     const { data } = await supabase
       .from('delivery_categories')
       .select('*')
       .order('sort_order', { ascending: true });
 
-    res.json(data || []);
+    const map = await getCategoryStoreTypes();
+    let list = (data || []).map(c => ({ ...c, storeType: categoryStoreType(c, map) }));
+    if (storeType) list = list.filter(c => c.storeType === storeType);
+
+    res.json(list);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -138,7 +189,7 @@ router.get('/categories', adminAuth, async (req, res) => {
 // POST /categories — admin, create
 router.post('/categories', adminAuth, async (req, res) => {
   try {
-    const { name, imageUrl, sortOrder } = req.body;
+    const { name, imageUrl, sortOrder, storeType } = req.body;
     if (!name) return res.status(400).json({ error: 'Name required' });
 
     const { data, error } = await supabase
@@ -148,7 +199,11 @@ router.post('/categories', adminAuth, async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.status(201).json(data);
+    if (storeType) {
+      const mapError = await setCategoryStoreType(data.id, storeType);
+      if (mapError) throw mapError;
+    }
+    res.status(201).json({ ...data, storeType: storeType || 'general' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -157,7 +212,7 @@ router.post('/categories', adminAuth, async (req, res) => {
 // PUT /categories/:id — admin, update
 router.put('/categories/:id', adminAuth, async (req, res) => {
   try {
-    const { name, imageUrl, sortOrder, isActive } = req.body;
+    const { name, imageUrl, sortOrder, isActive, storeType } = req.body;
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (imageUrl !== undefined) updates.image_url = imageUrl;
@@ -172,7 +227,12 @@ router.put('/categories/:id', adminAuth, async (req, res) => {
       .single();
 
     if (error) throw error;
-    res.json(data);
+    if (storeType !== undefined) {
+      const mapError = await setCategoryStoreType(data.id, storeType);
+      if (mapError) throw mapError;
+    }
+    const map = await getCategoryStoreTypes();
+    res.json({ ...data, storeType: categoryStoreType(data, map) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -183,6 +243,7 @@ router.delete('/categories/:id', adminAuth, async (req, res) => {
   try {
     const { error } = await supabase.from('delivery_categories').delete().eq('id', req.params.id);
     if (error) throw error;
+    await deleteCategoryStoreType(req.params.id);
     res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -221,10 +282,15 @@ router.post('/categories/seed', adminAuth, async (req, res) => {
 
     let count = 0;
     for (let i = 0; i < defaults.length; i++) {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('delivery_categories')
-        .upsert({ name: defaults[i].name, sort_order: i, is_active: true }, { onConflict: 'name' });
-      if (!error) count++;
+        .upsert({ name: defaults[i].name, sort_order: i, is_active: true }, { onConflict: 'name' })
+        .select()
+        .single();
+      if (!error && data?.id) {
+        await setCategoryStoreType(data.id, 'grocery');
+        count++;
+      }
     }
 
     res.json({ message: `Seeded ${count} categories`, count });

@@ -1,0 +1,99 @@
+import {
+  Header,
+  CategoryStrip,
+  Hero,
+  Marquee,
+  ProductGrid,
+  Banner,
+  Stats,
+  Newsletter,
+  Footer,
+} from '../ui';
+
+export default ({ storeName, tagline, bannerText, products, categories }) => (
+  <>
+    <Header
+      storeName={storeName}
+      links={[
+        { label: 'Boutique', to: '#catalogue' },
+        { label: 'Mis en avant', to: '#featured' },
+        { label: 'Suivi de commande', to: '/track' },
+        { label: 'Compte', to: '/auth/login' },
+      ]}
+    />
+
+    <Hero
+      eyebrow="Lineup automne 2026 — en stock"
+      title={bannerText}
+      lede={tagline}
+      primary="Voir la boutique"
+      primaryTo="#catalogue"
+      secondary="Mis en avant"
+      secondaryTo="#featured"
+    />
+
+    <Marquee items={[
+      'Livraison offerte dans le monde entier',
+      'Garantie 2 ans',
+      'Support 24/7',
+      'Charge rapide certifiée',
+      'Retours sous 30 jours',
+    ]} />
+
+    <CategoryStrip categories={categories} />
+
+    <ProductGrid title="Tout l'univers" products={products} columns={4} />
+
+    <Banner
+      id="featured"
+      eyebrow="Mis en avant — Pulsar Buds Pro"
+      title="Un seul système, tout connecté"
+      text="Écouteurs, chargeurs, téléphones et laptops partagent le même standard de charge rapide — un seul câble pour tout votre équipement."
+      to="#catalogue"
+      cta="En savoir plus"
+    />
+
+    <Stats items={[
+      { value: '50k+', label: 'Clients satisfaits' },
+      { value: '4.9/5', label: 'Note moyenne' },
+      { value: '120+', label: 'Pays livrés' },
+      { value: '24/7', label: 'Support' },
+    ]} />
+
+    <Newsletter
+      title="En avant-première des drops"
+      text="Nouveaux produits, restocks et tarifs membres — directement dans votre boîte mail."
+      button="S'abonner"
+    />
+
+    <Footer
+      storeName={storeName}
+      columns={[
+        {
+          title: 'Boutique',
+          links: [
+            { label: 'Catalogue complet', to: '#catalogue' },
+            { label: 'Mis en avant', to: '#featured' },
+            { label: 'Panier', to: 'cart' },
+          ],
+        },
+        {
+          title: 'Compte',
+          links: [
+            { label: 'Se connecter', to: '/auth/login' },
+            { label: 'Créer un compte', to: '/auth/register' },
+            { label: 'Mes commandes', to: '/track' },
+          ],
+        },
+        {
+          title: 'Aide',
+          links: [
+            { label: 'Suivi de commande', to: '/track' },
+            { label: 'Paiement sécurisé', to: '/checkout' },
+            { label: 'Retour à la boutique', to: '/' },
+          ],
+        },
+      ]}
+    />
+  </>
+);

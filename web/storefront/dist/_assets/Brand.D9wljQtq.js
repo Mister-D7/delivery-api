@@ -1,0 +1,1 @@
+import{t as e}from"./storefront.CVCrvQ4W.js";import{t}from"./jsx-runtime.hGNRxWI7.js";var n=t();function r(){let{settings:t}=e(),r=t.storeName||`NEXUS`;return(0,n.jsxs)(`a`,{href:`#`,className:`brand`,children:[(0,n.jsx)(`span`,{className:`brand-mark`}),r]})}export{r as default};

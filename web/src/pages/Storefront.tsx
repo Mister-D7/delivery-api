@@ -12,9 +12,10 @@ import { ThemeProvider, useTheme } from '../context/ThemeContext';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 import VideoBackground from '../components/theme/VideoBackground';
 import StorefrontRenderer from '../components/StorefrontRenderer';
+import { getStoreType } from '../themes';
 
-type RawProduct = { id: string; name?: string; productId?: string; promoPrice?: number | null; promoEndDate?: string | null; stockQty?: number; imageUrl?: string | null; displayOrder?: number; isActive?: boolean; customName?: string | null; customPrice?: number | null; customDescription?: string | null; specs?: string | null; barcode?: string | null; product?: { id: string; name: string; salePrice: number; barcode?: string | null; imageUrl?: string | null; stockQty: number } | null; category?: { id: string; name: string } | null };
-type Product = { id: string; catalogId: string; erpProductId?: string | null; customName?: string | null; customPrice?: number | null; name: string; salePrice: number; promoPrice?: number | null; imageUrl?: string | null; stockQty: number; category?: { id: string; name: string } | null; barcode?: string | null; displayOrder?: number; isActive?: boolean; specs?: string | null };
+type RawProduct = { id: string; name?: string; productId?: string; promoPrice?: number | null; promoEndDate?: string | null; stockQty?: number; imageUrl?: string | null; displayOrder?: number; isActive?: boolean; customName?: string | null; customPrice?: number | null; customDescription?: string | null; specs?: string | null; barcode?: string | null; product?: { id: string; name: string; salePrice: number; barcode?: string | null; imageUrl?: string | null; stockQty: number } | null; category?: { id: string; name: string } | null; storeType?: string | null };
+type Product = { id: string; catalogId: string; erpProductId?: string | null; customName?: string | null; customPrice?: number | null; name: string; salePrice: number; promoPrice?: number | null; imageUrl?: string | null; stockQty: number; category?: { id: string; name: string } | null; barcode?: string | null; displayOrder?: number; isActive?: boolean; specs?: string | null; storeType?: string | null };
 type Category = { id: string; name: string; imageUrl?: string | null };
 
 function flattenProduct(raw: RawProduct): Product {
@@ -38,6 +39,7 @@ function flattenProduct(raw: RawProduct): Product {
     displayOrder: raw.displayOrder,
     isActive: raw.isActive,
     specs: raw.specs || null,
+    storeType: raw.storeType || 'general',
   };
 }
 
@@ -67,9 +69,12 @@ function StorefrontInner() {
   const cat = searchParams.get('cat') || '';
 
   const loadData = useCallback(() => {
+    const storeType = getStoreType();
     return Promise.all([
-      api.get('/catalog').then(r => setProducts((r.data || []).map(flattenProduct))),
-      api.get('/categories/public').then(r => setCategories(r.data || [])),
+      api.get('/catalog').then(r => setProducts((r.data || []).map(flattenProduct).filter((p: Product) => !p.storeType || p.storeType === 'general' || p.storeType === storeType))),
+      api.get('/categories/public', { params: { storeType } }).then(r => setCategories((r.data || []).map((c: any) => ({
+        id: c.id, name: c.name, imageUrl: c.image_url || c.imageUrl || null,
+      })))),
     ]).finally(() => setLoading(false));
   }, []);
 
@@ -454,7 +459,15 @@ function StorefrontInner() {
   );
 }
 
+import TemplateStorefront from '../components/TemplateStorefront';
+
 export default function Storefront() {
+  const [hasTemplate] = useState(() => !!localStorage.getItem('delivery_selected_template'));
+
+  if (hasTemplate) {
+    return <TemplateStorefront />;
+  }
+
   return (
     <ThemeProvider>
       <StorefrontInner />
