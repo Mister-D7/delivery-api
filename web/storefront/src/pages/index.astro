@@ -1,6 +1,6 @@
 ---
 import ProductGrid from '../components/ProductGrid';
-import CartButton from '../components/CartButton';
+import HeaderActions from '../components/HeaderActions';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import Brand from '../components/Brand';
@@ -618,19 +618,7 @@ import HeroText from '../components/HeroText';
     <a href="#" class="brand">
       <Brand client:load />
     </a>
-    <nav id="mainNav">
-      <a href="#play">Séries PLAY</a>
-      <a href="#lumen">Séries LUMEN</a>
-      <a href="#promo">Promos</a>
-      <a href="/track">Suivi de commande</a>
-      <a href="/profile">Compte</a>
-    </nav>
-    <div class="header-actions">
-      <CartButton client:load />
-      <button class="burger" id="burgerBtn" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-    </div>
+    <HeaderActions client:load />
   </div>
 </header>
 
@@ -831,12 +819,6 @@ import HeroText from '../components/HeroText';
 </footer>
 
 <script>
-  // mobile nav toggle
-  const burger = document.getElementById('burgerBtn');
-  const nav = document.getElementById('mainNav');
-  burger.addEventListener('click', () => nav.classList.toggle('open'));
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
-
   // category pill filter
   const pills = document.querySelectorAll('.pill');
   const playSection = document.getElementById('play');

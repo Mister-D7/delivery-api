@@ -35,7 +35,6 @@ export function setQty(n: number) {
 }
 
 export function useModalStore() {
-  const productValue = useSyncExternalStore(subscribe, () => snapshot.product, () => snapshot.product);
-  const qtyValue = useSyncExternalStore(subscribe, () => snapshot.qty, () => snapshot.qty);
-  return { product: productValue, qty: qtyValue, openProduct, closeProduct, setQty };
+  const state = useSyncExternalStore(subscribe, () => snapshot, () => snapshot);
+  return { product: state.product, qty: state.qty, openProduct, closeProduct, setQty };
 }

@@ -35,8 +35,7 @@ function totalOf(list: CartItem[]) {
 let items: CartItem[] = load();
 let isCartOpen = false;
 let cartListeners = new Set<() => void>();
-let drawerListeners = new Set<() => void>();
-let snapshot = { items, count: countOf(items), total: totalOf(items) };
+let snapshot = { items, count: countOf(items), total: totalOf(items), isCartOpen };
 
 function persist() {
   try {
@@ -47,7 +46,7 @@ function persist() {
 }
 
 function commit() {
-  snapshot = { items, count: countOf(items), total: totalOf(items) };
+  snapshot = { items, count: countOf(items), total: totalOf(items), isCartOpen };
   cartListeners.forEach((l) => l());
 }
 
@@ -55,13 +54,6 @@ function subscribeCart(l: () => void) {
   cartListeners.add(l);
   return () => {
     cartListeners.delete(l);
-  };
-}
-
-function subscribeDrawer(l: () => void) {
-  drawerListeners.add(l);
-  return () => {
-    drawerListeners.delete(l);
   };
 }
 
@@ -100,24 +92,21 @@ export function clearCart() {
 
 export function openCart() {
   isCartOpen = true;
-  drawerListeners.forEach((l) => l());
+  commit();
 }
 
 export function closeCart() {
   isCartOpen = false;
-  drawerListeners.forEach((l) => l());
+  commit();
 }
 
 export function useCartStore() {
-  const itemsSnapshot = useSyncExternalStore(subscribeCart, () => snapshot.items, () => snapshot.items);
-  const count = useSyncExternalStore(subscribeCart, () => snapshot.count, () => snapshot.count);
-  const total = useSyncExternalStore(subscribeCart, () => snapshot.total, () => snapshot.total);
-  const isCartOpenValue = useSyncExternalStore(subscribeDrawer, () => isCartOpen, () => isCartOpen);
+  const state = useSyncExternalStore(subscribeCart, () => snapshot, () => snapshot);
   return {
-    items: itemsSnapshot,
-    count,
-    total,
-    isCartOpen: isCartOpenValue,
+    items: state.items,
+    count: state.count,
+    total: state.total,
+    isCartOpen: state.isCartOpen,
     addItem,
     removeItem,
     updateQty,

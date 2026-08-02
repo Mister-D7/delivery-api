@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime.hGNRxWI7.js";import{a as t}from"./cart.DDcwyS0R.js";var n=e();function r(){let{count:e,openCart:r}=t();return(0,n.jsxs)(`button`,{className:`cart-btn`,"aria-label":`Panier`,onClick:r,children:[`Panier `,(0,n.jsx)(`span`,{className:`cart-count`,children:e})]})}export{r as default};

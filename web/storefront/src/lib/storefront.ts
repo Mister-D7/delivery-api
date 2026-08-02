@@ -63,8 +63,10 @@ function onWake() {
 function start() {
   started = true;
   if (typeof window === 'undefined') return;
-  void refresh();
   timer = setInterval(refresh, POLL_MS);
+  setTimeout(() => {
+    void refresh();
+  }, 1500);
   window.addEventListener('focus', onWake);
   document.addEventListener('visibilitychange', onWake);
 }

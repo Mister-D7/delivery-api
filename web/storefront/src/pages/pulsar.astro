@@ -6,7 +6,7 @@ import PulsarCategories from '../components/PulsarCategories';
 import PulsarProductGrid from '../components/PulsarProductGrid';
 import PulsarSpotlight from '../components/PulsarSpotlight';
 import PulsarSpotlightScene from '../components/PulsarSpotlightScene';
-import CartButton from '../components/CartButton';
+import HeaderActions from '../components/HeaderActions';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 ---
@@ -23,19 +23,7 @@ import ProductModal from '../components/ProductModal';
 <header>
   <div class="wrap header-row">
     <a href="#" class="brand"><span class="brand-mark"></span>PULSAR</a>
-    <nav id="mainNav">
-      <a href="#shop">Catégories</a>
-      <a href="#featured">En vedette</a>
-      <a href="#lineup">La gamme</a>
-      <a href="/track">Suivi de commande</a>
-      <a href="/profile">Compte</a>
-    </nav>
-    <div class="header-actions">
-      <CartButton client:load />
-      <button class="burger" id="burgerBtn" aria-label="Menu">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-      </button>
-    </div>
+    <HeaderActions client:load />
   </div>
 </header>
 
@@ -159,13 +147,6 @@ import ProductModal from '../components/ProductModal';
     </div>
   </div>
 </footer>
-
-<script>
-  const burger = document.getElementById('burgerBtn');
-  const nav = document.getElementById('mainNav');
-  burger.addEventListener('click', () => nav.classList.toggle('open'));
-  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
-</script>
 
 <CartDrawer client:load />
 <ProductModal client:load />
