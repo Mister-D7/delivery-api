@@ -64,7 +64,7 @@ export default function PulsarHeroScene() {
       ring2.rotation.y = Math.PI / 5;
       group.add(ring2);
 
-      const nodeColors = state.isLight ? [0x00a8bd, 0x6d28d9, 0x14141c, 0x00a8bd] : [0x00e5ff, 0x8b5cf6, 0xffffff, 0x00e5ff];
+      const nodeColors = [0x000000, 0x000000, 0x000000, 0x000000];
       const nodes: { mesh: THREE.Mesh; radius: number; speed: number; offset: number; tilt: number }[] = [];
       for (let i = 0; i < 4; i++) {
         const geo = new THREE.BoxGeometry(0.16, 0.16, 0.16);
@@ -97,10 +97,9 @@ export default function PulsarHeroScene() {
       const applyTheme = (light: boolean) => {
         state.isLight = light;
         core.material.color.setHex(light ? 0xececf2 : 0x0c0c16);
-        nodes.forEach((n, i) => {
-          const c = light ? [0x00a8bd, 0x6d28d9, 0x14141c, 0x00a8bd] : [0x00e5ff, 0x8b5cf6, 0xffffff, 0x00e5ff];
-          (n.mesh.material as THREE.MeshStandardMaterial).color.setHex(c[i]);
-          (n.mesh.material as THREE.MeshStandardMaterial).emissive.setHex(c[i]);
+        nodes.forEach((n) => {
+          (n.mesh.material as THREE.MeshStandardMaterial).color.setHex(0x000000);
+          (n.mesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x000000);
         });
         if (light) {
           particleMat.color.setHex(0x00a8bd);
