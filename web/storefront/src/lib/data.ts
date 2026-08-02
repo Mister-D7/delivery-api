@@ -92,7 +92,13 @@ export const FALLBACK_PRODUCTS: Product[] = [
   },
 ];
 
-export const FALLBACK_CATEGORIES: string[] = ['PLAY', 'LUMEN'];
+export interface CategoryInfo {
+  id?: string;
+  name: string;
+  imageUrl?: string | null;
+}
+
+export const FALLBACK_CATEGORIES: CategoryInfo[] = [{ name: 'PLAY' }, { name: 'LUMEN' }];
 
 export interface StorefrontSettings {
   storeName?: string;

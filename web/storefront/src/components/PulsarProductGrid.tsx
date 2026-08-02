@@ -1,14 +1,12 @@
 import { useState } from 'react';
 import { useStorefront } from '../lib/storefront';
-import { openProduct } from '../lib/store';
-import { addItem } from '../lib/cart';
-import { formatPrice } from '../lib/format';
+import PulsarProductCard from './PulsarProductCard';
 
-const FALLBACK_CATS = ['Jeux vidéo', 'Accessoires', 'Téléphones', 'PC'];
+const FALLBACK_CATS = [{ name: 'Jeux vidéo' }, { name: 'Accessoires' }, { name: 'Téléphones' }, { name: 'PC' }];
 
-export default function PulsarProductGrid() {
+export default function PulsarProductGrid({ initialFilter }: { initialFilter?: string }) {
   const { products, categories } = useStorefront();
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState(initialFilter ?? 'all');
   const cats = categories.length ? categories : FALLBACK_CATS;
   const shown = filter === 'all' ? products : products.filter((p) => p.category === filter);
   return (
@@ -18,38 +16,14 @@ export default function PulsarProductGrid() {
           Tous
         </button>
         {cats.map((c) => (
-          <button key={c} className={`pill${filter === c ? ' active' : ''}`} onClick={() => setFilter(c)}>
-            {c}
+          <button key={c.id || c.name} className={`pill${filter === c.name ? ' active' : ''}`} onClick={() => setFilter(c.name)}>
+            {c.name}
           </button>
         ))}
       </div>
       <div className="grid">
         {shown.map((p) => (
-          <div className="card" key={p.id} data-cat={p.category || ''} data-edit-product={p.id}>
-            <div className="card-media">
-              <span className="badge">{p.oldPrice ? 'Promo' : 'En stock'}</span>
-              {p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : null}
-            </div>
-            <div className="card-body">
-              <span className="card-cat">{p.category || 'Boutique'}</span>
-              <h3 className="card-name">{p.name}</h3>
-              <div className="card-price">
-                <span className="now">{formatPrice(p.price)} DA</span>
-                {p.oldPrice ? <span className="old">{formatPrice(p.oldPrice)} DA</span> : null}
-              </div>
-              <a
-                href="#"
-                className="btn btn-solid"
-                onClick={(e) => {
-                  e.preventDefault();
-                  openProduct(p);
-                  addItem(p);
-                }}
-              >
-                Ajouter au panier
-              </a>
-            </div>
-          </div>
+          <PulsarProductCard key={p.id} p={p} />
         ))}
       </div>
     </>

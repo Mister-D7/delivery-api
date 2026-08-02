@@ -15,21 +15,61 @@ function iconFor(name: string): string {
   return '🛒';
 }
 
+const FALLBACK_CATS = [
+  { name: 'Jeux vidéo', imageUrl: null },
+  { name: 'Accessoires', imageUrl: null },
+  { name: 'Téléphones', imageUrl: null },
+  { name: 'PC', imageUrl: null },
+];
+
+function slug(name: string): string {
+  return encodeURIComponent(name.toLowerCase());
+}
+
 export default function PulsarCategories() {
   const { categories } = useStorefront();
-  const cats = categories.length ? categories.slice(0, 4) : ['Jeux vidéo', 'Accessoires', 'Téléphones', 'PC'];
+  const cats = categories.length ? categories.slice(0, 4) : FALLBACK_CATS;
+  const isEdit = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('edit');
+  const slots = Math.max(0, 4 - cats.length);
   return (
     <div className="cat-grid" id="catGrid">
-      {cats.map((name) => (
-        <a key={name} href="#shop" className="cat-card" data-tilt>
-          <div className="cat-icon">{iconFor(name)}</div>
+      {cats.map((c) => (
+        <a
+          key={c.id || c.name}
+          href={`/categorie/${slug(c.name)}`}
+          className="cat-card"
+          data-tilt
+          data-edit-category={c.id || ''}
+          data-cat-name={c.name}
+        >
+          <div className="cat-icon">
+            {c.imageUrl ? <img src={c.imageUrl} alt={c.name} loading="lazy" /> : <span className="cat-emoji">{iconFor(c.name)}</span>}
+          </div>
           <div>
-            <h3>{name}</h3>
+            <h3>{c.name}</h3>
             <p>VOIR LA COLLECTION</p>
           </div>
           <span className="cat-arrow">↗</span>
         </a>
       ))}
+      {isEdit &&
+        Array.from({ length: slots }).map((_, i) => (
+          <button
+            key={`add-${i}`}
+            type="button"
+            className="cat-card cat-add"
+            onClick={() => window.dispatchEvent(new CustomEvent('category:edit', { detail: { id: null } }))}
+          >
+            <div className="cat-icon cat-add-icon">
+              <span>+</span>
+            </div>
+            <div>
+              <h3>Ajouter</h3>
+              <p>NOUVELLE CATÉGORIE</p>
+            </div>
+            <span className="cat-arrow">↗</span>
+          </button>
+        ))}
     </div>
   );
 }

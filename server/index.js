@@ -152,6 +152,12 @@ async function ensureStorageBucket() {
 const webDist = path.join(__dirname, '..', 'web', 'dist');
 const storefrontDist = path.join(__dirname, '..', 'web', 'storefront', 'dist');
 app.use('/_assets', express.static(path.join(storefrontDist, '_assets')));
+app.get('/categorie/:slug', (req, res) => {
+  const page = path.join(storefrontDist, 'categorie', req.params.slug, 'index.html');
+  res.sendFile(page, (err) => {
+    if (err) res.redirect('/');
+  });
+});
 app.get('/', async (req, res) => {
   try {
     const { data } = await supabase

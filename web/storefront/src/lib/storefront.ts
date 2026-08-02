@@ -4,6 +4,7 @@ import {
   FALLBACK_CATEGORIES,
   mapRawProduct,
   type Product,
+  type CategoryInfo,
   type StorefrontSettings,
 } from './data';
 
@@ -24,7 +25,7 @@ export function storeTypeForTheme(theme?: string): string {
 
 export interface StorefrontSnapshot {
   products: Product[];
-  categories: string[];
+  categories: CategoryInfo[];
   settings: StorefrontSettings;
   status: 'loading' | 'ok' | 'offline';
   lastSync: number;
@@ -160,11 +161,17 @@ async function refresh() {
       const arr = Array.isArray(json) ? json : json?.data ?? json?.products ?? [];
       products = arr.map((r: any) => mapRawProduct(r, st)).filter((p: Product | null): p is Product => p !== null);
     }
-    let categories: string[] = [];
+    let categories: CategoryInfo[] = [];
     if (catsRes.ok) {
       const json = await catsRes.json();
       const arr = Array.isArray(json) ? json : json?.data ?? [];
-      categories = arr.map((c: any) => c?.name ?? c).filter(Boolean);
+      categories = arr
+        .map((c: any) => {
+          const name = c?.name ?? c;
+          if (!name) return null;
+          return { id: c?.id, name, imageUrl: c?.image_url || c?.imageUrl || null };
+        })
+        .filter((c: CategoryInfo | null): c is CategoryInfo => c !== null);
     }
     snapshot = {
       products: applyPinned(products, settings.pinned),

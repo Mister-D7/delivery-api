@@ -1,14 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
-import { useStorefront } from '../lib/storefront';
+import { useStorefront, storeTypeForTheme } from '../lib/storefront';
 import type { Product } from '../lib/data';
 import '../styles/islands.css';
 
 interface MenuState {
   x: number;
   y: number;
-  kind: 'text' | 'product' | '3d';
+  kind: 'text' | 'product' | '3d' | 'category';
   target: HTMLElement;
   textKey?: string;
+  categoryId?: string;
+  categoryName?: string;
+}
+
+interface CategoryEdit {
+  id: string | null;
+  name: string;
+  imageUrl: string;
 }
 
 function getToken(): string {
@@ -36,12 +44,13 @@ export default function EditCanvas() {
   const [isEdit, setIsEdit] = useState(false);
   const [menu, setMenu] = useState<MenuState | null>(null);
   const [editing, setEditing] = useState<Product | null>(null);
+  const [catEdit, setCatEdit] = useState<CategoryEdit | null>(null);
   const [busy, setBusy] = useState(false);
   const [toast, setToast] = useState('');
   const textTargetRef = useRef<HTMLElement | null>(null);
   const finishTextRef = useRef<(el: HTMLElement) => Promise<void>>(async () => {});
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const { products } = useStorefront();
+  const { products, categories, settings } = useStorefront();
 
   const notify = (msg: string) => {
     setToast(msg);
@@ -61,6 +70,7 @@ export default function EditCanvas() {
       const textEl = target.closest<HTMLElement>('[data-edit-text]');
       const prodEl = target.closest<HTMLElement>('[data-edit-product]');
       const modelEl = target.closest<HTMLElement>('[data-edit-3d]');
+      const catEl = target.closest<HTMLElement>('[data-edit-category]');
       let next: MenuState | null = null;
       if (textEl) {
         next = { x: e.clientX, y: e.clientY, kind: 'text', target: textEl, textKey: textEl.dataset.editText };
@@ -68,6 +78,15 @@ export default function EditCanvas() {
         next = { x: e.clientX, y: e.clientY, kind: 'product', target: prodEl };
       } else if (modelEl) {
         next = { x: e.clientX, y: e.clientY, kind: '3d', target: modelEl };
+      } else if (catEl) {
+        next = {
+          x: e.clientX,
+          y: e.clientY,
+          kind: 'category',
+          target: catEl,
+          categoryId: catEl.dataset.editCategory || null,
+          categoryName: catEl.dataset.catName,
+        };
       }
       if (next) {
         e.preventDefault();
@@ -84,6 +103,7 @@ export default function EditCanvas() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         close();
+        setCatEdit(null);
         (document.activeElement as HTMLElement)?.blur?.();
       }
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -98,18 +118,30 @@ export default function EditCanvas() {
       const el = textTargetRef.current;
       if (el && e.target === el) void finishTextRef.current(el);
     };
+    const onCategoryEvent = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      const id = detail?.id ? String(detail.id) : null;
+      const existing = categories.find((c) => String(c.id) === id);
+      setCatEdit({
+        id,
+        name: existing?.name || '',
+        imageUrl: existing?.imageUrl || '',
+      });
+    };
 
     document.addEventListener('contextmenu', onContext, true);
     document.addEventListener('mousedown', onDown, true);
     document.addEventListener('keydown', onKey, true);
     document.addEventListener('focusout', onFocusOut, true);
+    window.addEventListener('category:edit', onCategoryEvent);
     return () => {
       document.removeEventListener('contextmenu', onContext, true);
       document.removeEventListener('mousedown', onDown, true);
       document.removeEventListener('keydown', onKey, true);
       document.removeEventListener('focusout', onFocusOut, true);
+      window.removeEventListener('category:edit', onCategoryEvent);
     };
-  }, []);
+  }, [categories]);
 
   const startTextEdit = () => {
     if (!menu) return;
@@ -187,6 +219,101 @@ export default function EditCanvas() {
     setMenu(null);
   };
 
+  const openCategoryEdit = () => {
+    if (!menu) return;
+    const existing = categories.find((c) => String(c.id) === menu.categoryId);
+    setCatEdit({
+      id: menu.categoryId || null,
+      name: existing?.name || menu.categoryName || '',
+      imageUrl: existing?.imageUrl || '',
+    });
+    setMenu(null);
+  };
+
+  const onCategoryImageFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !catEdit) return;
+    try {
+      setBusy(true);
+      const token = getToken();
+      if (!token) throw new Error('Non autorisé');
+      const fd = new FormData();
+      fd.append('image', file);
+      const up = await fetch('/api/delivery/upload/image', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: fd,
+      });
+      if (!up.ok) throw new Error('Échec de l’upload');
+      const json = await up.json();
+      setCatEdit((c) => (c ? { ...c, imageUrl: json.url } : c));
+      notify('Image téléversée');
+    } catch (err) {
+      notify((err as Error).message || 'Erreur');
+    }
+    setBusy(false);
+  };
+
+  const saveCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!catEdit) return;
+    const name = catEdit.name.trim();
+    if (!name) return notify('Nom requis');
+    try {
+      setBusy(true);
+      const token = getToken();
+      if (!token) throw new Error('Non autorisé');
+      const exists = categories.some((c) => c.name.toLowerCase() === name.toLowerCase());
+      const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+      if (catEdit.id) {
+        const res = await fetch(`/api/delivery/categories/${catEdit.id}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({ name, imageUrl: catEdit.imageUrl || null }),
+        });
+        if (!res.ok) throw new Error('Erreur de sauvegarde');
+      } else {
+        const storeType = storeTypeForTheme(settings.theme);
+        const res = await fetch('/api/delivery/categories', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ name, imageUrl: catEdit.imageUrl || null, storeType }),
+        });
+        if (!res.ok) throw new Error('Erreur de création');
+        if (!exists) {
+          notify(`Catégorie « ${name} » créée — affectez ses produits depuis l'admin`);
+        }
+      }
+      setCatEdit(null);
+      window.setTimeout(() => window.location.reload(), 700);
+    } catch (err) {
+      notify((err as Error).message || 'Erreur');
+      setBusy(false);
+    }
+  };
+
+  const deleteCategory = async () => {
+    if (!catEdit?.id) return;
+    if (!window.confirm(`Supprimer la catégorie « ${catEdit.name} » ?`)) return;
+    try {
+      setBusy(true);
+      const token = getToken();
+      if (!token) throw new Error('Non autorisé');
+      const res = await fetch(`/api/delivery/categories/${catEdit.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error('Erreur de suppression');
+      setCatEdit(null);
+      notify('Catégorie supprimée');
+      window.setTimeout(() => window.location.reload(), 700);
+    } catch (err) {
+      notify((err as Error).message || 'Erreur');
+      setBusy(false);
+    }
+  };
+
   const saveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editing) return;
@@ -244,6 +371,10 @@ export default function EditCanvas() {
 
   if (!isEdit) return <></>;
 
+  const nameExists = catEdit
+    ? categories.some((c) => c.name.toLowerCase() === catEdit.name.trim().toLowerCase())
+    : true;
+
   return (
     <>
       <div className="ec-badge">✏️ Mode édition — clic droit</div>
@@ -263,6 +394,11 @@ export default function EditCanvas() {
           {menu.kind === '3d' && (
             <button className="ec-menu-item" onClick={startModelUpload}>
               🧊 Changer le modèle 3D
+            </button>
+          )}
+          {menu.kind === 'category' && (
+            <button className="ec-menu-item" onClick={openCategoryEdit}>
+              🗂️ Modifier la catégorie
             </button>
           )}
         </div>
@@ -312,6 +448,64 @@ export default function EditCanvas() {
               <button type="button" className="ec-danger" onClick={deleteProduct} disabled={busy}>
                 Supprimer
               </button>
+              <button type="submit" className="ec-save" disabled={busy}>
+                {busy ? '…' : 'Enregistrer'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {catEdit && (
+        <div className="ec-modal" onMouseDown={(e) => e.stopPropagation()}>
+          <form className="ec-modal-card" onSubmit={saveCategory}>
+            <div className="ec-modal-head">
+              <span>{catEdit.id ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</span>
+              <button type="button" className="ec-close" onClick={() => setCatEdit(null)}>
+                ×
+              </button>
+            </div>
+            <label>
+              Nom de la catégorie
+              <input
+                value={catEdit.name}
+                placeholder="Ex : Chargeurs"
+                onChange={(e) => setCatEdit({ ...catEdit, name: e.target.value })}
+              />
+            </label>
+            {!catEdit.id && catEdit.name.trim() && !nameExists && (
+              <p className="ec-hint">
+                ⚠️ La catégorie « {catEdit.name.trim()} » n'existe pas encore — elle sera créée automatiquement à l'enregistrement. Affectez ensuite ses produits depuis l'onglet Produits de l'admin.
+              </p>
+            )}
+            {!catEdit.id && catEdit.name.trim() && nameExists && (
+              <p className="ec-hint">✓ La catégorie « {catEdit.name.trim()} » existe déjà — la tuile y mènera directement.</p>
+            )}
+            <label>
+              Icône (URL)
+              <input
+                value={catEdit.imageUrl}
+                placeholder="https://… ou /uploads/images/…"
+                onChange={(e) => setCatEdit({ ...catEdit, imageUrl: e.target.value })}
+              />
+            </label>
+            {catEdit.imageUrl && (
+              <div className="ec-thumb">
+                <img src={catEdit.imageUrl} alt="aperçu" />
+              </div>
+            )}
+            <label>
+              Icône (fichier local)
+              <input type="file" accept="image/*" onChange={onCategoryImageFile} />
+            </label>
+            <div className="ec-modal-actions">
+              {catEdit.id ? (
+                <button type="button" className="ec-danger" onClick={deleteCategory} disabled={busy}>
+                  Supprimer
+                </button>
+              ) : (
+                <span />
+              )}
               <button type="submit" className="ec-save" disabled={busy}>
                 {busy ? '…' : 'Enregistrer'}
               </button>

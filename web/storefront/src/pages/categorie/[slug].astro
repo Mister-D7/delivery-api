@@ -1,0 +1,96 @@
+---
+import '../../styles/pulsar.css';
+import PulsarHeader from '../../components/PulsarHeader.astro';
+import PulsarCategoryPage from '../../components/PulsarCategoryPage';
+import CartDrawer from '../../components/CartDrawer';
+import ProductModal from '../../components/ProductModal';
+import EditCanvas from '../../components/EditCanvas';
+import { slugify } from '../../lib/slug';
+
+const FALLBACK_SEED = ['Chargeurs', 'Smartphones', 'Laptops', 'Composants PC'];
+
+export async function getStaticPaths() {
+  let cats: { name: string }[] = [];
+  try {
+    const port = process.env.PORT || 4000;
+    const res = await fetch(`http://127.0.0.1:${port}/api/delivery/categories/public?storeType=tech`, {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res.ok) {
+      const json = await res.json();
+      const arr = Array.isArray(json) ? json : json?.data ?? [];
+      cats = arr.map((c: any) => ({ name: c?.name ?? c })).filter((c: any) => c && c.name);
+    }
+  } catch {}
+  if (!cats.length) cats = FALLBACK_SEED.map((name) => ({ name }));
+  return cats.map((c) => ({ params: { slug: slugify(c.name) }, props: { name: c.name } }));
+}
+
+const { name } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSAR — {name}</title>
+<script is:inline>
+  (function () {
+    try {
+      var t = localStorage.getItem('pulsar_theme') || 'dark';
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+<PulsarHeader />
+
+<section class="cat-page">
+  <div class="wrap">
+    <PulsarCategoryPage name={name} client:load />
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">1200+</div><div class="stat-label">Configs livrées</div></div>
+  <div class="stat"><div class="stat-num">4.9/5</div><div class="stat-label">Note clients</div></div>
+  <div class="stat"><div class="stat-num">24/48h</div><div class="stat-label">Livraison</div></div>
+  <div class="stat"><div class="stat-num">7/7</div><div class="stat-label">Support</div></div>
+</div>
+
+<footer id="tracking">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <a href="/" class="brand"><span class="brand-mark"></span>PULSAR</a>
+        <p>Écouteurs, chargeurs, téléphones et ordinateurs pensés comme un seul écosystème à charge rapide.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul><li><a href="/#shop">Catégories</a></li><li><a href="/#lineup">La gamme</a></li><li><a href="/#featured">En vedette</a></li><li><a href="#">Promos</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul><li><a href="/track">Suivi de commande</a></li><li><a href="/profile">Mon compte</a></li><li><a href="#">Garantie 12 mois</a></li><li><a href="#">Retours</a></li><li><a href="#">Contact</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Entreprise</h4>
+        <ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="#">Mentions légales</a></li><li><a href="#">CGV</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 PULSAR. Tous droits réservés.</span>
+      <span>Conçu pour la puissance du quotidien</span>
+    </div>
+  </div>
+</footer>
+
+<CartDrawer client:load />
+<ProductModal client:load />
+<EditCanvas client:load />
+
+</body>
+</html>
