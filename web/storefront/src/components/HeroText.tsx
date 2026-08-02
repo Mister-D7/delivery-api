@@ -12,11 +12,10 @@ const DEFAULT_SUB =
 
 export default function HeroText() {
   const { settings } = useStorefront();
-  const title = settings.bannerText;
   const sub = settings.tagline;
   return (
     <>
-      <h1 className="hero-title" data-edit-text="bannerText">{title || DEFAULT_TITLE}</h1>
+      <h1 className="hero-title">{DEFAULT_TITLE}</h1>
       <p className="hero-sub" data-edit-text="tagline">{sub || DEFAULT_SUB}</p>
     </>
   );

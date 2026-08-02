@@ -19,8 +19,9 @@ export default function PulsarSpotlightScene() {
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
       const scene = new THREE.Scene();
+      const isModel = Boolean(modelUrl);
       const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
-      camera.position.set(0, 0.4, 5);
+      camera.position.set(0, 0.4, isModel ? 5.4 : 5);
 
       const size = () => {
         const w = canvas.clientWidth;
@@ -46,7 +47,7 @@ export default function PulsarSpotlightScene() {
           const box = new THREE.Box3().setFromObject(model);
           const sizeV = box.getSize(new THREE.Vector3());
           const maxDim = Math.max(sizeV.x, sizeV.y, sizeV.z) || 1;
-          const scale = 2.2 / maxDim;
+          const scale = 2.0 / maxDim;
           model.scale.setScalar(scale);
           const center = box.getCenter(new THREE.Vector3());
           model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
@@ -94,13 +95,29 @@ export default function PulsarSpotlightScene() {
         group.add(makeBud(-0.32), makeBud(0.32));
       }
 
-      scene.add(new THREE.AmbientLight(0x606070, 1.4));
-      const kl = new THREE.PointLight(0x00e5ff, 2.5, 10);
-      kl.position.set(3, 2, 3);
-      scene.add(kl);
-      const kl2 = new THREE.PointLight(0x8b5cf6, 2.5, 10);
-      kl2.position.set(-3, -1, 2);
-      scene.add(kl2);
+      if (isModel) {
+        scene.add(new THREE.AmbientLight(0xffffff, 1.7));
+        const key = new THREE.DirectionalLight(0xffffff, 3.2);
+        key.position.set(4, 6, 5);
+        scene.add(key);
+        const fill = new THREE.DirectionalLight(0xffffff, 1.3);
+        fill.position.set(-5, -2, 3);
+        scene.add(fill);
+        const back = new THREE.DirectionalLight(0xffffff, 0.9);
+        back.position.set(0, 3, -5);
+        scene.add(back);
+        const ledLight = new THREE.PointLight(0xffffff, 2.2, 12);
+        ledLight.position.set(2, 4, -2);
+        scene.add(ledLight);
+      } else {
+        scene.add(new THREE.AmbientLight(0x606070, 1.4));
+        const kl = new THREE.PointLight(0x00e5ff, 2.5, 10);
+        kl.position.set(3, 2, 3);
+        scene.add(kl);
+        const kl2 = new THREE.PointLight(0x8b5cf6, 2.5, 10);
+        kl2.position.set(-3, -1, 2);
+        scene.add(kl2);
+      }
 
       let dragging = false;
       let lastX = 0;

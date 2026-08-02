@@ -19,7 +19,7 @@ export const THEME_DEFAULTS: ThemeSettings = {
   productOrder: [], categoryOrder: [], fontFamily: "'Unbounded', sans-serif",
   bgColor: '#0a0a0a', surfaceColor: '#141414', textColor: '#f5f1e8', accentColor: '#bfa24e',
   glowEnabled: true, glowColor: '#bfa24e', animationEnabled: true,
-  bannerText: 'Commandez, on vous livre', heroImage: '', storeName: 'MISTER-DR', tagline: 'Parcourez notre catalogue et recevez vos produits directement chez vous.',
+  bannerText: '', heroImage: '', storeName: 'MISTER-DR', tagline: '',
   backgroundImage: '', backgroundType: 'color',
   glassEnabled: false,
 };

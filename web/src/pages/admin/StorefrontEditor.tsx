@@ -71,7 +71,6 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
 
   const buildBlob = useCallback(() => ({
     storeName: settings.storeName,
-    bannerText: settings.bannerText,
     tagline: settings.tagline,
     heroImage: settings.heroImage,
     bgColor: settings.bgColor,

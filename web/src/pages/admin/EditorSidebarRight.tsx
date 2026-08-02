@@ -145,10 +145,6 @@ export default function EditorSidebarRight(props: Props) {
                       <input value={settings.tagline} onChange={e => setSettings(s => ({ ...s, tagline: e.target.value }))} className="input-field text-xs w-full" />
                     </div>
                     <div>
-                      <label className="text-[9px] font-bold block mb-1" style={{ color: 'var(--admin-muted3)' }}>Texte hero</label>
-                      <input value={settings.bannerText} onChange={e => setSettings(s => ({ ...s, bannerText: e.target.value }))} className="input-field text-xs w-full" />
-                    </div>
-                    <div>
                       <label className="text-[9px] font-bold block mb-1" style={{ color: 'var(--admin-muted3)' }}>Image hero URL</label>
                       <input value={settings.heroImage} onChange={e => setSettings(s => ({ ...s, heroImage: e.target.value }))} placeholder="https://..." className="input-field text-xs w-full" />
                     </div>
