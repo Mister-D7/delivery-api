@@ -21,9 +21,9 @@ export default function HeaderActions() {
         const dx = e.clientX - cx;
         const dy = e.clientY - cy;
         const d = Math.hypot(dx, dy);
-        if (d < 260) {
-          btn.style.setProperty('--mx', `${dx * 0.22}px`);
-          btn.style.setProperty('--my', `${dy * 0.22}px`);
+        if (d < 110) {
+          btn.style.setProperty('--mx', `${dx * 0.1}px`);
+          btn.style.setProperty('--my', `${dy * 0.1}px`);
           btn.classList.add('magnetic-on');
         } else {
           btn.classList.remove('magnetic-on');
