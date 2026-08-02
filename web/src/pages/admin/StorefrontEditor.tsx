@@ -238,7 +238,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
             <>
               <iframe
                 key={previewKey}
-                src={(import.meta as any).env?.DEV ? 'http://localhost:4000/' : '/'}
+                src={(import.meta as any).env?.DEV ? 'http://localhost:4000/?edit=1' : '/?edit=1'}
                 className="w-full h-full block"
                 title="Aperçu boutique en direct"
                 style={{ border: 'none', background: '#fff' }}

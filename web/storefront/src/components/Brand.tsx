@@ -6,7 +6,7 @@ export default function Brand() {
   return (
     <a href="#" className="brand">
       <span className="brand-mark"></span>
-      {name}
+      <span data-edit-text="storeName">{name}</span>
     </a>
   );
 }

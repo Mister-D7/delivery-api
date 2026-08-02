@@ -14,6 +14,7 @@ fs.mkdirSync(path.join(uploadsDir, 'images'), { recursive: true });
 fs.mkdirSync(path.join(uploadsDir, 'videos'), { recursive: true });
 fs.mkdirSync(path.join(uploadsDir, 'voice'), { recursive: true });
 fs.mkdirSync(path.join(uploadsDir, 'background'), { recursive: true });
+fs.mkdirSync(path.join(uploadsDir, 'models'), { recursive: true });
 
 // --- Multer instances ---
 
@@ -129,6 +130,33 @@ router.post('/voice', adminAuth, (req, res, next) => {
     }
     if (!req.file) return res.status(400).json({ error: 'Aucun audio' });
     res.json({ url: `/uploads/voice/${req.file.filename}` });
+  });
+});
+
+// POST /upload/model
+router.post('/model', adminAuth, (req, res, next) => {
+  const modelUpload = multer({
+    storage: multer.diskStorage({
+      destination: (_req, _file, cb) => cb(null, path.join(uploadsDir, 'models')),
+      filename: (_req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        cb(null, `model-${Date.now()}${ext}`);
+      },
+    }),
+    limits: { fileSize: 230 * 1024 * 1024 },
+    fileFilter: (_req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (['.glb', '.gltf', '.fbx', '.obj'].includes(ext)) cb(null, true);
+      else cb(new Error('Seuls les modèles 3D (.glb/.gltf/.fbx/.obj) sont acceptés'));
+    },
+  });
+  modelUpload.single('model')(req, res, (err) => {
+    if (err) {
+      console.error('[Upload Model]', err.message);
+      return res.status(400).json({ error: err.message });
+    }
+    if (!req.file) return res.status(400).json({ error: 'Aucun modèle' });
+    res.json({ url: `/uploads/models/${req.file.filename}` });
   });
 });
 

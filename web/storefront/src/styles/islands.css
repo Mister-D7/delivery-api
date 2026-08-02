@@ -553,3 +553,218 @@
   background: color-mix(in srgb, #ff3b30 12%, transparent);
   color: #ff7a70;
 }
+
+/* --- Edit mode (admin preview) --- */
+
+.edit-mode [data-edit-text],
+.edit-mode [data-edit-product],
+.edit-mode [data-edit-3d] {
+  outline: 2px dashed rgba(255, 193, 7, 0);
+  outline-offset: 3px;
+  transition: outline-color 0.15s ease;
+}
+
+.edit-mode [data-edit-text]:hover,
+.edit-mode [data-edit-product]:hover,
+.edit-mode [data-edit-3d]:hover {
+  outline-color: rgba(255, 193, 7, 0.85);
+  cursor: context-menu;
+}
+
+.edit-mode [data-edit-text].ec-editing {
+  outline: 2px solid var(--accent, #00e5ff);
+  background: color-mix(in srgb, var(--accent, #00e5ff) 8%, transparent);
+  border-radius: 4px;
+}
+
+.ec-badge {
+  position: fixed;
+  left: 14px;
+  bottom: 14px;
+  z-index: 250;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent, #00e5ff) 12%, rgba(0, 0, 0, 0.75));
+  border: 1px solid color-mix(in srgb, var(--accent, #00e5ff) 40%, transparent);
+  color: var(--text, #f2f2f4);
+  font-family: var(--font-mono, monospace);
+  font-size: 11.5px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.ec-menu {
+  position: fixed;
+  z-index: 260;
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 12px;
+  background: rgba(22, 23, 28, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: ecMenuIn 0.12s ease;
+}
+
+@keyframes ecMenuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ec-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text, #f2f2f4);
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ec-menu-item:hover {
+  background: color-mix(in srgb, var(--accent, #00e5ff) 14%, transparent);
+}
+
+.ec-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 270;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.ec-modal-card {
+  width: min(420px, 92vw);
+  max-height: 88vh;
+  overflow: auto;
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--surface, #16171c);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ec-modal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.ec-close {
+  background: none;
+  border: none;
+  color: var(--muted, #8a8a92);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ec-close:hover {
+  color: var(--text, #f2f2f4);
+}
+
+.ec-modal-card label {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--muted, #8a8a92);
+}
+
+.ec-modal-card input {
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text, #f2f2f4);
+  font-size: 13px;
+  font-family: var(--font-body, inherit);
+}
+
+.ec-modal-card input:focus {
+  outline: none;
+  border-color: var(--accent, #00e5ff);
+}
+
+.ec-modal-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.ec-modal-actions button {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body, inherit);
+}
+
+.ec-save {
+  background: var(--accent, #00e5ff);
+  color: #0a0b0d;
+}
+
+.ec-save:hover {
+  filter: brightness(1.1);
+}
+
+.ec-danger {
+  background: rgba(255, 59, 48, 0.15);
+  color: #ff7a70;
+}
+
+.ec-danger:hover {
+  background: rgba(255, 59, 48, 0.28);
+}
+
+.ec-modal-actions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.ec-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 280;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(20, 21, 26, 0.95);
+  border: 1px solid var(--accent, #00e5ff);
+  color: var(--text, #f2f2f4);
+  font-size: 13px;
+  font-family: var(--font-body, inherit);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+  animation: ecMenuIn 0.15s ease;
+}

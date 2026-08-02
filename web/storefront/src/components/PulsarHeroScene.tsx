@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useStorefront } from '../lib/storefront';
 
 export default function PulsarHeroScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { settings } = useStorefront();
+  const modelUrl = settings.model3d;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -35,17 +38,39 @@ export default function PulsarHeroScene() {
       const group = new THREE.Group();
       scene.add(group);
 
-      const coreGeo = new THREE.IcosahedronGeometry(1.5, 1);
-      const coreMat = new THREE.MeshStandardMaterial({ color: 0x0c0c16, metalness: 0.85, roughness: 0.25 });
-      const core = new THREE.Mesh(coreGeo, coreMat);
-      group.add(core);
+      let core: THREE.Mesh | null = null;
+      let wire: THREE.LineSegments | null = null;
 
-      const wire = new THREE.LineSegments(
-        new THREE.EdgesGeometry(coreGeo),
-        new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.55 })
-      );
-      wire.scale.setScalar(1.001);
-      group.add(wire);
+      if (modelUrl) {
+        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        const loader = new GLTFLoader();
+        try {
+          const gltf = await loader.loadAsync(modelUrl);
+          const model = gltf.scene;
+          const box = new THREE.Box3().setFromObject(model);
+          const sizeV = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(sizeV.x, sizeV.y, sizeV.z) || 1;
+          const scale = 3 / maxDim;
+          model.scale.setScalar(scale);
+          const center = box.getCenter(new THREE.Vector3());
+          model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+          group.add(model);
+        } catch (err) {
+          console.error('[PulsarHero] Modèle 3D introuvable', err);
+        }
+      } else {
+        const coreGeo = new THREE.IcosahedronGeometry(1.5, 1);
+        const coreMat = new THREE.MeshStandardMaterial({ color: 0x0c0c16, metalness: 0.85, roughness: 0.25 });
+        core = new THREE.Mesh(coreGeo, coreMat);
+        group.add(core);
+
+        wire = new THREE.LineSegments(
+          new THREE.EdgesGeometry(coreGeo),
+          new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.55 })
+        );
+        wire.scale.setScalar(1.001);
+        group.add(wire);
+      }
 
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(2.6, 0.012, 16, 100),
@@ -112,8 +137,10 @@ export default function PulsarHeroScene() {
       let curRotY = 0;
 
       const pointerDown = (e: PointerEvent | TouchEvent) => {
+        const pe = e as PointerEvent;
+        if (pe.button !== undefined && pe.button !== 0) return;
         dragging = true;
-        const p = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as PointerEvent);
+        const p = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : pe;
         lastX = p.clientX;
         lastY = p.clientY;
       };
@@ -155,7 +182,7 @@ export default function PulsarHeroScene() {
 
         group.rotation.x = curRotX + Math.sin(t * 0.15) * 0.05;
         group.rotation.y = curRotY + t * 0.12;
-        wire.rotation.copy(group.rotation);
+        if (wire) wire.rotation.copy(group.rotation);
 
         ring.rotation.z = t * 0.2;
         ring2.rotation.z = -t * 0.15;
@@ -166,7 +193,7 @@ export default function PulsarHeroScene() {
           n.mesh.position.set(Math.cos(a) * n.radius, Math.sin(a * 0.6) * n.radius * n.tilt, Math.sin(a) * n.radius);
         });
 
-        core.material.color.setHSL(0.6, 0.15, 0.08 + Math.sin(t * 0.6) * 0.01);
+        if (core) core.material.color.setHSL(0.6, 0.15, 0.08 + Math.sin(t * 0.6) * 0.01);
         renderer.render(scene, camera);
       };
       animate();
@@ -185,7 +212,7 @@ export default function PulsarHeroScene() {
     void init();
 
     return () => cleanup?.();
-  }, []);
+  }, [modelUrl]);
 
-  return <canvas ref={canvasRef} id="heroCanvas" className="p3d-hero-canvas" />;
+  return <canvas ref={canvasRef} id="heroCanvas" className="p3d-hero-canvas" data-edit-3d="hero" />;
 }

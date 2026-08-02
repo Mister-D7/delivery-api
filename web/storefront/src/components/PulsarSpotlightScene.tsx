@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
+import { useStorefront } from '../lib/storefront';
 
 export default function PulsarSpotlightScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { settings } = useStorefront();
+  const modelUrl = settings.model3d;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -32,43 +35,64 @@ export default function PulsarSpotlightScene() {
       const group = new THREE.Group();
       scene.add(group);
 
-      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe8e8f0, metalness: 0.3, roughness: 0.35 });
-      const body = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.55, 48), bodyMat);
-      body.rotation.x = Math.PI / 2;
-      group.add(body);
+      let led: THREE.Mesh | null = null;
 
-      const seam = new THREE.Mesh(
-        new THREE.TorusGeometry(1.1, 0.02, 12, 64),
-        new THREE.MeshStandardMaterial({ color: 0x1a1a26, metalness: 0.6, roughness: 0.4 })
-      );
-      seam.position.z = 0.02;
-      group.add(seam);
+      if (modelUrl) {
+        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        const loader = new GLTFLoader();
+        try {
+          const gltf = await loader.loadAsync(modelUrl);
+          const model = gltf.scene;
+          const box = new THREE.Box3().setFromObject(model);
+          const sizeV = box.getSize(new THREE.Vector3());
+          const maxDim = Math.max(sizeV.x, sizeV.y, sizeV.z) || 1;
+          const scale = 2.2 / maxDim;
+          model.scale.setScalar(scale);
+          const center = box.getCenter(new THREE.Vector3());
+          model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+          group.add(model);
+        } catch (err) {
+          console.error('[PulsarSpotlight] Modèle 3D introuvable', err);
+        }
+      } else {
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xe8e8f0, metalness: 0.3, roughness: 0.35 });
+        const body = new THREE.Mesh(new THREE.CylinderGeometry(1.1, 1.1, 0.55, 48), bodyMat);
+        body.rotation.x = Math.PI / 2;
+        group.add(body);
 
-      const led = new THREE.Mesh(
-        new THREE.SphereGeometry(0.045, 16, 16),
-        new THREE.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 1.2 })
-      );
-      led.position.set(0, -0.75, 0.28);
-      group.add(led);
-
-      const makeBud = (x: number) => {
-        const budGroup = new THREE.Group();
-        const stem = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.05, 0.07, 0.5, 16),
-          new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.3 })
+        const seam = new THREE.Mesh(
+          new THREE.TorusGeometry(1.1, 0.02, 12, 64),
+          new THREE.MeshStandardMaterial({ color: 0x1a1a26, metalness: 0.6, roughness: 0.4 })
         );
-        stem.position.y = -0.3;
-        stem.rotation.z = 0.15 * (x > 0 ? 1 : -1);
-        const head = new THREE.Mesh(
-          new THREE.SphereGeometry(0.16, 20, 20),
-          new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.25 })
+        seam.position.z = 0.02;
+        group.add(seam);
+
+        led = new THREE.Mesh(
+          new THREE.SphereGeometry(0.045, 16, 16),
+          new THREE.MeshStandardMaterial({ color: 0x00e5ff, emissive: 0x00e5ff, emissiveIntensity: 1.2 })
         );
-        budGroup.add(stem, head);
-        budGroup.position.set(x, 1.55, 0.35);
-        budGroup.rotation.z = 0.25 * (x > 0 ? -1 : 1);
-        return budGroup;
-      };
-      group.add(makeBud(-0.32), makeBud(0.32));
+        led.position.set(0, -0.75, 0.28);
+        group.add(led);
+
+        const makeBud = (x: number) => {
+          const budGroup = new THREE.Group();
+          const stem = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.05, 0.07, 0.5, 16),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.3 })
+          );
+          stem.position.y = -0.3;
+          stem.rotation.z = 0.15 * (x > 0 ? 1 : -1);
+          const head = new THREE.Mesh(
+            new THREE.SphereGeometry(0.16, 20, 20),
+            new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0.2, roughness: 0.25 })
+          );
+          budGroup.add(stem, head);
+          budGroup.position.set(x, 1.55, 0.35);
+          budGroup.rotation.z = 0.25 * (x > 0 ? -1 : 1);
+          return budGroup;
+        };
+        group.add(makeBud(-0.32), makeBud(0.32));
+      }
 
       scene.add(new THREE.AmbientLight(0x606070, 1.4));
       const kl = new THREE.PointLight(0x00e5ff, 2.5, 10);
@@ -87,8 +111,10 @@ export default function PulsarSpotlightScene() {
       let targetX = 0.15;
 
       const onDown = (e: PointerEvent | TouchEvent) => {
+        const pe = e as PointerEvent;
+        if (pe.button !== undefined && pe.button !== 0) return;
         dragging = true;
-        const p = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as PointerEvent);
+        const p = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : pe;
         lastX = p.clientX;
         lastY = p.clientY;
       };
@@ -119,7 +145,7 @@ export default function PulsarSpotlightScene() {
         rotX += (targetX - rotX) * 0.1;
         group.rotation.y = rotY + (dragging ? 0 : t * 0.15);
         group.rotation.x = rotX;
-        led.material.emissiveIntensity = 0.8 + Math.sin(t * 2) * 0.4;
+        if (led) led.material.emissiveIntensity = 0.8 + Math.sin(t * 2) * 0.4;
 
         renderer.render(scene, camera);
       };
@@ -138,7 +164,7 @@ export default function PulsarSpotlightScene() {
     void init();
 
     return () => cleanup?.();
-  }, []);
+  }, [modelUrl]);
 
-  return <canvas ref={canvasRef} id="spotlightCanvas" />;
+  return <canvas ref={canvasRef} id="spotlightCanvas" data-edit-3d="spotlight" />;
 }

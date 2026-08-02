@@ -25,7 +25,7 @@ export default function PulsarProductGrid() {
       </div>
       <div className="grid">
         {shown.map((p) => (
-          <div className="card" key={p.id} data-cat={p.category || ''}>
+          <div className="card" key={p.id} data-cat={p.category || ''} data-edit-product={p.id}>
             <div className="card-media">
               <span className="badge">{p.oldPrice ? 'Promo' : 'En stock'}</span>
               {p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : null}

@@ -16,8 +16,8 @@ export default function HeroText() {
   const sub = settings.tagline;
   return (
     <>
-      <h1 className="hero-title">{title || DEFAULT_TITLE}</h1>
-      <p className="hero-sub">{sub || DEFAULT_SUB}</p>
+      <h1 className="hero-title" data-edit-text="bannerText">{title || DEFAULT_TITLE}</h1>
+      <p className="hero-sub" data-edit-text="tagline">{sub || DEFAULT_SUB}</p>
     </>
   );
 }

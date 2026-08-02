@@ -55,6 +55,7 @@ export default function ProductGrid({ sectionTitle }: Props) {
           className={`card${isLumen ? ' lumen' : ''}`}
           key={p.id}
           onClick={() => openProduct(p)}
+          data-edit-product={p.id}
         >
           <div className="card-media">
             <span className="badge">En stock</span>

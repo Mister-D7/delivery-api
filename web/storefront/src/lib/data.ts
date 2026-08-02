@@ -106,6 +106,7 @@ export interface StorefrontSettings {
   fontFamily?: string;
   pinned?: string[];
   theme?: string;
+  model3d?: string;
 }
 
 export function mapRawProduct(raw: any, storeType: string): Product | null {
