@@ -17,6 +17,29 @@
   --font-mono: ui-monospace, 'SF Mono', Consolas, monospace;
 }
 
+html {
+  color-scheme: dark;
+}
+
+/* Light theme — pure white, slightly warm (no blue cast)
+   !important required: storefront.ts injects the admin colors as inline vars on <html>,
+   and inline styles beat stylesheet rules unless the rule is important. */
+html[data-theme='light'] {
+  color-scheme: light;
+  --bg: #ffffff !important;
+  --surface: #fafaf6 !important;
+  --surface-2: #f4f4ee !important;
+  --surface-3: #ecece6 !important;
+  --border: rgba(25, 25, 34, 0.09) !important;
+  --border-strong: rgba(25, 25, 34, 0.18) !important;
+  --text: #17171c !important;
+  --muted: #6b6b74 !important;
+  --muted-2: #a2a2aa !important;
+  --cyan: #00a8bd !important;
+  --violet: #6d28d9 !important;
+  --grad: linear-gradient(120deg, #00a8bd, #6d28d9) !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -194,6 +217,51 @@ header {
   border-bottom: 1px solid var(--border);
 }
 
+html[data-theme='light'] header {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.theme-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+
+.theme-toggle:hover {
+  border-color: var(--cyan);
+  transform: translateY(-1px);
+}
+
+.theme-toggle .t-moon {
+  display: block;
+}
+
+.theme-toggle .t-sun {
+  display: none;
+}
+
+html[data-theme='light'] .theme-toggle .t-moon {
+  display: none;
+}
+
+html[data-theme='light'] .theme-toggle .t-sun {
+  display: block;
+}
+
 .header-row {
   display: flex;
   align-items: center;
@@ -327,6 +395,10 @@ header {
   z-index: 1;
   pointer-events: none;
   background: radial-gradient(ellipse at 50% 100%, rgba(5, 5, 8, 1) 10%, transparent 55%);
+}
+
+html[data-theme='light'] .hero::before {
+  background: radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 1) 10%, transparent 55%);
 }
 
 .hero-content {
@@ -620,6 +692,10 @@ section {
   aspect-ratio: 1/1;
   background: linear-gradient(150deg, var(--surface-3), #0a0a10 75%);
   overflow: hidden;
+}
+
+html[data-theme='light'] .card-media {
+  background: linear-gradient(150deg, #ecece6, #ffffff 75%);
 }
 
 .badge {

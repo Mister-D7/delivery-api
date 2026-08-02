@@ -15,6 +15,8 @@ export default function PulsarHeroScene() {
       const heroEl = canvas.closest('.hero') as HTMLElement | null;
       if (!heroEl) return;
 
+      const state = { isLight: document.documentElement.dataset.theme === 'light' };
+
       const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
@@ -36,7 +38,7 @@ export default function PulsarHeroScene() {
       scene.add(group);
 
       const coreGeo = new THREE.IcosahedronGeometry(1.5, 1);
-      const coreMat = new THREE.MeshStandardMaterial({ color: 0x0c0c16, metalness: 0.85, roughness: 0.25 });
+      const coreMat = new THREE.MeshStandardMaterial({ color: state.isLight ? 0xececf2 : 0x0c0c16, metalness: 0.85, roughness: 0.25 });
       const core = new THREE.Mesh(coreGeo, coreMat);
       group.add(core);
 
@@ -62,7 +64,7 @@ export default function PulsarHeroScene() {
       ring2.rotation.y = Math.PI / 5;
       group.add(ring2);
 
-      const nodeColors = [0x00e5ff, 0x8b5cf6, 0xffffff, 0x00e5ff];
+      const nodeColors = state.isLight ? [0x00a8bd, 0x6d28d9, 0x14141c, 0x00a8bd] : [0x00e5ff, 0x8b5cf6, 0xffffff, 0x00e5ff];
       const nodes: { mesh: THREE.Mesh; radius: number; speed: number; offset: number; tilt: number }[] = [];
       for (let i = 0; i < 4; i++) {
         const geo = new THREE.BoxGeometry(0.16, 0.16, 0.16);
@@ -84,16 +86,38 @@ export default function PulsarHeroScene() {
       }
       const particleGeo = new THREE.BufferGeometry();
       particleGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-      const particleMat = new THREE.PointsMaterial({
-        color: 0x00e5ff,
-        size: 0.028,
-        transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending,
-        depthWrite: false,
-      });
+      const particleMat = new THREE.PointsMaterial(
+        state.isLight
+          ? { color: 0x00a8bd, size: 0.028, transparent: true, opacity: 0.7, depthWrite: false }
+          : { color: 0x00e5ff, size: 0.028, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }
+      );
       const particles = new THREE.Points(particleGeo, particleMat);
       scene.add(particles);
+
+      const applyTheme = (light: boolean) => {
+        state.isLight = light;
+        core.material.color.setHex(light ? 0xececf2 : 0x0c0c16);
+        nodes.forEach((n, i) => {
+          const c = light ? [0x00a8bd, 0x6d28d9, 0x14141c, 0x00a8bd] : [0x00e5ff, 0x8b5cf6, 0xffffff, 0x00e5ff];
+          (n.mesh.material as THREE.MeshStandardMaterial).color.setHex(c[i]);
+          (n.mesh.material as THREE.MeshStandardMaterial).emissive.setHex(c[i]);
+        });
+        if (light) {
+          particleMat.color.setHex(0x00a8bd);
+          particleMat.opacity = 0.7;
+          particleMat.blending = THREE.NormalBlending;
+          particleMat.needsUpdate = true;
+        } else {
+          particleMat.color.setHex(0x00e5ff);
+          particleMat.opacity = 0.6;
+          particleMat.blending = THREE.AdditiveBlending;
+          particleMat.needsUpdate = true;
+        }
+      };
+      const onThemeChange = (e: Event) => {
+        applyTheme((e as CustomEvent).detail?.theme === 'light');
+      };
+      window.addEventListener('theme:change', onThemeChange);
 
       scene.add(new THREE.AmbientLight(0x404060, 1.2));
       const pl1 = new THREE.PointLight(0x00e5ff, 3, 12);
@@ -168,7 +192,7 @@ export default function PulsarHeroScene() {
           n.mesh.position.set(Math.cos(a) * n.radius, Math.sin(a * 0.6) * n.radius * n.tilt, Math.sin(a) * n.radius);
         });
 
-        core.material.color.setHSL(0.6, 0.15, 0.08 + Math.sin(t * 0.6) * 0.01);
+        core.material.color.setHSL(0.6, 0.15, (state.isLight ? 0.92 : 0.08) + Math.sin(t * 0.6) * 0.01);
         renderer.render(scene, camera);
       };
       animate();
@@ -176,6 +200,7 @@ export default function PulsarHeroScene() {
 
       cleanup = () => {
         cancelAnimationFrame(raf);
+        window.removeEventListener('theme:change', onThemeChange);
         canvas.removeEventListener('pointerdown', pointerDown);
         window.removeEventListener('pointermove', pointerMove);
         window.removeEventListener('pointerup', pointerUp);
