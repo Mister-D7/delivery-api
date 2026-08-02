@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useStorefront } from '../lib/storefront';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 export default function PulsarSpotlightScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,10 +43,6 @@ export default function PulsarSpotlightScene() {
       let led: THREE.Mesh | null = null;
 
       if (modelUrl) {
-        const [{ GLTFLoader }, { RoomEnvironment }] = await Promise.all([
-          import('three/examples/jsm/loaders/GLTFLoader.js'),
-          import('three/examples/jsm/environments/RoomEnvironment.js'),
-        ]);
         const loader = new GLTFLoader();
         try {
           const gltf = await loader.loadAsync(modelUrl);
