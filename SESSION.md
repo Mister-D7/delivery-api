@@ -1,45 +1,58 @@
-# Session Resume
+# SESSION — Storefront Astro + Thème Pulsar (porté via DeepSeek TSX)
 
-## How to resume
-Show this file to the AI assistant in your next session. It contains everything from the previous session. **Do NOT re-read design HTML files** (`G:\DESIGNE DELIVERY FOR CLIENT\cloud ai design\*.html`) — the NEXUS design is already ported; `pulsar.html` may be read ONCE only if `pulsar.astro` still needs to be created.
+## Objectif (archi actuelle)
+- Storefront public = **Astro** (`web/storefront/`) avec React islands (`client:load`/`client:visible`). `/admin/*` = React SPA (`web/`). Zéro leak admin côté client.
+- Admin et client affichent **la même page en temps réel** (produits, textes, couleurs, produits épinglés) : polling 8s + focus/visibility. Données **runtime** (pas build-time).
+- **Plus AUCUN travail sur les HTML de design** (`G:\DESIGNE DELIVERY FOR CLIENT\...`). Nouvelle méthode : l'utilisateur fournit un dossier avec thème en **TSX** → copié dans `G:\delivery soft\themes\<name>\` (source de vérité) → porté en page `.astro` + islands.
 
-## Working directory
-```
-G:\delivery soft\
-```
-Git branch: `main`. `web/` = React SPA admin, `web/storefront/` = Astro public page, `server/` = Express (port 4000). node_modules hoisted at repo root — never `npm install` inside `web/storefront`.
+## Règles anti-burn (EXIGENCE de l'utilisateur — à respecter strictement)
+- Ne jamais relire les HTML de design ni les gros fichiers déjà en contexte.
+- Utiliser `grep` ciblé / `read` avec offset/limit / agent `explore`. Réponses courtes.
+- L'utilisateur prévient « je suis presque hors contexte » → tout sauvegarder immédiatement (SESSION.md + AGENTS.md + commit).
+- Parler français, ton « habibi ».
 
-## Current architecture (Astro storefront + React admin)
-- **Client page** = Astro at `web/storefront/`: `src/pages/index.astro` = NEXUS design (ported). React islands (`client:load`) in `src/components/`: `ProductGrid`, `CartButton`, `CartDrawer`, `ProductModal`, `Brand`, `HeroText`, + Pulsar versions (`PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight` — written, NOT yet built/verified).
-- **Libs** `web/storefront/src/lib/`: `storefront.ts` (runtime store, polls every 8s catalog + categories + settings, applies CSS vars + pinned ordering; `storeTypeForTheme()`: pulsar→tech, claro→general, nexus-gaming→gaming; 2-phase refresh settings-first), `data.ts` (`Product`, `StorefrontSettings` incl. `theme?`, `mapRawProduct(raw, storeType)`), `cart.ts`, `store.ts`, `format.ts` (fr-FR `N DA`).
-- **Server** `server/index.js`: `/` → `storefront/dist/index.html`, `/_assets` → Astro assets, then SPA. Supabase settings blob key `storefront` in `delivery_settings` (`GET/PUT /api/delivery/storefront/settings/storefront`).
-- **Admin** `web/src/pages/admin/StorefrontEditor.tsx`: preview = iframe of live page, autosave 600ms of blob → server, so admin sees the SAME page as client in real time. Tools now limited to **Thèmes / Produits / Catégories** (Texte/Image/Couleur/Police/Importer.css/Télécharger HTML removed); each theme shows a color swatch (bg+accent).
+## Environnement
+- Node v24.17.0, npm 11.17.0, Astro 7.1.6, @astrojs/react 6.0.2, React 18.3.1.
+- `node_modules` hoisté : **`G:\delivery soft\web\node_modules`** (PAS à la racine ni dans storefront).
+- Builds : `node "G:\delivery soft\web\node_modules\astro\bin\astro.mjs" build` (workdir `web/storefront`) ; SPA : `node node_modules/vite/bin/vite.js build` (workdir `web`).
+- Serveur : lancer de `G:\delivery soft` (`PORT=4099 node server/index.js`) — sinon `supabaseUrl is required.`.
+- Vérif : `"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --dump-dom http://localhost:4099/` (le DOM dump est fiable ; `--virtual-time-budget` peut donner DOM vide, ne pas en dépendre).
+- `three` ajouté à `web/` via `npm i three --legacy-peer-deps` (conflit grapesjs/@grapesjs/react préexistant → toujours `--legacy-peer-deps`).
 
-## KNOWN BUG — CRITICAL (fix first next session)
-Astro `<style>` is **scoped** (`data-astro-cid-*` present in dist). The NEXUS design CSS therefore applies only to static markup, NOT to React-island content (product grid, cart drawer, modal). Fix: `is:global` (or `is:inline`) on the `<style>` blocks in `index.astro` + future `pulsar.astro`.
+## Données / API
+- `/api/delivery/catalog` (flat : `salePrice`, `promoPrice`, `imageUrl`, `storeType`, `category.name`).
+- `/api/delivery/categories/public?storeType=X`.
+- Blob settings : `GET/PUT /api/delivery/storefront/settings/storefront` (Supabase `delivery_settings` clé `storefront`). Contient `theme`, `pinned`, couleurs, fonts, textes. Le GET est **public** (pas d'auth), le PUT est admin.
+- Auth admin : Google + login email/mot de passe (users table). Il existe un « mode invité » (l'utilisateur l'a mentionné).
+- Le blob en prod a déjà `theme: "pulsar"`.
 
-## Current state / what's done
-- SPA build green (StorefrontEditor cleaned). Storefront builds green at last full check — BEFORE the Pulsar component edits; must rebuild.
-- Real-time sync admin↔client works (products, texts, colors, pinned update live).
-- 43 products in catalog. NEXUS = gaming store (STORE_TYPE default 'gaming').
+## Ce qui est FAIT (cette session = port Pulsar complet)
+1. **Nouvelle méthode thème validée** : dossier source → `themes/<name>/` à la racine. Pulsar copié → `G:\delivery soft\themes\pulsar\` (deepseek_css + deepseek_tsx + txt résumés).
+2. **`three` installé** (hoisté web/).
+3. **Scènes 3D** : `web/storefront/src/components/PulsarHeroScene.tsx` (canvas `#heroCanvas`, `class="p3d-hero-canvas"`) + `PulsarSpotlightScene.tsx` (canvas `#spotlightCanvas`). Bugs DeepSeek corrigés : RAF annulé, listeners `pointerdown/move/up` + `resize` retirés, `renderer.dispose()`.
+   - IMPORTANT : dans `PulsarHeroScene`, le conteneur = `canvas.closest('.hero')` (PAS parentElement — l'island wrapper a `display:contents`).
+4. **4 islands Pulsar** (`PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight`) — alignés sur les classes du CSS DeepSeek. `PulsarSpotlight` ne rend plus de canvas (le scene le fournit) ; il rend `<div>` texte + bouton, se place à côté de `<PulsarSpotlightScene/>`.
+5. **CSS** : `themes/pulsar/deepseek_css_*.css` copié → `web/storefront/src/styles/pulsar.css` (importé global dans pulsar.astro ; styles canvas `#heroCanvas`/`#spotlightCanvas` ajoutés en fin de fichier + `.iso-close`).
+6. **`web/storefront/src/pages/pulsar.astro`** : structure complète (header/marquee/shop/featured/lineup/features/stats/newsletter/footer), islands `client:load`, script burger. **2 pages Astro** : `/` (nexus) + `/pulsar/`.
+7. **Câblage thème** :
+   - `StorefrontEditor.tsx` : `buildBlob()` inclut `theme: template?.id` (deps `[settings, pinned, template]`).
+   - `server/index.js` : import `fs` ajouté ; route `/` lit le blob, si `blob?.theme === 'pulsar'` et `dist/pulsar/index.html` existe → sert pulsar, sinon `dist/index.html` (nexus).
+   - `web/src/themes/index.ts` : `claro` retiré du registry → liste admin = `[nexusGaming, pulsar]` seulement.
+8. **Vérifié Edge headless** (serveur 4099) : `/` sert PULSAR, 8 produits runtime en DA, vraies images `/uploads/*.jpg`, catégories PLAY/LUMEN, canvas 3D hero+spotlight, cart drawer, zéro leak admin. Builds SPA + storefront verts.
 
-## In progress (next session, in order)
-1. Build storefront (`node node_modules/astro/bin/astro.mjs build` in `web/storefront`, or root `npm run build`).
-2. Fix CSS scoping with `is:global` on style blocks.
-3. Create `pulsar.astro` (port `G:\DESIGNE DELIVERY FOR CLIENT\cloud ai design\pulsar.html` once — design: dark cyan/violet gradient, preloader, hero Three.js canvas, marquee, category grid, spotlight canvas, product grid + pills, features/stats/newsletter/footer; pattern = index.astro).
-4. Theme wiring: add `theme: template?.id` to `buildBlob()` in StorefrontEditor; `storeTemplates` = only ported themes (`nexus-gaming`, `pulsar`); Express `/` serves `pulsar.html` when `blob.theme === 'pulsar'` (fs.existsSync guard).
-5. Rebuild SPA + storefront; verify via Edge headless DOM (products visible, no admin leak).
+## À FAIRE / PROCHAINES ÉTAPES
+- **Commit** : 38 fichiers modifiés/nouveaux (theme wiring, pulsar page, three, dist) — PAS ENCORE COMMITÉ.
+- Si l'utilisateur fournit d'autres thèmes TSX : répéter la pipeline (copier dans `themes/<name>/` → CSS importé global dans une page `.astro` → islands branchés sur `useStorefront()` → ajouter id au registry admin + mapping `storeTypeForTheme` si besoin → branch Express).
+- Notes : `three` bundle ~724 KB (chunk séparé, chargé à la demande — OK). Le `<style>` des pages Astro DOIT avoir `is:global` sinon le CSS design ne s'applique qu'au markup statique (bug NEXUS fixé ceci, vérifier pour toute nouvelle page).
+- `@astrojs/check` non installé → pas de `astro check` ; le build suffit.
 
-## Waiting on the user
-User is designing their own better theme solution on their side — DO NOT rebuild the theme system; keep current until they come back.
-
-## Context-burning rules (critical)
-- Never re-read big design HTML files or files already read this session; use grep + `read` with `offset`/`limit` on targeted ranges.
-- Use the `explore` subagent for searches (compact summaries).
-- Keep messages short, no giant summaries. Respond in simple French.
-
-## Commands / gotchas
-- Server must run from `G:\delivery soft` (dotenv needs root `.env`): `PORT=4099 node server/index.js`.
-- Edge headless: `C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe --headless=new --window-size=1440,6000 --virtual-time-budget=20000 --dump-dom URL`.
-- Admin login via `POST /api/delivery/auth/login` → Bearer token for admin routes.
-- Old template system (Bootstrap HTML in `web/public/templates/`, `web/src/templates/`) is DELETED/legacy. `web/src/themes/` MDX registry is vestigial — only used by the admin theme list, NOT by the client page.
+## Fichiers clés
+- `G:\delivery soft\SESSION.md`, `AGENTS.md` : état + guide (à jour).
+- `G:\delivery soft\themes\pulsar\` : source officielle du thème Pulsar (TSX + CSS).
+- `web/storefront/src/pages/{index.astro, pulsar.astro}` : pages thèmes.
+- `web/storefront/src/components/` : islands (NEXUS + Pulsar + scènes 3D).
+- `web/storefront/src/styles/` : `islands.css` (importé par CartDrawer/ProductModal), `pulsar.css`.
+- `web/storefront/src/lib/` : `storefront.ts` (useStorefront, applySettings, storeTypeForTheme : pulsar→tech, claro→general, nexus-gaming→gaming), `data.ts` (`Product`, `StorefrontSettings` incl. `theme?`, `mapRawProduct`), `cart.ts`, `store.ts`, `format.ts`.
+- `server/index.js` : route `/` thématisée.
+- `web/src/pages/admin/StorefrontEditor.tsx` : éditeur (Thèmes/Produits/Catégories) + blob.
+- `web/src/themes/index.ts` : registry admin (nexus-gaming, pulsar) + helpers.

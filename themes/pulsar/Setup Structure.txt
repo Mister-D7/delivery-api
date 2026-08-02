@@ -1,0 +1,24 @@
+2. Setup Structure
+Create these files:
+
+App.tsx (the main component)
+
+App.css (styles)
+
+Add images to /public/images/ folder:
+
+buds-air.jpg
+
+buds-pro.jpg
+
+gan-65w.jpg
+
+magcharge.jpg
+
+phone-s1.jpg
+
+phone-s1-pro.jpg
+
+book-14.jpg
+
+book-pro-16.jpg

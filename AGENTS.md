@@ -9,26 +9,27 @@
 The client page is now **Astro** (`web/storefront/`), served by Express on `/`. The React SPA is the admin only. No iframe/preview bridge for the live page anymore — the admin previews via an iframe of the real `/`.
 
 ### Architecture
-- **Astro page per design**: `web/storefront/src/pages/index.astro` (NEXUS, ported). Design HTML+CSS lives in `.astro`; interactive parts are React islands (`client:load`) in `web/storefront/src/components/`.
-- **Runtime store**: `web/storefront/src/lib/storefront.ts` — polls every 8s `/api/delivery/catalog` + `/api/delivery/categories/public?storeType=X` + `/api/delivery/storefront/settings/storefront`; applies CSS vars (`--red/--bg/--surface/--text/--font`) + pinned order; `storeTypeForTheme()` (pulsar→tech, claro→general, nexus-gaming→gaming); refresh is 2-phase (settings first). React hook `useStorefront()`.
+- **Astro page per design**: `web/storefront/src/pages/index.astro` (NEXUS) + `pulsar.astro` (PULSAR, ported from DeepSeek TSX). Design CSS is global (imported or `is:global`); interactive parts are React islands (`client:load`) in `web/storefront/src/components/`.
+- **Runtime store**: `web/storefront/src/lib/storefront.ts` — polls every 8s `/api/delivery/catalog` + `/api/delivery/categories/public?storeType=X` + `/api/delivery/storefront/settings/storefront`; applies CSS vars (`--red/--cyan/--violet/--grad/--bg/--surface/--text/--font`) + pinned order; `storeTypeForTheme()` (pulsar→tech, claro→general, nexus-gaming→gaming); refresh is 2-phase (settings first). React hook `useStorefront()`.
 - **Data**: `web/storefront/src/lib/data.ts` — `Product`, `StorefrontSettings` (incl. `theme?`), `mapRawProduct(raw, storeType)` (filters store type, maps flat `salePrice`/`promoPrice`).
-- **Islands**: `ProductGrid`, `CartButton`, `CartDrawer`, `ProductModal`, `Brand`, `HeroText` (NEXUS) + `PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight` (Pulsar, written but unverified). Shared island CSS: `src/styles/islands.css` (drawer/modal, theme-agnostic via CSS vars).
-- **Server**: `server/index.js` — `/` → `storefront/dist/index.html`, `/_assets` → Astro assets, then SPA fallback. Settings blob in Supabase `delivery_settings` key `storefront` (`GET/PUT /api/delivery/storefront/settings/storefront`).
-- **Admin editor**: `web/src/pages/admin/StorefrontEditor.tsx` — preview = iframe of live page (`/`), autosave blob 600ms + Sauvegarder. Tools limited to **Thèmes / Produits / Catégories** (pin by drag-drop). Theme list shows a color swatch (bg+accent).
+- **Islands**: NEXUS (`ProductGrid`, `CartButton`, `CartDrawer`, `ProductModal`, `Brand`, `HeroText`) + Pulsar (`PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight` + 3D scenes `PulsarHeroScene`, `PulsarSpotlightScene` using `three`). Shared island CSS: `src/styles/islands.css` (drawer/modal, theme-agnostic via CSS vars). `three` is a dependency of `web/` (install with `--legacy-peer-deps`).
+- **Server**: `server/index.js` — `/` reads the settings blob; if `blob.theme === 'pulsar'` and `dist/pulsar/index.html` exists it serves Pulsar, else `dist/index.html` (NEXUS). `/_assets` → Astro assets, then SPA fallback. Blob in Supabase `delivery_settings` key `storefront` (`GET` public / `PUT` admin).
+- **Admin editor**: `web/src/pages/admin/StorefrontEditor.tsx` — preview = iframe of live page (`/`), autosave blob 600ms + Sauvegarder, `buildBlob()` includes `theme: template?.id`. Tools limited to **Thèmes / Produits / Catégories** (pin by drag-drop). Theme list shows a color swatch (bg+accent). Admin theme list comes from `web/src/themes/index.ts` registry = **`[nexus-gaming, pulsar]`** only (claro removed — no storefront port).
 
-### KNOWN BUG — fix first
-Astro `<style>` is **scoped** (`data-astro-cid-*`). Design CSS only reaches static markup, NOT React islands. Use `is:global` on `<style>` in `index.astro` and `pulsar.astro`.
+### Theme source method (NEW — no more reading design HTML files)
+- The user supplies a folder with a theme as **TSX** (converted by an external AI, e.g. DeepSeek Vision). Copy it to `G:\delivery soft\themes\<name>\` (CSS + TSX + any readme) — this is the **source of truth**. The user wants a new such folder per theme at the project root. Never re-read the original HTML design files (`G:\DESIGNE DELIVERY FOR CLIENT\...`).
+
+### Adding a new theme (from a TSX folder)
+1. Copy the source to `themes/<name>/`; take the CSS → `web/storefront/src/styles/<name>.css` (imported globally in the page; keep the design's CSS vars).
+2. `web/storefront/src/pages/<name>.astro` — build the structure from the TSX (header/hero/marquee/sections/footer), replace hardcoded data (products/prices/images) with islands bound to `useStorefront()` + `formatPrice` (DA) + real `imageUrl`. Use `is:global` on any `<style>` block.
+3. Small islands in `web/storefront/src/components/` for dynamic bits; port 3D/canvas scenes as islands with **proper cleanup** (cancel RAF, remove listeners, `renderer.dispose()`); size canvases via `canvas.closest('.section')`, NOT `parentElement` (Astro island wrapper is `display:contents`).
+4. Add a theme entry in `web/src/themes/` (id, name, storeType, defaults) + register in `themes/index.ts`; add `theme → storeType` mapping in `storefront.ts` `storeTypeForTheme()`; extend `applySettings()` for the design's CSS vars if needed.
+5. Wire theme selection: `buildBlob()` already sends `theme: template?.id`; add a branch in `server/index.js` `/` to serve `<name>/index.html` when blob.theme matches (with `fs.existsSync` guard).
+6. Rebuild SPA + storefront; verify with Edge headless (`--dump-dom`, check products render + zero admin leak).
 
 ### localStorage keys (admin browser only — the CLIENT page uses the server blob, not localStorage)
 - `delivery_store_type`, `delivery_selected_template`, `delivery_storefront_theme_<themeId>`, `delivery_pinned_products`, `delivery_custom_themes`
-- `web/src/themes/` (MDX React registry: `nexus-gaming`, `pulsar`, `claro`) is now **vestigial** — only feeds the admin theme list; the client page does NOT use it.
-
-### Adding a new design (porting an HTML design)
-1. `web/storefront/src/pages/<name>.astro` — copy the design's HTML+CSS verbatim (CSS global via `is:global`), replace interactive parts with React islands.
-2. Small islands in `web/storefront/src/components/` for dynamic bits (products, cart, brand, hero text).
-3. Add `theme` → store type mapping in `storefront.ts` `storeTypeForTheme()`; extend `applySettings()` for the design's CSS vars if needed.
-4. Wire theme selection: add `theme: template?.id` to the admin blob; Express `/` serves `<name>.html` when blob.theme matches.
-5. Build storefront, build SPA, verify via Edge headless DOM.
+- `web/src/themes/` (MDX React registry) is now **vestigial** — only feeds the admin theme list; the client page does NOT use it.
 
 ## Open Design (OD) integration — design engine for themes
 OD 0.16.1 installed at `F:\Open Design` (Electron). The daemon runs INSIDE the desktop app (`Open Design.exe`) and is **auth-gated** via a named pipe — there is no fixed port anymore.
@@ -51,7 +52,7 @@ OD 0.16.1 installed at `F:\Open Design` (Electron). The daemon runs INSIDE the d
 - The user is a French/Darija speaker — respond in simple French-friendly terms, step by step, confirm before big actions.
 - Work happens in `G:\delivery soft\web` (and `server`). The opencode session cwd may be elsewhere; always use absolute paths.
 - **Never read huge generated files** (theme HTML, bundles) unless needed — prefer grep/glob and targeted reads.
-- **Never re-read design HTML files** (`G:\DESIGNE DELIVERY FOR CLIENT\cloud ai design\*.html`) — NEXUS is ported; `pulsar.html` only if `pulsar.astro` needs creating. Never re-read files already in context.
+- **Never re-read design HTML files** (`G:\DESIGNE DELIVERY FOR CLIENT\...`) — NEXUS and PULSAR are ported. New themes come as TSX folders copied to `themes/<name>/` at repo root. Never re-read files already in context.
 - **Check `SESSION.md` first** in a new session — it holds the current state and next steps.
 - `web` package has a pre-existing peer conflict: `@grapesjs/react@2.0.0` ↔ `grapesjs@^0.23.3` — use `--legacy-peer-deps` when installing.
 - Pre-existing TS errors exist in unrelated files (`Storefront.tsx`, `Revenue.tsx`, `StorefrontBuilder.tsx`, `OrderTracking.tsx`, `Customize.tsx`, `NotificationBell.tsx`) — they never block `npm run build` (Vite doesn't typecheck). Only fix errors in files we touch.

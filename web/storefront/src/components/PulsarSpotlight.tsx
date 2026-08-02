@@ -57,7 +57,6 @@ export default function PulsarSpotlight() {
           Ajouter au panier
         </a>
       </div>
-      <canvas id="spotlightCanvas"></canvas>
     </>
   );
 }

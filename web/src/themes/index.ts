@@ -1,6 +1,5 @@
 import type { ComponentType } from 'react';
 import nexusGaming from './nexus-gaming';
-import claro from './claro';
 import pulsar from './pulsar';
 import DefaultPage from './ui/DefaultPage';
 
@@ -120,7 +119,7 @@ export function filterProductsForStore<T extends { storeType?: string | null }>(
   return products.filter(p => !p.storeType || p.storeType === 'general' || p.storeType === storeType);
 }
 
-const registry: ThemePage[] = [nexusGaming, pulsar, claro];
+const registry: ThemePage[] = [nexusGaming, pulsar];
 
 const CUSTOM_BASE_DEFAULTS: ThemeSettings = {
   accent: '#2563eb',

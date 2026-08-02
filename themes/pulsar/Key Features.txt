@@ -1,0 +1,15 @@
+✅ Full 3D scenes (hero + spotlight) with Three.js
+
+✅ Interactive drag rotation
+
+✅ Product filtering
+
+✅ Cart functionality
+
+✅ Responsive design
+
+✅ Easy to edit data
+
+✅ All original design preserved
+
+✅ TypeScript for type safety

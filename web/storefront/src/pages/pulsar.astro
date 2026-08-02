@@ -1,0 +1,173 @@
+---
+import '../styles/pulsar.css';
+import PulsarHero from '../components/PulsarHero';
+import PulsarHeroScene from '../components/PulsarHeroScene';
+import PulsarCategories from '../components/PulsarCategories';
+import PulsarProductGrid from '../components/PulsarProductGrid';
+import PulsarSpotlight from '../components/PulsarSpotlight';
+import PulsarSpotlightScene from '../components/PulsarSpotlightScene';
+import CartButton from '../components/CartButton';
+import CartDrawer from '../components/CartDrawer';
+import ProductModal from '../components/ProductModal';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSAR — La puissance qui vous accompagne</title>
+</head>
+<body>
+
+<header>
+  <div class="wrap header-row">
+    <a href="#" class="brand"><span class="brand-mark"></span>PULSAR</a>
+    <nav id="mainNav">
+      <a href="#shop">Catégories</a>
+      <a href="#featured">En vedette</a>
+      <a href="#lineup">La gamme</a>
+      <a href="#tracking">Suivi de commande</a>
+    </nav>
+    <div class="header-actions">
+      <CartButton client:load />
+      <button class="burger" id="burgerBtn" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <PulsarHeroScene client:load />
+  <div class="hero-content">
+    <PulsarHero client:load />
+    <div class="hero-ctas">
+      <a href="#shop" class="btn btn-solid">Découvrir la gamme</a>
+      <a href="#featured" class="btn btn-outline">Voir en 3D</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
+</section>
+
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Paiement à la livraison</span>
+    <span>Garantie 12 mois</span>
+    <span>Support 7/7</span>
+    <span>Charge rapide</span>
+    <span>Retour sous 14 jours</span>
+    <span>Paiement à la livraison</span>
+    <span>Garantie 12 mois</span>
+    <span>Support 7/7</span>
+    <span>Charge rapide</span>
+    <span>Retour sous 14 jours</span>
+  </div>
+</div>
+
+<section id="shop">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">Acheter par catégorie</span>
+        <h2 class="section-title">Quatre familles. <span class="accent">Un écosystème.</span></h2>
+      </div>
+      <p class="section-desc">Chaque appareil partage le même standard de charge rapide — plus jamais de bagarre de câbles.</p>
+    </div>
+    <PulsarCategories client:load />
+  </div>
+</section>
+
+<section id="featured">
+  <div class="wrap">
+    <div class="spotlight">
+      <PulsarSpotlight client:load />
+      <PulsarSpotlightScene client:load />
+    </div>
+  </div>
+</section>
+
+<section id="lineup">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow">La gamme</span>
+        <h2 class="section-title">Tout au <span class="accent">même endroit</span></h2>
+      </div>
+      <p class="section-desc">Filtrez par catégorie — chaque produit est livré chargé et prêt à être associé.</p>
+    </div>
+    <PulsarProductGrid client:load />
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="section-head">
+      <div><span class="eyebrow">Pourquoi PULSAR</span><h2 class="section-title">Conçu comme <span class="accent">un seul système</span></h2></div>
+    </div>
+    <div class="features">
+      <div class="feature"><span class="feature-num">01</span><h4>Charge rapide partagée</h4><p>Chaque appareil — des écouteurs à l'ordinateur — se charge sur le même standard, un seul chargeur suffit.</p></div>
+      <div class="feature"><span class="feature-num">02</span><h4>Passerelle entre appareils</h4><p>Appels, médias et presse-papiers passent instantanément entre votre téléphone, vos écouteurs et votre ordinateur.</p></div>
+      <div class="feature"><span class="feature-num">03</span><h4>Batterie qui dure</h4><p>Autonomies testées en conditions réelles, pas des chiffres de laboratoire.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">1200+</div><div class="stat-label">Configs livrées</div></div>
+  <div class="stat"><div class="stat-num">4.9/5</div><div class="stat-label">Note clients</div></div>
+  <div class="stat"><div class="stat-num">24/48h</div><div class="stat-label">Livraison</div></div>
+  <div class="stat"><div class="stat-num">7/7</div><div class="stat-label">Support</div></div>
+</div>
+
+<section class="newsletter">
+  <div class="wrap">
+    <span class="eyebrow">Restez branché</span>
+    <h2>Accès anticipé aux nouveautés</h2>
+    <p>Nouveaux produits, restocks et prix membres — directement dans votre boîte mail.</p>
+    <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Inscrit ✓';">
+      <input type="email" placeholder="Votre adresse email" required>
+      <button type="submit" class="btn btn-solid">S'inscrire</button>
+    </form>
+  </div>
+</section>
+
+<footer id="tracking">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="footer-col footer-brand">
+        <a href="#" class="brand"><span class="brand-mark"></span>PULSAR</a>
+        <p>Écouteurs, chargeurs, téléphones et ordinateurs pensés comme un seul écosystème à charge rapide.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Boutique</h4>
+        <ul><li><a href="#shop">Catégories</a></li><li><a href="#lineup">La gamme</a></li><li><a href="#featured">En vedette</a></li><li><a href="#">Promos</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Support</h4>
+        <ul><li><a href="#">Suivi de commande</a></li><li><a href="#">Garantie 12 mois</a></li><li><a href="#">Retours</a></li><li><a href="#">Contact</a></li></ul>
+      </div>
+      <div class="footer-col">
+        <h4>Entreprise</h4>
+        <ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="#">Mentions légales</a></li><li><a href="#">CGV</a></li></ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 PULSAR. Tous droits réservés.</span>
+      <span>Conçu pour la puissance du quotidien</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const burger = document.getElementById('burgerBtn');
+  const nav = document.getElementById('mainNav');
+  burger.addEventListener('click', () => nav.classList.toggle('open'));
+  nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => nav.classList.remove('open')));
+</script>
+
+<CartDrawer client:load />
+<ProductModal client:load />
+
+</body>
+</html>

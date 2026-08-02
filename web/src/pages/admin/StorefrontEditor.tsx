@@ -80,7 +80,8 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     accentColor: settings.accentColor,
     fontFamily: settings.fontFamily,
     pinned,
-  }), [settings, pinned]);
+    theme: template?.id,
+  }), [settings, pinned, template]);
 
   useEffect(() => {
     if (!template) return;

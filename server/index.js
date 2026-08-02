@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
 import authRoutes from './routes/auth.js';
@@ -151,7 +152,19 @@ async function ensureStorageBucket() {
 const webDist = path.join(__dirname, '..', 'web', 'dist');
 const storefrontDist = path.join(__dirname, '..', 'web', 'storefront', 'dist');
 app.use('/_assets', express.static(path.join(storefrontDist, '_assets')));
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('delivery_settings')
+      .select('value')
+      .eq('key', 'storefront')
+      .single();
+    const blob = data?.value;
+    const pulsarPath = path.join(storefrontDist, 'pulsar', 'index.html');
+    if (blob?.theme === 'pulsar' && fs.existsSync(pulsarPath)) {
+      return res.sendFile(pulsarPath);
+    }
+  } catch {}
   res.sendFile(path.join(storefrontDist, 'index.html'));
 });
 app.use(express.static(webDist));
