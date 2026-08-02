@@ -17,6 +17,8 @@ export default function PulsarSpotlightScene() {
 
       const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.25;
 
       const scene = new THREE.Scene();
       const isModel = Boolean(modelUrl);
@@ -39,18 +41,46 @@ export default function PulsarSpotlightScene() {
       let led: THREE.Mesh | null = null;
 
       if (modelUrl) {
-        const { GLTFLoader } = await import('three/examples/jsm/loaders/GLTFLoader.js');
+        const [{ GLTFLoader }, { RoomEnvironment }] = await Promise.all([
+          import('three/examples/jsm/loaders/GLTFLoader.js'),
+          import('three/examples/jsm/environments/RoomEnvironment.js'),
+        ]);
         const loader = new GLTFLoader();
         try {
           const gltf = await loader.loadAsync(modelUrl);
           const model = gltf.scene;
-          const box = new THREE.Box3().setFromObject(model);
+          model.updateMatrixWorld(true);
+
+          const junk: THREE.Object3D[] = [];
+          model.traverse((o) => {
+            if ((o as THREE.Object3D).isLight || (o as THREE.Object3D).isCamera) junk.push(o);
+          });
+          junk.forEach((o) => o.parent?.remove(o));
+
+          const box = new THREE.Box3();
+          model.traverse((o) => {
+            if ((o as THREE.Mesh).isMesh) box.expandByObject(o);
+          });
+          if (box.isEmpty()) box.setFromObject(model);
           const sizeV = box.getSize(new THREE.Vector3());
           const maxDim = Math.max(sizeV.x, sizeV.y, sizeV.z) || 1;
           const scale = 2.0 / maxDim;
           model.scale.setScalar(scale);
           const center = box.getCenter(new THREE.Vector3());
           model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+
+          model.traverse((o) => {
+            const mesh = o as THREE.Mesh;
+            if (!mesh.isMesh) return;
+            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+            mats.forEach((m) => {
+              if (!m) return;
+              m.transparent = false;
+              m.opacity = 1;
+              m.depthWrite = true;
+            });
+          });
+
           group.add(model);
         } catch (err) {
           console.error('[PulsarSpotlight] Modèle 3D introuvable', err);
@@ -96,17 +126,22 @@ export default function PulsarSpotlightScene() {
       }
 
       if (isModel) {
-        scene.add(new THREE.AmbientLight(0xffffff, 1.7));
-        const key = new THREE.DirectionalLight(0xffffff, 3.2);
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+      }
+
+      if (isModel) {
+        scene.add(new THREE.AmbientLight(0xffffff, 2.0));
+        const key = new THREE.DirectionalLight(0xffffff, 4.0);
         key.position.set(4, 6, 5);
         scene.add(key);
-        const fill = new THREE.DirectionalLight(0xffffff, 1.3);
+        const fill = new THREE.DirectionalLight(0xffffff, 1.8);
         fill.position.set(-5, -2, 3);
         scene.add(fill);
-        const back = new THREE.DirectionalLight(0xffffff, 0.9);
+        const back = new THREE.DirectionalLight(0xffffff, 1.3);
         back.position.set(0, 3, -5);
         scene.add(back);
-        const ledLight = new THREE.PointLight(0xffffff, 2.2, 12);
+        const ledLight = new THREE.PointLight(0xffffff, 3.0, 12);
         ledLight.position.set(2, 4, -2);
         scene.add(ledLight);
       } else {
@@ -152,11 +187,11 @@ export default function PulsarSpotlightScene() {
       window.addEventListener('pointerup', onUp);
       window.addEventListener('resize', size);
 
-      const clock = new THREE.Clock();
+      const t0 = performance.now();
       let raf = 0;
       const animate = () => {
         raf = requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
+        const t = (performance.now() - t0) / 1000;
 
         rotY += (targetY - rotY) * 0.1;
         rotX += (targetX - rotX) * 0.1;

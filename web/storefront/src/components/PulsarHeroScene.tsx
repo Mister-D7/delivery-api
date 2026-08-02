@@ -146,11 +146,11 @@ export default function PulsarHeroScene() {
       window.addEventListener('pointerup', pointerUp);
       window.addEventListener('resize', size);
 
-      const clock = new THREE.Clock();
+      const t0 = performance.now();
       let raf = 0;
       const animate = () => {
         raf = requestAnimationFrame(animate);
-        const t = clock.getElapsedTime();
+        const t = (performance.now() - t0) / 1000;
 
         curRotX += (targetRotX - curRotX) * 0.08;
         curRotY += (targetRotY - curRotY) * 0.08;
