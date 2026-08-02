@@ -51,14 +51,14 @@ export default function PulsarHeroScene() {
 
       const ring = new THREE.Mesh(
         new THREE.TorusGeometry(2.6, 0.012, 16, 100),
-        new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.6 })
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.7 })
       );
       ring.rotation.x = Math.PI / 2.4;
       group.add(ring);
 
       const ring2 = new THREE.Mesh(
         new THREE.TorusGeometry(3.15, 0.008, 16, 100),
-        new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.35 })
+        new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.5 })
       );
       ring2.rotation.x = Math.PI / 1.7;
       ring2.rotation.y = Math.PI / 5;
@@ -88,8 +88,8 @@ export default function PulsarHeroScene() {
       particleGeo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
       const particleMat = new THREE.PointsMaterial(
         state.isLight
-          ? { color: 0x00a8bd, size: 0.028, transparent: true, opacity: 0.7, depthWrite: false }
-          : { color: 0x00e5ff, size: 0.028, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }
+          ? { color: 0x000000, size: 0.028, transparent: true, opacity: 0.85, depthWrite: false }
+          : { color: 0x000000, size: 0.028, transparent: true, opacity: 0.5, depthWrite: false }
       );
       const particles = new THREE.Points(particleGeo, particleMat);
       scene.add(particles);
@@ -101,17 +101,10 @@ export default function PulsarHeroScene() {
           (n.mesh.material as THREE.MeshStandardMaterial).color.setHex(0x000000);
           (n.mesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x000000);
         });
-        if (light) {
-          particleMat.color.setHex(0x00a8bd);
-          particleMat.opacity = 0.7;
-          particleMat.blending = THREE.NormalBlending;
-          particleMat.needsUpdate = true;
-        } else {
-          particleMat.color.setHex(0x00e5ff);
-          particleMat.opacity = 0.6;
-          particleMat.blending = THREE.AdditiveBlending;
-          particleMat.needsUpdate = true;
-        }
+        particleMat.color.setHex(0x000000);
+        particleMat.opacity = light ? 0.85 : 0.5;
+        particleMat.blending = THREE.NormalBlending;
+        particleMat.needsUpdate = true;
       };
       const onThemeChange = (e: Event) => {
         applyTheme((e as CustomEvent).detail?.theme === 'light');
