@@ -991,6 +991,49 @@ footer {
   touch-action: none;
 }
 
+.spot-3d-wrap {
+  position: relative;
+}
+
+.spot-zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 5;
+}
+
+.spot-zoom button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(10, 10, 14, 0.55);
+  color: #fff;
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.spot-zoom button:hover {
+  background: rgba(0, 229, 255, 0.85);
+  border-color: rgba(0, 229, 255, 0.9);
+  color: #04141a;
+  transform: scale(1.08);
+}
+
+.spot-zoom button:active {
+  transform: scale(0.96);
+}
+
 /* islands / cart integration */
 .iso-close {
   color: var(--muted, #8b8b9a);

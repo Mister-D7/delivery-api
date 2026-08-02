@@ -5,6 +5,7 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 
 export default function PulsarSpotlightScene() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const zoomRef = useRef<{ zoomIn: () => void; zoomOut: () => void; reset: () => void } | null>(null);
   const { settings } = useStorefront();
   const modelUrl = settings.model3d;
 
@@ -24,8 +25,20 @@ export default function PulsarSpotlightScene() {
 
       const scene = new THREE.Scene();
       const isModel = Boolean(modelUrl);
+      const baseDist = isModel ? 5.4 : 5;
       const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 50);
-      camera.position.set(0, 0.4, isModel ? 5.4 : 5);
+      camera.position.set(0, 0.4, baseDist);
+
+      const MIN_DIST = 1.8;
+      const MAX_DIST = 12;
+      let dist = baseDist;
+      let targetDist = baseDist;
+      const clampDist = (v: number) => Math.max(MIN_DIST, Math.min(MAX_DIST, v));
+      zoomRef.current = {
+        zoomIn: () => { targetDist = clampDist(targetDist * 0.75); },
+        zoomOut: () => { targetDist = clampDist(targetDist / 0.75); },
+        reset: () => { targetDist = baseDist; },
+      };
 
       const size = () => {
         const w = canvas.clientWidth;
@@ -193,6 +206,8 @@ export default function PulsarSpotlightScene() {
 
         rotY += (targetY - rotY) * 0.1;
         rotX += (targetX - rotX) * 0.1;
+        dist += (targetDist - dist) * 0.12;
+        camera.position.set(0, 0.4, dist);
         group.rotation.y = rotY + (dragging ? 0 : t * 0.15);
         group.rotation.x = rotX;
         if (led) led.material.emissiveIntensity = 0.8 + Math.sin(t * 2) * 0.4;
@@ -203,6 +218,7 @@ export default function PulsarSpotlightScene() {
 
       cleanup = () => {
         cancelAnimationFrame(raf);
+        zoomRef.current = null;
         canvas.removeEventListener('pointerdown', onDown);
         window.removeEventListener('pointermove', onMove);
         window.removeEventListener('pointerup', onUp);
@@ -216,5 +232,14 @@ export default function PulsarSpotlightScene() {
     return () => cleanup?.();
   }, [modelUrl]);
 
-  return <canvas ref={canvasRef} id="spotlightCanvas" data-edit-3d="spotlight" />;
+  return (
+    <div className="spot-3d-wrap">
+      <canvas ref={canvasRef} id="spotlightCanvas" data-edit-3d="spotlight" />
+      <div className="spot-zoom">
+        <button type="button" aria-label="Zoom avant" title="Zoom avant" onClick={() => zoomRef.current?.zoomIn()}>+</button>
+        <button type="button" aria-label="Zoom arrière" title="Zoom arrière" onClick={() => zoomRef.current?.zoomOut()}>−</button>
+        <button type="button" aria-label="Réinitialiser le zoom" title="Réinitialiser le zoom" onClick={() => zoomRef.current?.reset()}>↺</button>
+      </div>
+    </div>
+  );
 }
