@@ -3,8 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import fs from 'fs';
+import dns from 'node:dns';
 import { fileURLToPath } from 'url';
 import multer from 'multer';
+
+dns.setDefaultResultOrder('ipv4first');
 import authRoutes from './routes/auth.js';
 import catalogRoutes from './routes/catalog.js';
 import orderRoutes from './routes/orders.js';
@@ -20,8 +23,11 @@ import backupRoutes from './routes/backup.js';
 import cloudRoutes from './routes/cloud.js';
 import emailRoutes from './routes/email.js';
 import dismissedRoutes from './routes/dismissed.js';
+import couponRoutes from './routes/coupons.js';
+import comboRoutes from './routes/combos.js';
 import { startOrderNotifier } from './lib/notifications.js';
 import { startScheduler as startBackupScheduler } from './lib/backup.js';
+import { startArchiveScheduler } from './lib/archive.js';
 import supabase from './lib/supabase.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +58,8 @@ app.use('/api/delivery/backup', backupRoutes);
 app.use('/api/delivery/cloud', cloudRoutes);
 app.use('/api/delivery/email', emailRoutes);
 app.use('/api/delivery/dismissed', dismissedRoutes);
+app.use('/api/delivery/coupons', couponRoutes);
+app.use('/api/delivery/combos', comboRoutes);
 
 // Multer error handler — returns proper error messages
 app.use((err, _req, res, next) => {
@@ -73,6 +81,31 @@ app.get('/api/delivery/health', (req, res) => {
     github: !!process.env.GITHUB_TOKEN,
     render: !!process.env.RENDER_API_KEY,
   });
+});
+
+// Same-origin image proxy — serves external images through the app origin so
+// they are not subject to Edge/Chrome Tracking Prevention, mixed-content
+// blocks, or hotlink restrictions. Only forwards responses that are images.
+app.get('/api/img', async (req, res) => {
+  const raw = req.query.url;
+  const url = Array.isArray(raw) ? raw[0] : raw;
+  if (!url || !/^https?:\/\//i.test(String(url))) {
+    return res.status(400).json({ error: 'Invalid url' });
+  }
+  try {
+    const upstream = await fetch(String(url), { redirect: 'follow', signal: AbortSignal.timeout(15000) });
+    const type = String(upstream.headers.get('content-type') || '').split(';')[0].trim().toLowerCase();
+    if (!upstream.ok || !/^image\/(jpe?g|png|webp|gif|avif|svg\+xml)/i.test(type)) {
+      return res.status(upstream.ok ? 415 : upstream.status).end();
+    }
+    const buf = Buffer.from(await upstream.arrayBuffer());
+    res.set('Content-Type', type);
+    res.set('Cache-Control', 'public, max-age=86400, immutable');
+    res.set('X-Content-Type-Options', 'nosniff');
+    res.send(buf);
+  } catch {
+    res.status(502).json({ error: 'Fetch failed' });
+  }
 });
 
 /* ══════════════════════════════════════════
@@ -152,8 +185,15 @@ async function ensureStorageBucket() {
 const webDist = path.join(__dirname, '..', 'web', 'dist');
 const storefrontDist = path.join(__dirname, '..', 'web', 'storefront', 'dist');
 app.use('/_assets', express.static(path.join(storefrontDist, '_assets')));
+app.use('/images', express.static(path.join(storefrontDist, 'images')));
 app.get('/categorie/:slug', (req, res) => {
   const page = path.join(storefrontDist, 'categorie', req.params.slug, 'index.html');
+  res.sendFile(page, (err) => {
+    if (err) res.redirect('/');
+  });
+});
+app.get('/mentions-legales', (req, res) => {
+  const page = path.join(storefrontDist, 'mentions-legales', 'index.html');
   res.sendFile(page, (err) => {
     if (err) res.redirect('/');
   });
@@ -169,6 +209,10 @@ app.get('/', async (req, res) => {
     const pulsarPath = path.join(storefrontDist, 'pulsar', 'index.html');
     if (blob?.theme === 'pulsar' && fs.existsSync(pulsarPath)) {
       return res.sendFile(pulsarPath);
+    }
+    const greensPath = path.join(storefrontDist, 'greens', 'index.html');
+    if (blob?.theme === 'greens' && fs.existsSync(greensPath)) {
+      return res.sendFile(greensPath);
     }
   } catch {}
   res.sendFile(path.join(storefrontDist, 'index.html'));
@@ -198,5 +242,6 @@ app.listen(PORT, () => {
     ensureStorageBucket();
     startOrderNotifier();
     startBackupScheduler();
+    startArchiveScheduler();
   }
 });

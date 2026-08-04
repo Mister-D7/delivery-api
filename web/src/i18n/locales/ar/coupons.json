@@ -1,0 +1,57 @@
+{
+  "title": "الكوبونات",
+  "subtitle": "برنامج الولاء — أكواد الخصم والتخفيضات",
+  "new": "كوبون جديد",
+  "edit": "تعديل",
+  "delete": "حذف",
+  "toggle_active": "تفعيل / إيقاف",
+  "empty": "لا توجد كوبونات",
+  "table": {
+    "code": "الرمز",
+    "type": "النوع",
+    "value": "القيمة",
+    "min_order": "حد أدنى للطلب",
+    "expiry": "الانتهاء",
+    "uses": "الاستخدامات",
+    "customer": "العميل",
+    "status": "الحالة",
+    "actions": "إجراءات"
+  },
+  "type": {
+    "percent": "نسبة",
+    "fixed": "مبلغ ثابت"
+  },
+  "customer": {
+    "all": "جميع العملاء",
+    "none": "—"
+  },
+  "form": {
+    "create_title": "كوبون جديد",
+    "edit_title": "تعديل الكوبون",
+    "code": "الرمز",
+    "code_placeholder": "مثال: FIDEL-XXXXXX",
+    "generate": "توليد",
+    "type": "النوع",
+    "value": "القيمة",
+    "value_percent_hint": "10 = خصم 10%",
+    "value_fixed_hint": "المبلغ بالدينار",
+    "min_order": "الحد الأدنى للطلب (0 = بدون)",
+    "expiry": "الانتهاء (اختياري)",
+    "max_uses": "الحد الأقصى للاستخدام (1 = مرة واحدة)",
+    "customer": "العميل (اختياري)",
+    "orders": "{{count}} طلب",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "active": "نشط"
+  },
+  "toasts": {
+    "created": "تم إنشاء الكوبون",
+    "updated": "تم تحديث الكوبون",
+    "deleted": "تم حذف الكوبون",
+    "toggled_on": "تم تفعيل الكوبون",
+    "toggled_off": "تم إيقاف الكوبون",
+    "error": "حدث خطأ في العملية"
+  },
+  "no_expiry": "أبداً",
+  "expired_badge": "منتهي"
+}

@@ -15,6 +15,21 @@
     "location": "الموقع على الخريطة",
     "use_my_location": "استخدام موقعي"
   },
+  "coupon": {
+    "placeholder": "رمز الخصم (مثال: FIDEL-XXXXXX)",
+    "apply": "تطبيق",
+    "applied": "تم تطبيق الرمز",
+    "discount": "الخصم",
+    "remove": "إزالة",
+    "errors": {
+      "NOT_FOUND": "رمز غير صالح",
+      "INACTIVE": "الرمز معطل",
+      "EXPIRED": "انتهت صلاحية الرمز",
+      "MAX_USES": "تم استخدام الرمز بالفعل",
+      "MIN_ORDER": "الحد الأدنى للطلب {{minOrder}} دج مطلوب",
+      "CUSTOMER_ONLY": "هذا الرمز مخصص لعميل محدد"
+    }
+  },
   "success": {
     "title": "تم تسجيل الطلب!",
     "track": "تتبع طلبي",

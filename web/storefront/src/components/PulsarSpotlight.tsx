@@ -1,6 +1,5 @@
 import { useStorefront } from '../lib/storefront';
-import { openProduct } from '../lib/store';
-import { addItem } from '../lib/cart';
+import { addItem, openCart } from '../lib/cart';
 import { formatPrice } from '../lib/format';
 
 function parseSpecs(specs?: string[] | string): string[] {
@@ -11,7 +10,7 @@ function parseSpecs(specs?: string[] | string): string[] {
 
 export default function PulsarSpotlight() {
   const { products } = useStorefront();
-  const featured = products.find((p) => p.oldPrice) || products[0];
+  const featured = products.find((p) => p.modelUrl) || products.find((p) => p.oldPrice) || products[0];
   if (!featured) return null;
   const specs = parseSpecs(featured.specs);
   return (
@@ -50,8 +49,8 @@ export default function PulsarSpotlight() {
           className="btn btn-solid"
           onClick={(e) => {
             e.preventDefault();
-            openProduct(featured);
             addItem(featured);
+            openCart();
           }}
         >
           Ajouter au panier

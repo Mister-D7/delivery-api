@@ -1,8 +1,9 @@
 import type { Product } from '../lib/data';
 import { useStorefront } from '../lib/storefront';
 import { openProduct } from '../lib/store';
-import { addItem } from '../lib/cart';
+import { addItem, openCart } from '../lib/cart';
 import { formatPrice } from '../lib/format';
+import { imgSrc } from '../lib/image';
 
 interface Props {
   sectionTitle: string;
@@ -59,7 +60,7 @@ export default function ProductGrid({ sectionTitle }: Props) {
         >
           <div className="card-media">
             <span className="badge">En stock</span>
-            {p.imageUrl ? <img src={p.imageUrl} alt={p.name} loading="lazy" /> : null}
+            {p.imageUrl ? <img src={imgSrc(p.imageUrl)} alt={p.name} loading="lazy" /> : null}
           </div>
           <div className="card-body">
             <h3 className="card-name">{p.name}</h3>
@@ -82,8 +83,8 @@ export default function ProductGrid({ sectionTitle }: Props) {
                 className="btn btn-solid"
                 onClick={(e) => {
                   e.preventDefault();
-                  openProduct(p);
                   addItem(p);
+                  openCart();
                 }}
               >
                 Configurer et acheter

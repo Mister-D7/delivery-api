@@ -14,12 +14,10 @@ export function storeTypeForTheme(theme?: string): string {
   switch (theme) {
     case 'pulsar':
       return 'tech';
-    case 'claro':
-      return 'general';
-    case 'nexus-gaming':
-      return 'gaming';
+    case 'greens':
+      return 'grocery';
     default:
-      return 'gaming';
+      return 'tech';
   }
 }
 
@@ -144,7 +142,7 @@ async function refresh() {
   if (inflight) return;
   inflight = true;
   try {
-    const setRes = await fetch('/api/delivery/storefront/settings/storefront', { signal: AbortSignal.timeout(6000) });
+    const setRes = await fetch('/api/delivery/storefront/settings/storefront', { signal: AbortSignal.timeout(6000), cache: 'no-store' });
     let settings: StorefrontSettings = {};
     if (setRes.ok) {
       const json = await setRes.json();
@@ -152,8 +150,8 @@ async function refresh() {
     }
     const st = storeTypeForTheme(settings.theme);
     const [catRes, catsRes] = await Promise.all([
-      fetch('/api/delivery/catalog', { signal: AbortSignal.timeout(6000) }),
-      fetch(`/api/delivery/categories/public?storeType=${st}`, { signal: AbortSignal.timeout(6000) }),
+      fetch(`/api/delivery/catalog?storeType=${st}`, { signal: AbortSignal.timeout(6000), cache: 'no-store' }),
+      fetch(`/api/delivery/categories/public?storeType=${st}`, { signal: AbortSignal.timeout(6000), cache: 'no-store' }),
     ]);
     let products: Product[] = [];
     if (catRes.ok) {

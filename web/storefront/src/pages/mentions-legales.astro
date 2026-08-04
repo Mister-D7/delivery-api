@@ -1,0 +1,66 @@
+---
+import '../styles/pulsar.css';
+import PulsarHeader from '../components/PulsarHeader.astro';
+import TermsGate from '../components/TermsGate.astro';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PULSAR — Mentions légales</title>
+<script is:inline>
+  (function () {
+    try {
+      var t = localStorage.getItem('pulsar_theme') || 'dark';
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body>
+
+<TermsGate />
+
+<PulsarHeader />
+
+<section class="cat-page">
+  <div class="wrap">
+    <div class="legal-page">
+      <span class="eyebrow">Mentions légales</span>
+      <h2 class="section-title legal-title">LEGAL NOTICE &amp; COPYRIGHT PROTECTION</h2>
+
+      <div class="legal-card">
+        <p class="legal-lead">© 2026 Driss Djellali. All Rights Reserved.</p>
+        <p>
+          All content, code, designs, graphics, and materials created by Driss Djellali are protected under
+          international copyright laws. Strictly no part of this work may be copied, reproduced, republished,
+          uploaded, posted, transmitted, or redistributed in any way without prior explicit written permission
+          from Driss Djellali.
+        </p>
+        <p>
+          Unauthorized use, modification, or distribution of this work constitutes a violation of copyright law
+          and will be met with immediate legal action.
+        </p>
+        <p>To request permission for reuse, contact me via:</p>
+        <div class="legal-contact">
+          <p>Email : <a href="mailto:djellalidris02@gmail.com">djellalidris02@gmail.com</a></p>
+          <p>Telegram : @Phantom_DR</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="tracking">
+  <div class="wrap">
+    <div class="footer-bottom">
+      <span>© 2026 Driss Djellali. All Rights Reserved.</span>
+      <span>Conçu pour la puissance du quotidien</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

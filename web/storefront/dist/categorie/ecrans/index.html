@@ -5,7 +5,144 @@
       document.documentElement.dataset.theme = t;
     } catch (e) {}
   })();
-</script><link rel="stylesheet" href="/_assets/PulsarProductCard.HLsqE54P.css"><link rel="stylesheet" href="/_assets/EditCanvas.BaUmvTeN.css"></head><body><header><div class="wrap header-row"><a href="/" class="brand"><span class="brand-mark"></span>PULSAR</a><div class="header-right"><button id="themeToggle" class="theme-toggle" type="button" aria-label="Changer de thème (sombre / clair)" title="Changer de thème"><span class="t-sun" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg></span><span class="t-moon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></span></button><div class="hdr-actions"><button class="hdr-icon hdr-cart" aria-label="Panier"><span class="hdr-glow"></span><span class="hdr-spark h-s1"></span><span class="hdr-spark h-s2"></span><span class="hdr-spark h-s3"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.4"></circle><circle cx="19" cy="21" r="1.4"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H6"></path></svg></button><div class="hdr-user"><button class="hdr-icon hdr-globe" aria-label="Mon compte" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"></circle><path d="M2.9 12h18.2"></path><path d="M12 2.8c2.6 2.5 3.9 5.6 3.9 9.2S14.6 18.7 12 21.2c-2.6-2.5-3.9-5.6-3.9-9.2S9.4 5.3 12 2.8z"></path></svg></button></div></div></div></div></header><script>
+</script><link rel="stylesheet" href="/_assets/PulsarHeader.Cf_olJzR.css"><link rel="stylesheet" href="/_assets/TermsGate.Bep0Crmn.css"></head><body><script>
+  (async function () {
+    var KEY = 'djdr_tos_accepted';
+    var accepted = false;
+    try { accepted = localStorage.getItem(KEY) === '1'; } catch (e) {}
+    var isEdit = (window.location.search || '').indexOf('edit=') !== -1;
+    var isAdmin = false;
+    try { isAdmin = !!localStorage.getItem('delivery_token'); } catch (e) {}
+    if (accepted || isEdit || isAdmin) return;
+
+    var brandName = '';
+    var contactEmail = '';
+    var contactPhone = '';
+    try {
+      var r = await fetch('/api/delivery/storefront/settings/storefront');
+      var blob = await r.json();
+      brandName = blob.storeName || (blob.texts && blob.texts.storeName) || '';
+      var texts = blob.texts || {};
+      contactEmail = texts.contactEmail || '';
+      contactPhone = texts.contactPhone || '';
+    } catch (e) {}
+
+    var overlay = document.createElement('div');
+    overlay.id = 'djdr-tos';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', 'Conditions d\'utilisation');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#08080b;color:#f2f2f5;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'max-width:620px;width:100%;background:#141419;border:1px solid #2a2a33;border-radius:18px;padding:34px;margin:auto;';
+
+    var h = document.createElement('h1');
+    h.textContent = brandName || 'Bienvenue';
+    h.style.cssText = 'font-size:26px;font-weight:800;letter-spacing:.03em;margin:0 0 2px;';
+
+    var sub = document.createElement('p');
+    sub.textContent = 'Designed by Driss-Djellali \u2014 Terms of Service & Legal Notice';
+    sub.style.cssText = 'font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a95;margin:0 0 22px;';
+
+    var p1 = document.createElement('p');
+    p1.textContent = 'LEGAL NOTICE & COPYRIGHT PROTECTION';
+    p1.style.cssText = 'font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px;';
+
+    var body = document.createElement('div');
+    body.style.cssText = 'font-size:14px;line-height:1.7;color:#c9c9d2;';
+
+    var paras = [
+      '\u00A9 2026 Driss Djellali. All Rights Reserved.',
+      'All content, code, designs, graphics, and materials created by Driss Djellali are protected under international copyright laws. Strictly no part of this work may be copied, reproduced, republished, uploaded, posted, transmitted, or redistributed in any way without prior explicit written permission from Driss Djellali.',
+      'Unauthorized use, modification, or distribution of this work constitutes a violation of copyright law and will be met with immediate legal action.',
+      'To request permission for reuse, contact me via:'
+    ];
+    paras.forEach(function (t) {
+      var p = document.createElement('p');
+      p.textContent = t;
+      p.style.margin = '0 0 12px';
+      body.appendChild(p);
+    });
+
+    var contact = document.createElement('div');
+    contact.style.cssText = 'background:#1b1b22;border:1px solid #2a2a33;border-radius:12px;padding:14px 16px;margin-bottom:18px;';
+
+    var mail = document.createElement('p');
+    mail.innerHTML = 'Email: <a href="mailto:' + (contactEmail || 'djellalidris02@gmail.com') + '" style="color:#8ab4ff;text-decoration:none;">' + (contactEmail || 'djellalidris02@gmail.com') + '</a>';
+    mail.style.cssText = 'margin:0 0 6px;font-size:14px;';
+
+    var tel = document.createElement('p');
+    tel.textContent = contactPhone ? ('Phone: ' + contactPhone) : 'Telegram: @Phantom_DR';
+    tel.style.cssText = 'margin:0;font-size:14px;';
+
+    contact.appendChild(mail);
+    contact.appendChild(tel);
+    body.appendChild(contact);
+
+    var err = document.createElement('p');
+    err.id = 'djdr-tos-err';
+    err.style.cssText = 'display:none;color:#ff6b5e;font-size:12.5px;margin:0 0 14px;';
+    err.textContent = 'Vous devez accepter les conditions pour acc\u00E9der au site.';
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:12px;flex-wrap:wrap;';
+
+    var accept = document.createElement('button');
+    accept.textContent = 'J\u2019accepte les conditions';
+    accept.style.cssText = 'flex:1;min-width:150px;padding:13px 18px;border:0;border-radius:12px;background:linear-gradient(120deg,#7c5cff,#ff3b30);color:#fff;font-weight:700;font-size:14px;cursor:pointer;';
+    accept.addEventListener('click', function () {
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      overlay.style.display = 'none';
+    });
+
+    var decline = document.createElement('button');
+    decline.textContent = 'Je refuse';
+    decline.style.cssText = 'flex:1;min-width:130px;padding:13px 18px;border:1px solid #33333c;border-radius:12px;background:transparent;color:#8a8a95;font-weight:600;font-size:14px;cursor:pointer;';
+    decline.addEventListener('click', function () {
+      err.style.display = 'block';
+    });
+
+    row.appendChild(accept);
+    row.appendChild(decline);
+
+    card.appendChild(h);
+    card.appendChild(sub);
+    card.appendChild(p1);
+    card.appendChild(body);
+    card.appendChild(err);
+    card.appendChild(row);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  })();
+</script><header><div class="wrap header-row"><a href="/" class="brand brand-logo"><span class="brand-word"><span class="brand-part">PUL</span><span class="brand-triangle"><svg viewBox="0 0 100 100" aria-hidden="true"><polygon class="tri-sheen" points="50,80 14,18 86,18"></polygon><polygon class="tri-shape" points="50,88 8,12 92,12"></polygon></svg></span><span class="brand-part">SAR</span></span><span class="brand-sub">Designed by DjDr</span></a><div class="header-right"><button id="themeToggle" class="theme-toggle" type="button" aria-label="Changer de thème (sombre / clair)" title="Changer de thème"><span class="t-sun" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 1.5v3M12 19.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1.5 12h3M19.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg></span><span class="t-moon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></span></button><style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var g=Object.defineProperty;var w=(a,s,c)=>s in a?g(a,s,{enumerable:!0,configurable:!0,writable:!0,value:c}):a[s]=c;var l=(a,s,c)=>w(a,typeof s!="symbol"?s+"":s,c);var E=new Set(["__proto__","constructor","prototype"]);{let a={0:t=>y(t),1:t=>c(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(c(t)),5:t=>new Set(c(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>Number.POSITIVE_INFINITY*t},s=t=>{let[p,e]=t;return p in a?a[p](e):void 0},c=t=>t.map(s),y=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([p,e])=>[p,s(e)]));class f extends HTMLElement{constructor(){super(...arguments);l(this,"Component");l(this,"hydrator");l(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let r=this.querySelectorAll("astro-slot"),n={},d=this.querySelectorAll("template[data-astro-template]");for(let o of d){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("data-astro-template")||"default"]=o.innerHTML,o.remove())}for(let o of r){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("name")||"default"]=o.innerHTML)}let u;try{u=this.hasAttribute("props")?y(JSON.parse(this.getAttribute("props"))):{}}catch(o){let i=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(i+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${i}`,this.getAttribute("props"),o),o}let h;await this.hydrator(this)(this.Component,u,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});l(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),r.disconnect(),this.childrenConnectedCallback()},r=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});r.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}getRetryImportUrl(e){let r=new URL(e,document.baseURI);return r.searchParams.set("astro-retry",Date.now().toString()),r.toString()}async importWithRetry(e){try{return await import(e)}catch(r){return await new Promise(n=>setTimeout(n,1e3)),import(this.getRetryImportUrl(e))}}handleHydrationError(e){let r=this.getAttribute("component-url"),n=new CustomEvent("astro:hydration-error",{cancelable:!0,bubbles:!0,composed:!0,detail:{error:e,componentUrl:r}});this.dispatchEvent(n)&&console.error(`[astro-island] Error hydrating ${r}`,e)}async start(){let e=JSON.parse(this.getAttribute("opts")),r=this.getAttribute("client");if(Astro[r]===void 0){window.addEventListener(`astro:${r}`,()=>this.start(),{once:!0});return}try{await Astro[r](async()=>{let n=this.getAttribute("renderer-url");try{let[d,{default:u}]=await Promise.all([this.importWithRetry(this.getAttribute("component-url")),n?this.importWithRetry(n):Promise.resolve({default:()=>()=>{}})]),h=this.getAttribute("component-export")||"default";if(h.includes(".")){this.Component=d;for(let m of h.split(".")){if(E.has(m)||!this.Component||typeof this.Component!="object"&&typeof this.Component!="function"||!Object.hasOwn(this.Component,m))throw new Error(`Invalid component export path: ${h}`);this.Component=this.Component[m]}}else{if(E.has(h))throw new Error(`Invalid component export path: ${h}`);this.Component=d[h]}return this.hydrator=u,this.hydrate}catch(d){return this.handleHydrationError(d),()=>{}}},e,this)}catch(n){this.handleHydrationError(n)}}attributeChangedCallback(){this.hydrate()}}l(f,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",f)}})();</script><astro-island uid="Z1PWL6B" prefix="r9" component-url="/_assets/HeaderActions.C1ng7odf.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;HeaderActions&quot;,&quot;value&quot;:true}" await-children><div class="hdr-actions"><button class="hdr-icon hdr-cart" aria-label="Panier"><span class="hdr-glow"></span><span class="hdr-spark h-s1"></span><span class="hdr-spark h-s2"></span><span class="hdr-spark h-s3"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1.4"></circle><circle cx="19" cy="21" r="1.4"></circle><path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H6"></path></svg></button><div class="hdr-user"><button class="hdr-icon hdr-globe" aria-label="Mon compte" aria-expanded="false"><span class="hdr-glow"></span><span class="hdr-spark h-s1"></span><span class="hdr-spark h-s2"></span><span class="hdr-spark h-s3"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.4" opacity="0.4"></circle><circle cx="12" cy="7.8" r="3.9"></circle><path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0"></path></svg></button></div></div><!--astro:end--></astro-island></div></div></header><script>
+  (function () {
+    var header = document.querySelector('header');
+    if (!header) return;
+    var lastY = window.scrollY;
+    var ticking = false;
+    var hideAfter = 140;
+    var nearTop = 8;
+    function update() {
+      var y = window.scrollY;
+      if (y > lastY && y > hideAfter) {
+        header.classList.add('hdr-hidden');
+      } else if (y <= nearTop) {
+        header.classList.remove('hdr-hidden');
+      }
+      lastY = y;
+      ticking = false;
+    }
+    if (window.scrollY > hideAfter) {
+      header.classList.add('hdr-hidden');
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }, { passive: true });
+  })();
+</script><script>
   (function () {
     var btn = document.getElementById('themeToggle');
     if (!btn) return;
@@ -17,4 +154,4 @@
       window.dispatchEvent(new CustomEvent('theme:change', { detail: { theme: next } }));
     });
   })();
-</script><section class="cat-page"><div class="wrap"><style>astro-island,astro-slot,astro-static-slot{display:contents}</style><script>(()=>{var e=async t=>{await(await t())()};(self.Astro||(self.Astro={})).load=e;window.dispatchEvent(new Event("astro:load"));})();</script><script>(()=>{var g=Object.defineProperty;var w=(a,s,c)=>s in a?g(a,s,{enumerable:!0,configurable:!0,writable:!0,value:c}):a[s]=c;var l=(a,s,c)=>w(a,typeof s!="symbol"?s+"":s,c);var E=new Set(["__proto__","constructor","prototype"]);{let a={0:t=>y(t),1:t=>c(t),2:t=>new RegExp(t),3:t=>new Date(t),4:t=>new Map(c(t)),5:t=>new Set(c(t)),6:t=>BigInt(t),7:t=>new URL(t),8:t=>new Uint8Array(t),9:t=>new Uint16Array(t),10:t=>new Uint32Array(t),11:t=>Number.POSITIVE_INFINITY*t},s=t=>{let[p,e]=t;return p in a?a[p](e):void 0},c=t=>t.map(s),y=t=>typeof t!="object"||t===null?t:Object.fromEntries(Object.entries(t).map(([p,e])=>[p,s(e)]));class f extends HTMLElement{constructor(){super(...arguments);l(this,"Component");l(this,"hydrator");l(this,"hydrate",async()=>{var b;if(!this.hydrator||!this.isConnected)return;let e=(b=this.parentElement)==null?void 0:b.closest("astro-island[ssr]");if(e){e.addEventListener("astro:hydrate",this.hydrate,{once:!0});return}let r=this.querySelectorAll("astro-slot"),n={},d=this.querySelectorAll("template[data-astro-template]");for(let o of d){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("data-astro-template")||"default"]=o.innerHTML,o.remove())}for(let o of r){let i=o.closest(this.tagName);i!=null&&i.isSameNode(this)&&(n[o.getAttribute("name")||"default"]=o.innerHTML)}let u;try{u=this.hasAttribute("props")?y(JSON.parse(this.getAttribute("props"))):{}}catch(o){let i=this.getAttribute("component-url")||"<unknown>",v=this.getAttribute("component-export");throw v&&(i+=` (export ${v})`),console.error(`[hydrate] Error parsing props for component ${i}`,this.getAttribute("props"),o),o}let h;await this.hydrator(this)(this.Component,u,n,{client:this.getAttribute("client")}),this.removeAttribute("ssr"),this.dispatchEvent(new CustomEvent("astro:hydrate"))});l(this,"unmount",()=>{this.isConnected||this.dispatchEvent(new CustomEvent("astro:unmount"))})}disconnectedCallback(){document.removeEventListener("astro:after-swap",this.unmount),document.addEventListener("astro:after-swap",this.unmount,{once:!0})}connectedCallback(){if(!this.hasAttribute("await-children")||document.readyState==="interactive"||document.readyState==="complete")this.childrenConnectedCallback();else{let e=()=>{document.removeEventListener("DOMContentLoaded",e),r.disconnect(),this.childrenConnectedCallback()},r=new MutationObserver(()=>{var n;((n=this.lastChild)==null?void 0:n.nodeType)===Node.COMMENT_NODE&&this.lastChild.nodeValue==="astro:end"&&(this.lastChild.remove(),e())});r.observe(this,{childList:!0}),document.addEventListener("DOMContentLoaded",e)}}async childrenConnectedCallback(){let e=this.getAttribute("before-hydration-url");e&&await import(e),this.start()}getRetryImportUrl(e){let r=new URL(e,document.baseURI);return r.searchParams.set("astro-retry",Date.now().toString()),r.toString()}async importWithRetry(e){try{return await import(e)}catch(r){return await new Promise(n=>setTimeout(n,1e3)),import(this.getRetryImportUrl(e))}}handleHydrationError(e){let r=this.getAttribute("component-url"),n=new CustomEvent("astro:hydration-error",{cancelable:!0,bubbles:!0,composed:!0,detail:{error:e,componentUrl:r}});this.dispatchEvent(n)&&console.error(`[astro-island] Error hydrating ${r}`,e)}async start(){let e=JSON.parse(this.getAttribute("opts")),r=this.getAttribute("client");if(Astro[r]===void 0){window.addEventListener(`astro:${r}`,()=>this.start(),{once:!0});return}try{await Astro[r](async()=>{let n=this.getAttribute("renderer-url");try{let[d,{default:u}]=await Promise.all([this.importWithRetry(this.getAttribute("component-url")),n?this.importWithRetry(n):Promise.resolve({default:()=>()=>{}})]),h=this.getAttribute("component-export")||"default";if(h.includes(".")){this.Component=d;for(let m of h.split(".")){if(E.has(m)||!this.Component||typeof this.Component!="object"&&typeof this.Component!="function"||!Object.hasOwn(this.Component,m))throw new Error(`Invalid component export path: ${h}`);this.Component=this.Component[m]}}else{if(E.has(h))throw new Error(`Invalid component export path: ${h}`);this.Component=d[h]}return this.hydrator=u,this.hydrate}catch(d){return this.handleHydrationError(d),()=>{}}},e,this)}catch(n){this.handleHydrationError(n)}}attributeChangedCallback(){this.hydrate()}}l(f,"observedAttributes",["props"]),customElements.get("astro-island")||customElements.define("astro-island",f)}})();</script><astro-island uid="1EJVo6" prefix="r5" component-url="/_assets/PulsarCategoryPage.CVKv07pa.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{&quot;name&quot;:[0,&quot;Écrans&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;PulsarCategoryPage&quot;,&quot;value&quot;:true}" await-children><span class="eyebrow">Catégorie</span><h2 class="section-title cat-page-title">Écrans</h2><p class="section-desc">0<!-- --> produit<!-- --> dans cette catégorie — livré chargé et prêt à être associé.</p><div class="cat-empty">Aucun produit dans cette catégorie pour le moment.</div><!--astro:end--></astro-island></div></section><div class="stats"><div class="stat"><div class="stat-num">1200+</div><div class="stat-label">Configs livrées</div></div><div class="stat"><div class="stat-num">4.9/5</div><div class="stat-label">Note clients</div></div><div class="stat"><div class="stat-num">24/48h</div><div class="stat-label">Livraison</div></div><div class="stat"><div class="stat-num">7/7</div><div class="stat-label">Support</div></div></div><footer id="tracking"><div class="wrap"><div class="footer-grid"><div class="footer-col footer-brand"><a href="/" class="brand"><span class="brand-mark"></span>PULSAR</a><p>Écouteurs, chargeurs, téléphones et ordinateurs pensés comme un seul écosystème à charge rapide.</p></div><div class="footer-col"><h4>Boutique</h4><ul><li><a href="/#shop">Catégories</a></li><li><a href="/#lineup">La gamme</a></li><li><a href="/#featured">En vedette</a></li><li><a href="#">Promos</a></li></ul></div><div class="footer-col"><h4>Support</h4><ul><li><a href="/track">Suivi de commande</a></li><li><a href="/profile">Mon compte</a></li><li><a href="#">Garantie 12 mois</a></li><li><a href="#">Retours</a></li><li><a href="#">Contact</a></li></ul></div><div class="footer-col"><h4>Entreprise</h4><ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="#">Mentions légales</a></li><li><a href="#">CGV</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 PULSAR. Tous droits réservés.</span><span>Conçu pour la puissance du quotidien</span></div></div></footer><astro-island uid="GXEFd" prefix="r6" component-url="/_assets/CartDrawer.DFo13W02.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;CartDrawer&quot;,&quot;value&quot;:true}"></astro-island><astro-island uid="1dQ2ge" prefix="r7" component-url="/_assets/ProductModal.C2bQpwzO.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;ProductModal&quot;,&quot;value&quot;:true}"></astro-island><astro-island uid="25oAhy" prefix="r8" component-url="/_assets/EditCanvas.DGCZjjmk.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;EditCanvas&quot;,&quot;value&quot;:true}"></astro-island></body></html>
+</script><section class="cat-page"><div class="wrap"><astro-island uid="IJM6G" prefix="r5" component-url="/_assets/PulsarCategoryPage.DDGdcDxj.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{&quot;name&quot;:[0,&quot;Écrans&quot;]}" ssr client="load" opts="{&quot;name&quot;:&quot;PulsarCategoryPage&quot;,&quot;value&quot;:true}" await-children><span class="eyebrow">Catégorie</span><h2 class="section-title cat-page-title">Écrans</h2><p class="section-desc cat-page-desc">Filtré sur « <!-- -->Écrans<!-- --> » — retirez le filtre pour voir tous les produits, et triez par prix.</p><div class="grid-toolbar"><div class="grid-filters"><span class="grid-filter-chip"><span class="grid-filter-chip-name">Écrans</span><button type="button" class="grid-filter-clear" aria-label="Retirer le filtre" title="Afficher tous les produits">✕</button></span><label class="grid-sort"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7h12M8 12h9M8 17h6"></path><path d="M3.5 6.5l1.8 1.8 1.8-1.8M3.5 11.5l1.8 1.8 1.8-1.8M3.5 16.5l1.8 1.8 1.8-1.8"></path></svg><select aria-label="Trier par prix"><option value="default" selected="">Trier par prix</option><option value="low">Prix : du plus bas au plus élevé</option><option value="high">Prix : du plus élevé au plus bas</option></select></label></div><span class="grid-count">0<!-- --> produit</span></div><div class="grid-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><input type="search" placeholder="Rechercher un produit… (ex: MacBook, même avec une faute)" aria-label="Rechercher un produit" value=""/></div><div class="grid"><p class="grid-empty">Aucun produit trouvé pour « <!-- --> ».<!-- --> Vérifiez la catégorie « Écrans ».</p></div><!--astro:end--></astro-island></div></section><div class="stats"><div class="stat"><div class="stat-num">1200+</div><div class="stat-label">Configs livrées</div></div><div class="stat"><div class="stat-num">4.9/5</div><div class="stat-label">Note clients</div></div><div class="stat"><div class="stat-num">24/48h</div><div class="stat-label">Livraison</div></div><div class="stat"><div class="stat-num">7/7</div><div class="stat-label">Support</div></div></div><footer id="tracking"><div class="wrap"><div class="footer-grid"><div class="footer-col footer-brand"><a href="/" class="brand brand-logo"><span class="brand-word"><span class="brand-part">PUL</span><span class="brand-triangle"><svg viewBox="0 0 100 100" aria-hidden="true"><polygon class="tri-sheen" points="50,80 14,18 86,18"></polygon><polygon class="tri-shape" points="50,88 8,12 92,12"></polygon></svg></span><span class="brand-part">SAR</span></span><span class="brand-sub">Designed by DjDr</span></a><p>Écouteurs, chargeurs, téléphones et ordinateurs pensés comme un seul écosystème à charge rapide.</p></div><div class="footer-col"><h4>Boutique</h4><ul><li><a href="/#shop">Catégories</a></li><li><a href="/#lineup">La gamme</a></li><li><a href="/#featured">En vedette</a></li><li><a href="#">Promos</a></li></ul></div><div class="footer-col"><h4>Support</h4><ul><li><a href="/track">Suivi de commande</a></li><li><a href="/profile">Mon compte</a></li><li><a href="#">Garantie 12 mois</a></li><li><a href="#">Retours</a></li><li><a href="#">Contact</a></li></ul></div><div class="footer-col"><h4>Entreprise</h4><ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/mentions-legales">CGV</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 Driss Djellali. All Rights Reserved.</span><span>Conçu pour la puissance du quotidien</span></div></div></footer><astro-island uid="GXEFd" prefix="r6" component-url="/_assets/CartDrawer.CAF3U0hf.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;CartDrawer&quot;,&quot;value&quot;:true}"></astro-island><astro-island uid="1dQ2ge" prefix="r7" component-url="/_assets/ProductModal.17W_HAhD.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;ProductModal&quot;,&quot;value&quot;:true}"></astro-island><astro-island uid="25oAhy" prefix="r8" component-url="/_assets/EditCanvas.BwdVjQAR.js" component-export="default" renderer-url="/_assets/client.kEwcHzz8.js" props="{}" ssr client="load" opts="{&quot;name&quot;:&quot;EditCanvas&quot;,&quot;value&quot;:true}"></astro-island></body></html>

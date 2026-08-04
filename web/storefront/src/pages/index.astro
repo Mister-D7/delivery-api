@@ -6,6 +6,7 @@ import ProductModal from '../components/ProductModal';
 import EditCanvas from '../components/EditCanvas';
 import Brand from '../components/Brand';
 import HeroText from '../components/HeroText';
+import TermsGate from '../components/TermsGate.astro';
 ---
 
 <!DOCTYPE html>
@@ -124,6 +125,16 @@ import HeroText from '../components/HeroText';
     font-size:19px;
     font-weight:700;
     letter-spacing:.04em;
+  }
+  .brand-text{
+    display:flex; flex-direction:column; line-height:1.05;
+  }
+  .brand-sub{
+    font-size:8.5px; font-weight:600;
+    letter-spacing:.18em; text-transform:uppercase;
+    font-family:var(--font-mono);
+    color:var(--muted-2);
+    margin-top:2px;
   }
   .brand-mark{
     width:26px; height:26px;
@@ -614,6 +625,8 @@ import HeroText from '../components/HeroText';
 </head>
 <body>
 
+<TermsGate />
+
 <header>
   <div class="wrap header-row">
     <a href="#" class="brand">
@@ -807,13 +820,13 @@ import HeroText from '../components/HeroText';
         <ul>
           <li><a href="#">À propos</a></li>
           <li><a href="#">Atelier &amp; tests</a></li>
-          <li><a href="#">Mentions légales</a></li>
-          <li><a href="#">CGV</a></li>
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+          <li><a href="/mentions-legales">CGV</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 NEXUS. Tous droits réservés.</span>
+      <span>© 2026 Driss Djellali. All Rights Reserved.</span>
       <span>Assemblé &amp; testé en Algérie</span>
     </div>
   </div>

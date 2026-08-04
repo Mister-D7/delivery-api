@@ -1,6 +1,6 @@
-export type RawCatalog = { id: string; name?: string; barcode?: string; productId?: string; isActive?: boolean; salePrice?: number | null; promoPrice?: number | null; costPrice?: number | null; stockQty?: number; imageUrl?: string | null; displayOrder?: number; customName?: string | null; customPrice?: number | null; customDescription?: string | null; specs?: string | null; description?: string | null; product?: { id: string; name: string; salePrice: number; barcode?: string | null; imageUrl?: string | null; stockQty: number; description?: string | null } | null; category?: { id: string; name: string; imageUrl?: string | null } | null; storeType?: string | null };
+export type RawCatalog = { id: string; name?: string; barcode?: string; productId?: string; isActive?: boolean; salePrice?: number | null; promoPrice?: number | null; costPrice?: number | null; stockQty?: number; imageUrl?: string | null; modelUrl?: string | null; displayOrder?: number; customName?: string | null; customPrice?: number | null; customDescription?: string | null; specs?: string | null; description?: string | null; product?: { id: string; name: string; salePrice: number; barcode?: string | null; imageUrl?: string | null; stockQty: number; description?: string | null } | null; category?: { id: string; name: string; imageUrl?: string | null } | null; storeType?: string | null };
 
-export type CatalogProduct = { id: string; name: string; salePrice: number; imageUrl?: string | null; stockQty: number; category?: { id: string; name: string } | null; barcode?: string | null; displayOrder?: number; isActive?: boolean; promoPrice?: number | null; costPrice?: number | null; customName?: string | null; customPrice?: number | null; customDescription?: string | null; productId?: string | null; specs?: string | null; description?: string | null; storeType?: string | null };
+export type CatalogProduct = { id: string; name: string; salePrice: number; imageUrl?: string | null; modelUrl?: string | null; stockQty: number; category?: { id: string; name: string } | null; barcode?: string | null; displayOrder?: number; isActive?: boolean; promoPrice?: number | null; costPrice?: number | null; customName?: string | null; customPrice?: number | null; customDescription?: string | null; productId?: string | null; specs?: string | null; description?: string | null; storeType?: string | null };
 
 export type Category = { id: string; name: string; imageUrl?: string | null; position?: number; storeType?: string };
 
@@ -11,6 +11,7 @@ export type ThemeSettings = {
   bannerText: string; heroImage: string; storeName: string; tagline: string;
   backgroundImage: string; backgroundType: 'color' | 'image' | 'video';
   glassEnabled: boolean;
+  model3d?: string;
 };
 
 export type SelectedElement = { type: 'product' | 'category' | 'theme' | 'section'; id: string; data: any };

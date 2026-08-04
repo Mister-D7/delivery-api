@@ -15,6 +15,21 @@
     "location": "Location on Map",
     "use_my_location": "Use My Location"
   },
+  "coupon": {
+    "placeholder": "Promo code (ex: FIDEL-XXXXXX)",
+    "apply": "Apply",
+    "applied": "Code applied",
+    "discount": "Discount",
+    "remove": "Remove",
+    "errors": {
+      "NOT_FOUND": "Invalid code",
+      "INACTIVE": "Code disabled",
+      "EXPIRED": "Code expired",
+      "MAX_USES": "Code already used",
+      "MIN_ORDER": "Minimum order of {{minOrder}} DA required",
+      "CUSTOMER_ONLY": "This code is reserved for a specific customer"
+    }
+  },
   "success": {
     "title": "Order Placed!",
     "track": "Track My Order",

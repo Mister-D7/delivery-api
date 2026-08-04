@@ -5,8 +5,13 @@ import '../styles/islands.css';
 export default function HeaderActions() {
   const { count, openCart } = useCartStore();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const cartRef = useRef<HTMLButtonElement>(null);
   const globeRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const btn = cartRef.current;
@@ -77,7 +82,7 @@ export default function HeaderActions() {
           <circle cx="19" cy="21" r="1.4" />
           <path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H6" />
         </svg>
-        {count > 0 ? (
+        {mounted && count > 0 ? (
           <span key={count} className="hdr-badge">
             {count}
           </span>
@@ -91,10 +96,14 @@ export default function HeaderActions() {
           aria-label="Mon compte"
           aria-expanded={menuOpen}
         >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="9.2" />
-            <path d="M2.9 12h18.2" />
-            <path d="M12 2.8c2.6 2.5 3.9 5.6 3.9 9.2S14.6 18.7 12 21.2c-2.6-2.5-3.9-5.6-3.9-9.2S9.4 5.3 12 2.8z" />
+          <span className="hdr-glow" />
+          <span className="hdr-spark h-s1" />
+          <span className="hdr-spark h-s2" />
+          <span className="hdr-spark h-s3" />
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="9.4" opacity="0.4" />
+            <circle cx="12" cy="7.8" r="3.9" />
+            <path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0" />
           </svg>
         </button>
         {menuOpen ? (

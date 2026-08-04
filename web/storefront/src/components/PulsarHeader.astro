@@ -4,7 +4,19 @@ import HeaderActions from './HeaderActions';
 
 <header>
   <div class="wrap header-row">
-    <a href="/" class="brand"><span class="brand-mark"></span>PULSAR</a>
+    <a href="/" class="brand brand-logo">
+      <span class="brand-word">
+        <span class="brand-part">PUL</span>
+        <span class="brand-triangle">
+          <svg viewBox="0 0 100 100" aria-hidden="true">
+            <polygon class="tri-sheen" points="50,80 14,18 86,18" />
+            <polygon class="tri-shape" points="50,88 8,12 92,12" />
+          </svg>
+        </span>
+        <span class="brand-part">SAR</span>
+      </span>
+      <span class="brand-sub">Designed by DjDr</span>
+    </a>
     <div class="header-right">
       <button id="themeToggle" class="theme-toggle" type="button" aria-label="Changer de thème (sombre / clair)" title="Changer de thème">
         <span class="t-sun" aria-hidden="true">
@@ -19,10 +31,40 @@ import HeaderActions from './HeaderActions';
           </svg>
         </span>
       </button>
-      <HeaderActions />
+      <HeaderActions client:load />
     </div>
   </div>
 </header>
+
+<script is:inline>
+  (function () {
+    var header = document.querySelector('header');
+    if (!header) return;
+    var lastY = window.scrollY;
+    var ticking = false;
+    var hideAfter = 140;
+    var nearTop = 8;
+    function update() {
+      var y = window.scrollY;
+      if (y > lastY && y > hideAfter) {
+        header.classList.add('hdr-hidden');
+      } else if (y <= nearTop) {
+        header.classList.remove('hdr-hidden');
+      }
+      lastY = y;
+      ticking = false;
+    }
+    if (window.scrollY > hideAfter) {
+      header.classList.add('hdr-hidden');
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }, { passive: true });
+  })();
+</script>
 
 <script is:inline>
   (function () {

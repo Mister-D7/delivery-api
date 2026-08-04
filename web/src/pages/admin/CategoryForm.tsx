@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { X, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 
@@ -12,12 +12,37 @@ export default function CategoryForm({ initial, storeType, onClose, onSaved }: {
   const [name, setName] = useState(initial?.name || '');
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl || initial?.image_url || '');
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('image', f);
+      const r = await api.post('/upload/image', fd);
+      const url = r.data?.url;
+      if (url) {
+        setImageUrl(url);
+        toast.success('Image téléversée');
+      } else {
+        toast.error('Téléversement échoué');
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur lors du téléversement');
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) return toast.error('Nom de la catégorie requis');
     setSaving(true);
     try {
-      const payload = { name: name.trim(), imageUrl: imageUrl.trim() || null, storeType: storeType || initial?.storeType || 'general' };
+      const payload = { name: name.trim(), imageUrl: imageUrl.trim() || null, storeType: storeType || initial?.storeType || 'tech' };
       if (initial?.id) {
         await api.put(`/categories/${initial.id}`, payload);
       } else {
@@ -49,12 +74,25 @@ export default function CategoryForm({ initial, storeType, onClose, onSaved }: {
           </div>
 
           <div>
-            <label className="text-[10px] font-semibold block mb-1" style={{ color: 'var(--admin-muted)' }}>Image (URL)</label>
-            <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..."
-              className="w-full px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }} />
+            <label className="text-[10px] font-semibold block mb-1" style={{ color: 'var(--admin-muted)' }}>Image de la catégorie</label>
+            <div className="flex items-center gap-3">
+              <button onClick={() => fileRef.current?.click()} disabled={uploading}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold flex-shrink-0"
+                style={{ background: 'var(--admin-gold-bg)', color: 'var(--admin-gold)' }}>
+                <Upload size={14} /> {uploading ? 'Envoi...' : 'Téléverser'}
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" hidden onChange={handleFile} />
+              <span className="text-[10px]" style={{ color: 'var(--admin-muted2)' }}>ou</span>
+              <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="URL de l'image"
+                className="flex-1 min-w-0 px-3 py-2 rounded-lg text-xs" style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }} />
+            </div>
             {imageUrl && (
-              <img src={imageUrl} alt="preview" className="mt-2 w-20 h-20 rounded-xl object-cover" style={{ border: '1px solid var(--admin-border2)' }}
-                onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+              <div className="mt-2 relative w-20 h-20 rounded-xl overflow-hidden" style={{ border: '1px solid var(--admin-border2)' }}>
+                <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
+                <button onClick={() => setImageUrl('')} className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}>
+                  <X size={10} />
+                </button>
+              </div>
             )}
           </div>
         </div>

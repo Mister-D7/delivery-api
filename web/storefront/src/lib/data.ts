@@ -3,7 +3,9 @@ export interface Product {
   name: string;
   price: number;
   oldPrice?: number;
+  costPrice?: number;
   imageUrl: string;
+  modelUrl?: string;
   category?: string;
   specs?: string[] | string;
   stockQty?: number;
@@ -100,6 +102,17 @@ export interface CategoryInfo {
 
 export const FALLBACK_CATEGORIES: CategoryInfo[] = [{ name: 'PLAY' }, { name: 'LUMEN' }];
 
+export interface StorefrontTexts {
+  storeName?: string;
+  copyright?: string;
+  tagline?: string;
+  contactPhone?: string;
+  contactEmail?: string;
+  socialFacebook?: string;
+  socialInstagram?: string;
+  [key: string]: unknown;
+}
+
 export interface StorefrontSettings {
   storeName?: string;
   bannerText?: string;
@@ -113,11 +126,12 @@ export interface StorefrontSettings {
   pinned?: string[];
   theme?: string;
   model3d?: string;
+  texts?: StorefrontTexts;
 }
 
 export function mapRawProduct(raw: any, storeType: string): Product | null {
   const rawType = raw?.storeType;
-  if (rawType && rawType !== 'general' && rawType !== storeType) return null;
+  if (rawType && rawType !== storeType) return null;
   const name = raw?.name || raw?.product?.name;
   if (!name) return null;
   return {
@@ -125,7 +139,9 @@ export function mapRawProduct(raw: any, storeType: string): Product | null {
     name,
     price: raw?.promoPrice ?? raw?.salePrice ?? raw?.product?.salePrice ?? 0,
     oldPrice: raw?.promoPrice ? (raw?.salePrice ?? raw?.product?.salePrice) : undefined,
+    costPrice: raw?.costPrice ?? raw?.product?.costPrice ?? 0,
     imageUrl: raw?.imageUrl || raw?.product?.imageUrl || '',
+    modelUrl: raw?.modelUrl || null,
     category: raw?.category?.name,
     specs: raw?.specs,
     stockQty: raw?.stockQty ?? raw?.product?.stockQty ?? 0,

@@ -53,6 +53,7 @@ const router = Router();
 
 // ── Store-type ↔ category mapping (stored in delivery_settings to avoid schema migrations) ──
 const STORE_TYPE_SETTINGS_KEY = 'category_store_types';
+const DEFAULT_STORE = 'tech';
 
 async function getCategoryStoreTypes() {
   const { data, error } = await supabase
@@ -67,7 +68,7 @@ async function getCategoryStoreTypes() {
 
 async function setCategoryStoreType(categoryId, storeType) {
   const map = await getCategoryStoreTypes();
-  if (storeType && storeType !== 'general') map[categoryId] = storeType;
+  if (storeType) map[categoryId] = storeType;
   else delete map[categoryId];
   const { error } = await supabase
     .from('delivery_settings')
@@ -84,7 +85,72 @@ async function deleteCategoryStoreType(categoryId) {
 }
 
 function categoryStoreType(c, map) {
-  return map[c.id] || 'general';
+  return map[c.id] || DEFAULT_STORE;
+}
+
+function normalizeName(s) {
+  return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+}
+
+function isVedetteName(name) {
+  return normalizeName(name) === 'vedette';
+}
+
+function isImageUrl(u) {
+  return /\.(jpe?g|png|webp|gif|svg)(\?|#|$)/i.test(String(u || ''));
+}
+
+async function getCategoryName(categoryId) {
+  if (!categoryId) return null;
+  const { data } = await supabase
+    .from('delivery_categories')
+    .select('name')
+    .eq('id', categoryId)
+    .single();
+  return data?.name || null;
+}
+
+async function countVedetteProducts(categoryId, excludeId) {
+  let q = supabase.from('delivery_products').select('id').eq('category_id', categoryId);
+  if (excludeId) q = q.neq('id', excludeId);
+  const { data } = await q;
+  return (data || []).length;
+}
+
+function vedetteFirst(a, b) {
+  return (isVedetteName(b.name) ? 1 : 0) - (isVedetteName(a.name) ? 1 : 0);
+}
+
+async function ensureVedetteCategory() {
+  const { data } = await supabase.from('delivery_categories').select('*').limit(300);
+  const found = (data || []).find(c => isVedetteName(c.name));
+  if (found) return found;
+  const { data: created, error } = await supabase
+    .from('delivery_categories')
+    .insert({ name: 'Vedette', image_url: null, sort_order: -1, is_active: true })
+    .select()
+    .single();
+  if (!error && created?.id) {
+    await setCategoryStoreType(created.id, 'tech');
+  }
+  return created || null;
+}
+
+async function clearStorefrontModel3d() {
+  const { data } = await supabase
+    .from('delivery_settings')
+    .select('value')
+    .eq('key', 'storefront')
+    .maybeSingle();
+  if (!data?.value) return;
+  let v = (typeof data.value === 'object' && data.value) ? data.value : null;
+  if (!v) {
+    try { v = JSON.parse(data.value || '{}'); } catch { v = {}; }
+  }
+  if (v && typeof v === 'object' && 'model3d' in v) {
+    delete v.model3d;
+    await supabase.from('delivery_settings').upsert({ key: 'storefront', value: v }, { onConflict: 'key' });
+  }
 }
 
 
@@ -92,6 +158,7 @@ function categoryStoreType(c, map) {
 router.get('/catalog', async (req, res) => {
   try {
     const now = new Date().toISOString();
+    const storeType = req.query.storeType;
     const catMap = await getCategoryStoreTypes();
 
     const { data: products } = await supabase
@@ -113,6 +180,8 @@ router.get('/catalog', async (req, res) => {
         }
       }
 
+      const isVedette = p.delivery_categories ? isVedetteName(p.delivery_categories.name) : false;
+
       return {
         id: p.id,
         barcode: p.catalog_id || p.id,
@@ -125,7 +194,8 @@ router.get('/catalog', async (req, res) => {
         flashSalePrice: isFlashSale ? p.flash_sale_price : null,
         flashSaleEnds: isFlashSale ? p.flash_sale_end_date : null,
         effectivePrice,
-        imageUrl: p.image_url,
+        imageUrl: isVedette ? null : p.image_url,
+        modelUrl: isVedette ? p.image_url : null,
         stockQty: p.stock_qty,
         isCustom: p.is_custom,
         isFlashSale,
@@ -135,11 +205,59 @@ router.get('/catalog', async (req, res) => {
           imageUrl: p.delivery_categories.image_url,
           sortOrder: p.delivery_categories.sort_order,
         } : null,
-        storeType: p.delivery_categories ? (catMap[p.delivery_categories.id] || 'general') : 'general',
+        storeType: p.delivery_categories ? (catMap[p.delivery_categories.id] || DEFAULT_STORE) : DEFAULT_STORE,
       };
     });
 
-    res.json(catalog);
+    res.json(storeType ? catalog.filter(p => p.storeType === storeType) : catalog);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /catalog/admin — admin, active products optionally filtered by store type
+router.get('/catalog/admin', adminAuth, async (req, res) => {
+  try {
+    const storeType = req.query.storeType;
+    const catMap = await getCategoryStoreTypes();
+
+    const { data: products } = await supabase
+      .from('delivery_products')
+      .select('*, delivery_categories(id, name, image_url, sort_order)')
+      .order('product_order', { ascending: true });
+
+    const catalog = (products || []).map(p => {
+      const isVedette = p.delivery_categories ? isVedetteName(p.delivery_categories.name) : false;
+      return {
+        id: p.id,
+        barcode: p.catalog_id || p.id,
+        name: p.name,
+        description: p.description,
+        specs: p.specs,
+        salePrice: p.sale_price,
+        costPrice: p.cost_price,
+        promoPrice: p.promo_price,
+        imageUrl: isVedette ? null : p.image_url,
+        modelUrl: isVedette ? p.image_url : null,
+        stockQty: p.stock_qty,
+        isActive: p.is_active,
+        isCustom: p.is_custom,
+        category: p.delivery_categories ? {
+          id: p.delivery_categories.id,
+          name: p.delivery_categories.name,
+          imageUrl: p.delivery_categories.image_url,
+          sortOrder: p.delivery_categories.sort_order,
+        } : null,
+        storeType: p.delivery_categories ? (catMap[p.delivery_categories.id] || DEFAULT_STORE) : DEFAULT_STORE,
+      };
+    });
+
+    let list = catalog;
+    if (storeType) {
+      list = list.filter(p => p.storeType === storeType);
+    }
+
+    res.json(list);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -149,6 +267,7 @@ router.get('/catalog', async (req, res) => {
 router.get('/categories/public', async (req, res) => {
   try {
     const storeType = req.query.storeType;
+    await ensureVedetteCategory();
     const { data } = await supabase
       .from('delivery_categories')
       .select('*')
@@ -160,6 +279,7 @@ router.get('/categories/public', async (req, res) => {
       const map = await getCategoryStoreTypes();
       list = list.filter(c => categoryStoreType(c, map) === storeType);
     }
+    list.sort(vedetteFirst);
 
     res.json(list);
   } catch (err) {
@@ -171,6 +291,7 @@ router.get('/categories/public', async (req, res) => {
 router.get('/categories', adminAuth, async (req, res) => {
   try {
     const storeType = req.query.storeType;
+    await ensureVedetteCategory();
     const { data } = await supabase
       .from('delivery_categories')
       .select('*')
@@ -179,6 +300,7 @@ router.get('/categories', adminAuth, async (req, res) => {
     const map = await getCategoryStoreTypes();
     let list = (data || []).map(c => ({ ...c, storeType: categoryStoreType(c, map) }));
     if (storeType) list = list.filter(c => c.storeType === storeType);
+    list.sort(vedetteFirst);
 
     res.json(list);
   } catch (err) {
@@ -203,7 +325,7 @@ router.post('/categories', adminAuth, async (req, res) => {
       const mapError = await setCategoryStoreType(data.id, storeType);
       if (mapError) throw mapError;
     }
-    res.status(201).json({ ...data, storeType: storeType || 'general' });
+    res.status(201).json({ ...data, storeType: storeType || DEFAULT_STORE });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -213,6 +335,17 @@ router.post('/categories', adminAuth, async (req, res) => {
 router.put('/categories/:id', adminAuth, async (req, res) => {
   try {
     const { name, imageUrl, sortOrder, isActive, storeType } = req.body;
+
+    const { data: existing } = await supabase
+      .from('delivery_categories')
+      .select('name')
+      .eq('id', req.params.id)
+      .maybeSingle();
+    const reqStore = req.body.storeType ?? req.query.storeType;
+    if (existing && isVedetteName(existing.name) && name !== undefined && !isVedetteName(name) && (reqStore === undefined || reqStore === 'tech')) {
+      return res.status(400).json({ error: "La catégorie Vedette est protégée et ne peut pas être renommée." });
+    }
+
     const updates = {};
     if (name !== undefined) updates.name = name;
     if (imageUrl !== undefined) updates.image_url = imageUrl;
@@ -241,6 +374,16 @@ router.put('/categories/:id', adminAuth, async (req, res) => {
 // DELETE /categories/:id — admin
 router.delete('/categories/:id', adminAuth, async (req, res) => {
   try {
+    const { data: existing } = await supabase
+      .from('delivery_categories')
+      .select('name')
+      .eq('id', req.params.id)
+      .maybeSingle();
+    const reqStore = req.body.storeType ?? req.query.storeType;
+    if (existing && isVedetteName(existing.name) && (reqStore === undefined || reqStore === 'tech')) {
+      return res.status(400).json({ error: "La catégorie Vedette est protégée et ne peut pas être supprimée." });
+    }
+
     const { error } = await supabase.from('delivery_categories').delete().eq('id', req.params.id);
     if (error) throw error;
     await deleteCategoryStoreType(req.params.id);
@@ -314,7 +457,23 @@ router.post('/products', adminAuth, imageUpload.single('image'), async (req, res
     const description = body.description || body.customDescription || null;
     let imageUrl = body.imageUrl || null;
 
-    if (req.file) {
+    const catName = categoryId ? await getCategoryName(categoryId) : null;
+    const isVedette = catName ? isVedetteName(catName) : false;
+
+    if (isVedette) {
+      if (req.file) {
+        return res.status(400).json({ error: "La catégorie Vedette n'accepte que des modèles 3D (.glb/.gltf/.fbx/.obj), pas d'images." });
+      }
+      const existingCount = await countVedetteProducts(categoryId, body.catalogId || null);
+      if (existingCount >= 1) {
+        return res.status(400).json({ error: "La catégorie Vedette ne peut contenir qu'un seul produit. Supprimez d'abord le produit vedette actuel." });
+      }
+      const model = body.modelUrl || body.imageUrl || null;
+      if (model && isImageUrl(model)) {
+        return res.status(400).json({ error: "Vedette n'accepte que des modèles 3D (.glb/.gltf/.fbx/.obj), pas d'images." });
+      }
+      imageUrl = model;
+    } else if (req.file) {
       const upsertPath = `products/${req.file.filename}`;
       imageUrl = await uploadToStorage(req.file.path, upsertPath);
     }
@@ -324,11 +483,17 @@ router.post('/products', adminAuth, imageUpload.single('image'), async (req, res
       sale_price: Number(salePrice) || 0,
       cost_price: Number(costPrice) || 0,
       stock_qty: Number(stockQty) || 0,
-      image_url: imageUrl,
       category_id: categoryId,
       specs,
       description,
     };
+
+    if (body.catalogId) {
+      // update: keep existing image/model unless a new one is provided
+      if (req.file || imageUrl) productData.image_url = imageUrl;
+    } else {
+      productData.image_url = imageUrl;
+    }
 
     if (body.promoPrice !== undefined) productData.promo_price = body.promoPrice ? Number(body.promoPrice) : null;
     if (body.flashSalePrice !== undefined) productData.flash_sale_price = body.flashSalePrice ? Number(body.flashSalePrice) : null;
@@ -362,9 +527,46 @@ router.post('/products', adminAuth, imageUpload.single('image'), async (req, res
   }
 });
 
+// PATCH /products/:id/model — admin, replace a vedette product's 3D model URL
+router.patch('/products/:id/model', adminAuth, async (req, res) => {
+  try {
+    const modelUrl = String(req.body.modelUrl || '').trim();
+    if (!modelUrl) return res.status(400).json({ error: 'modelUrl required' });
+
+    const { data: prod } = await supabase
+      .from('delivery_products')
+      .select('category_id, delivery_categories(name)')
+      .eq('id', req.params.id)
+      .maybeSingle();
+    if (!prod) return res.status(404).json({ error: 'Produit introuvable' });
+    if (!prod.delivery_categories || !isVedetteName(prod.delivery_categories.name)) {
+      return res.status(400).json({ error: "Le modèle 3D ne peut être remplacé que sur un produit de la catégorie Vedette." });
+    }
+    if (isImageUrl(modelUrl)) {
+      return res.status(400).json({ error: "Vedette n'accepte que des modèles 3D (.glb/.gltf/.fbx/.obj), pas d'images." });
+    }
+
+    const { error } = await supabase.from('delivery_products').update({ image_url: modelUrl }).eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // DELETE /products/:id — admin
 router.delete('/products/:id', adminAuth, async (req, res) => {
   try {
+    const { data: prod } = await supabase
+      .from('delivery_products')
+      .select('category_id, delivery_categories(name)')
+      .eq('id', req.params.id)
+      .maybeSingle();
+
+    if (prod?.delivery_categories && isVedetteName(prod.delivery_categories.name)) {
+      await clearStorefrontModel3d();
+    }
+
     const { error } = await supabase.from('delivery_products').delete().eq('id', req.params.id);
     if (error) throw error;
     res.json({ ok: true });

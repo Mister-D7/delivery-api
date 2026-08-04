@@ -74,41 +74,41 @@ export default function CustomerProfile() {
   if (loading || !customer) return null;
 
   return (
-    <div className="min-h-screen px-4 py-8" style={{ background: '#0a0a0a' }}>
+    <div className="min-h-screen px-4 py-8" style={{ background: 'var(--pt-bg)' }}>
       <div className="max-w-lg mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <p className="text-xs tracking-[0.25em] font-semibold mb-2" style={{ color: '#bfa24e', fontFamily: "'IBM Plex Mono', monospace" }}>{t('title')}</p>
-          <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: "'Unbounded', sans-serif" }}>{customer.name}</h1>
+          <p className="text-xs tracking-[0.25em] font-semibold mb-2" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('title')}</p>
+          <h1 className="text-2xl font-extrabold mb-6" style={{ fontFamily: 'var(--pt-font)' }}>{customer.name}</h1>
 
           {/* Logout button — top */}
-          <button onClick={() => { logout(); navigate('/'); }} className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mb-4" style={{ background: 'rgba(217,96,59,0.1)', color: '#d9603b' }}>
+          <button onClick={() => { logout(); window.location.href = '/'; }} className="w-full py-3 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 mb-4" style={{ background: 'var(--pt-danger-soft)', color: 'var(--pt-danger)' }}>
             <LogOut size={15} /> {t('logout')}
           </button>
 
           {/* Profile */}
           <div className="surface-card p-5 mb-4">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold tracking-wide" style={{ color: '#8c8578' }}>{t('title')}</p>
+              <p className="text-xs font-bold tracking-wide" style={{ color: 'var(--pt-muted)' }}>{t('title')}</p>
               {!editing ? (
-                <button onClick={() => setEditing(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#bfa24e' }}>
+                <button onClick={() => setEditing(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--pt-accent)' }}>
                   <Edit3 size={12} /> Modifier
                 </button>
               ) : (
-                <button onClick={() => { setName(customer.name); setPhone(customer.phone || ''); setAddresses((customer?.addresses as Address[]) || []); setEditing(false); }} className="text-xs" style={{ color: '#8c8578' }}>
+                <button onClick={() => { setName(customer.name); setPhone(customer.phone || ''); setAddresses((customer?.addresses as Address[]) || []); setEditing(false); }} className="text-xs" style={{ color: 'var(--pt-muted)' }}>
                   Annuler
                 </button>
               )}
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>{t('name')}</label>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: 'var(--pt-muted2)' }}>{t('name')}</label>
                 <input value={name} onChange={e => setName(e.target.value)} disabled={!editing} className="input-field" />
               </div>
               <div>
-                <label className="text-[10px] font-semibold mb-1 block" style={{ color: '#555' }}>{t('phone')}</label>
+                <label className="text-[10px] font-semibold mb-1 block" style={{ color: 'var(--pt-muted2)' }}>{t('phone')}</label>
                 <input value={phone} onChange={e => setPhone(e.target.value)} disabled={!editing} placeholder="Ex: 0555 12 34 56" className="input-field" />
               </div>
-              <p className="text-xs" style={{ color: '#555' }}>{customer.email}</p>
+              <p className="text-xs" style={{ color: 'var(--pt-muted2)' }}>{customer.email}</p>
             </div>
             {editing && (
               <button onClick={handleSave} className="gold-btn w-full py-2.5 text-xs font-bold mt-4">{t('save')}</button>
@@ -118,33 +118,33 @@ export default function CustomerProfile() {
           {/* Addresses */}
           <div className="surface-card p-5 mb-4">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold tracking-wide flex items-center gap-1.5" style={{ color: '#8c8578' }}><MapPin size={13} /> {t('addresses')}</p>
+              <p className="text-xs font-bold tracking-wide flex items-center gap-1.5" style={{ color: 'var(--pt-muted)' }}><MapPin size={13} /> {t('addresses')}</p>
               {editing && (
-                <button onClick={() => setShowAddAddr(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: '#bfa24e' }}>
+                <button onClick={() => setShowAddAddr(true)} className="text-xs font-semibold flex items-center gap-1" style={{ color: 'var(--pt-accent)' }}>
                   <Plus size={12} /> {t('add_address')}
                 </button>
               )}
             </div>
             {addresses.length === 0 && !showAddAddr && (
-              <p className="text-xs text-center py-3" style={{ color: '#555' }}>{t('add_address')}</p>
+              <p className="text-xs text-center py-3" style={{ color: 'var(--pt-muted2)' }}>{t('add_address')}</p>
             )}
             <div className="space-y-2">
               {addresses.map(a => (
-                <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: '#1a1a1a' }}>
+                <div key={a.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--pt-surface3)' }}>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold">{a.label}</p>
-                    <p className="text-xs truncate" style={{ color: '#8c8578' }}>{a.address}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--pt-muted)' }}>{a.address}</p>
                   </div>
-                  {editing && <button onClick={() => removeAddress(a.id)}><Trash2 size={13} style={{ color: '#d9603b' }} /></button>}
+                  {editing && <button onClick={() => removeAddress(a.id)}><Trash2 size={13} style={{ color: 'var(--pt-danger)' }} /></button>}
                 </div>
               ))}
             </div>
             {showAddAddr && (
-              <div className="mt-3 p-3 rounded-xl space-y-2" style={{ background: '#1a1a1a' }}>
+              <div className="mt-3 p-3 rounded-xl space-y-2" style={{ background: 'var(--pt-surface3)' }}>
                 <input value={newAddrLabel} onChange={e => setNewAddrLabel(e.target.value)} placeholder="Ex: Maison, Travail" className="input-field" />
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[9px] font-semibold mb-1 block" style={{ color: '#555' }}>Wilaya</label>
+                    <label className="text-[9px] font-semibold mb-1 block" style={{ color: 'var(--pt-muted2)' }}>Wilaya</label>
                     <select value={newAddrWilaya ?? ''} onChange={e => { setNewAddrWilaya(Number(e.target.value) || null); setNewAddrCommune(''); }}
                       className="input-field text-[11px]">
                       <option value="">Wilaya</option>
@@ -152,7 +152,7 @@ export default function CustomerProfile() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-[9px] font-semibold mb-1 block" style={{ color: '#555' }}>Commune</label>
+                    <label className="text-[9px] font-semibold mb-1 block" style={{ color: 'var(--pt-muted2)' }}>Commune</label>
                     <select value={newAddrCommune} onChange={e => setNewAddrCommune(e.target.value)}
                       className="input-field text-[11px]" disabled={!newAddrWilaya}>
                       <option value="">Commune</option>
@@ -163,7 +163,7 @@ export default function CustomerProfile() {
                 <input value={newAddrText} onChange={e => setNewAddrText(e.target.value)} placeholder="Rue, cité..." className="input-field" />
                 <div className="flex gap-2">
                   <button onClick={addAddress} className="gold-btn flex-1 py-2 text-xs font-bold">{t('add_address')}</button>
-                  <button onClick={() => setShowAddAddr(false)} className="flex-1 py-2 text-xs font-semibold rounded-xl" style={{ background: '#1a1a1a', color: '#8c8578' }}>Annuler</button>
+                  <button onClick={() => setShowAddAddr(false)} className="flex-1 py-2 text-xs font-semibold rounded-xl" style={{ background: 'var(--pt-surface3)', color: 'var(--pt-muted)' }}>Annuler</button>
                 </div>
               </div>
             )}
@@ -174,22 +174,22 @@ export default function CustomerProfile() {
 
           {/* Orders */}
           <div className="surface-card p-5 mb-4">
-            <p className="text-xs font-bold tracking-wide mb-3 flex items-center gap-1.5" style={{ color: '#8c8578' }}><Package size={13} /> {t('orders')}</p>
+            <p className="text-xs font-bold tracking-wide mb-3 flex items-center gap-1.5" style={{ color: 'var(--pt-muted)' }}><Package size={13} /> {t('orders')}</p>
             {loadingOrders ? (
-              <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: '#1a1a1a' }} />)}</div>
+              <div className="space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-16 rounded-xl animate-pulse" style={{ background: 'var(--pt-surface3)' }} />)}</div>
             ) : orders.length === 0 ? (
-              <p className="text-xs text-center py-4" style={{ color: '#555' }}>{t('orders')}</p>
+              <p className="text-xs text-center py-4" style={{ color: 'var(--pt-muted2)' }}>{t('orders')}</p>
             ) : (
               <div className="space-y-2">
                 {orders.map(o => (
-                  <button key={o.id} onClick={() => navigate(`/track/${o.secureToken}`)} className="w-full flex items-center gap-3 p-3 rounded-xl text-left" style={{ background: '#1a1a1a' }}>
+                  <button key={o.id} onClick={() => navigate(`/track/${o.secureToken}`)} className="w-full flex items-center gap-3 p-3 rounded-xl text-left" style={{ background: 'var(--pt-surface3)' }}>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold">#{o.id.slice(0, 8)}</p>
-                      <p className="text-[11px]" style={{ color: '#8c8578' }}>{new Date(o.createdAt).toLocaleDateString('fr-FR')}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--pt-muted)' }}>{new Date(o.createdAt).toLocaleDateString('fr-FR')}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold" style={{ color: '#bfa24e' }}>{o.total} DA</p>
-                      <p className="text-[11px]" style={{ color: '#8c8578' }}>{o.status}</p>
+                      <p className="text-sm font-bold" style={{ color: 'var(--pt-accent)' }}>{o.total} DA</p>
+                      <p className="text-[11px]" style={{ color: 'var(--pt-muted)' }}>{o.status}</p>
                     </div>
                   </button>
                 ))}

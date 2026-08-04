@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import supabase from '../lib/supabase.js';
 import { adminAuth } from '../middleware/auth.js';
 import { deliveryEvents } from '../lib/events.js';
+import { runAutoArchive } from '../lib/archive.js';
+import { resolveCustomerFromRequest, validateCouponForCheckout, consumeCoupon } from './coupons.js';
 
 const router = Router();
 
@@ -37,10 +39,14 @@ function mapOrder(o) {
     ...o,
     createdAt: o.created_at,
     updatedAt: o.updated_at,
+    archivedAt: o.archived_at,
     secureToken: o.secure_token,
     customerId: o.customer_id,
     customerName: o.customer_name,
     deliveryFee: o.delivery_fee,
+    couponId: o.coupon_id,
+    couponCode: o.coupon_code,
+    discountAmount: o.discount_amount,
     voiceOrderUrl: o.voice_order_url,
     items: (o.delivery_order_items || o.items || []).map(mapItem),
   };
@@ -57,6 +63,7 @@ function mapItem(i) {
     ...i,
     orderId: i.order_id,
     unitPrice: i.unit_price,
+    costPrice: i.cost_price,
     customName: i.custom_name,
     customPrice: i.custom_price,
     catalogItemId: i.catalog_item_id,
@@ -68,19 +75,21 @@ function mapItem(i) {
 // POST /orders — create order (public) with stock deduction
 router.post('/', async (req, res) => {
   try {
-    const { items, total, customerName, phone, address, latitude, longitude, customerId, deliveryFee, voiceOrderUrl } = req.body;
+    const { items, total, customerName, phone, address, latitude, longitude, customerId, deliveryFee, voiceOrderUrl, couponCode } = req.body;
     if (!items?.length) return res.status(400).json({ error: 'No items' });
     if (!customerName || !phone || !address) return res.status(400).json({ error: 'Customer info required' });
 
     // Stock validation + deduction for catalog items
     const itemsWithCatalogId = items.filter(i => i.catalogItemId);
+    const costMap = new Map();
     if (itemsWithCatalogId.length > 0) {
       const { data: catalogItems } = await supabase
         .from('delivery_products')
-        .select('id, name, stock_qty')
+        .select('id, name, stock_qty, cost_price')
         .in('id', itemsWithCatalogId.map(i => i.catalogItemId));
 
       if (catalogItems) {
+        for (const c of catalogItems) costMap.set(c.id, c);
         const stockMap = new Map(catalogItems.map(c => [c.id, c]));
         for (const item of itemsWithCatalogId) {
           const product = stockMap.get(item.catalogItemId);
@@ -107,18 +116,49 @@ router.post('/', async (req, res) => {
 
     const secure_token = await generateTrackingToken(customerName, phone);
 
+    const authedCustomerId = await resolveCustomerFromRequest(req);
+    const orderCustomerId = authedCustomerId || customerId || null;
+
+    let couponApplied = null;
+    let finalTotal = Number(total) || 0;
+    if (couponCode) {
+      const result = await validateCouponForCheckout({
+        code: couponCode,
+        subtotal: finalTotal,
+        customerId: authedCustomerId,
+      });
+      if (!result.valid) {
+        const messages = {
+          NOT_FOUND: 'Code promo invalide',
+          INACTIVE: 'Ce code promo n\'est plus actif',
+          EXPIRED: 'Ce code promo a expiré',
+          MAX_USES: 'Ce code promo a déjà été utilisé',
+          MIN_ORDER: `Commande minimale de ${result.minOrder} DA requise pour ce code promo`,
+          CUSTOMER_ONLY: 'Ce code promo est réservé à un client spécifique',
+        };
+        return res.status(400).json({ error: messages[result.reason] || 'Code promo invalide', code: result.reason });
+      }
+      couponApplied = { couponId: result.coupon.id, couponCode: result.coupon.code, discount: result.discount };
+      finalTotal = Math.max(0, finalTotal - result.discount);
+    }
+
     const orderData = {
       secure_token,
-      customer_id: customerId || null,
+      customer_id: orderCustomerId,
       customer_name: customerName,
       phone,
       address,
       latitude: latitude || null,
       longitude: longitude || null,
-      total: total || 0,
+      total: finalTotal,
       delivery_fee: deliveryFee || 0, // estimated fee, finalized on confirmation
       status: 'PENDING',
     };
+    if (couponApplied) {
+      orderData.coupon_id = couponApplied.couponId;
+      orderData.coupon_code = couponApplied.couponCode;
+      orderData.discount_amount = couponApplied.discount;
+    }
 
     let order;
     // Try insert — may fail if voice_order_url column doesn't exist yet
@@ -140,6 +180,15 @@ router.post('/', async (req, res) => {
     if (insertErr) throw insertErr;
     order = data;
 
+    if (couponApplied) {
+      const consumed = await consumeCoupon(couponApplied.couponId);
+      if (!consumed) {
+        await supabase.from('delivery_order_items').delete().eq('order_id', order.id);
+        await supabase.from('delivery_orders').delete().eq('id', order.id);
+        return res.status(400).json({ error: 'Ce code promo a déjà été utilisé', code: 'MAX_USES' });
+      }
+    }
+
     const orderItems = items.map(item => ({
       order_id: order.id,
       product_id: item.productId || item.erpProductId || null,
@@ -147,12 +196,17 @@ router.post('/', async (req, res) => {
       name: item.customName || item.name || 'Item',
       quantity: item.quantity || 1,
       unit_price: Number(item.unitPrice) || 0,
+      cost_price: Number(item.costPrice) || Number(costMap.get(item.catalogItemId)?.cost_price) || 0,
       image_url: item.imageUrl || null,
       custom_name: item.customName || null,
       custom_price: item.customPrice || null,
     }));
 
-    const { error: itemsError } = await supabase.from('delivery_order_items').insert(orderItems);
+    let { error: itemsError } = await supabase.from('delivery_order_items').insert(orderItems);
+    if (itemsError?.message?.includes('cost_price')) {
+      const trimmed = orderItems.map(({ cost_price, ...rest }) => rest);
+      ({ error: itemsError } = await supabase.from('delivery_order_items').insert(trimmed));
+    }
     if (itemsError) throw itemsError;
 
     await supabase.from('delivery_order_status_history').insert({
@@ -172,32 +226,55 @@ router.post('/', async (req, res) => {
       createdAt: order.created_at,
     });
 
-    res.status(201).json({ id: order.id, secureToken: secure_token });
+    res.status(201).json({
+      id: order.id,
+      secureToken: secure_token,
+      total: order.total,
+      discount: couponApplied ? couponApplied.discount : 0,
+      couponCode: couponApplied ? couponApplied.couponCode : null,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
 // GET /orders — admin list with pagination
+// ?archived=true → only archived | ?archived=all → everything | absent → active (not archived)
 router.get('/', adminAuth, async (req, res) => {
   try {
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 50));
     const statusFilter = req.query.status || null;
+    const archivedParam = req.query.archived;
 
-    let query = supabase
-      .from('delivery_orders')
-      .select('*, delivery_order_items(*)', { count: 'exact' });
+    runAutoArchive();
 
-    if (statusFilter) {
-      query = query.eq('status', statusFilter);
+    const build = async (archiveFilter) => {
+      let query = supabase
+        .from('delivery_orders')
+        .select('*, delivery_order_items(*)', { count: 'exact' });
+      if (statusFilter) query = query.eq('status', statusFilter);
+      if (archiveFilter) query = archiveFilter(query);
+      query = query.order('created_at', { ascending: false }).range((page - 1) * limit, page * limit - 1);
+      return query;
+    };
+
+    const archiveFilter = (query) => {
+      if (archivedParam === 'true') return query.eq('archived', true);
+      if (archivedParam === 'all') return query;
+      return query.or('archived.is.null,archived.eq.false');
+    };
+
+    let { data: orders, count, error } = await build(archiveFilter);
+
+    // Fallback for databases where the archived column doesn't exist yet
+    if (error) {
+      const { data: fb, count: fbCount, error: fbError } = await build(null);
+      if (fbError) throw fbError;
+      orders = fb;
+      count = fbCount;
     }
 
-    const { data: orders, count, error } = await query
-      .order('created_at', { ascending: false })
-      .range((page - 1) * limit, page * limit - 1);
-
-    if (error) throw error;
     res.json({ orders: (orders || []).map(mapOrder), total: count || 0, page, limit });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -406,6 +483,42 @@ router.patch('/:id/status', adminAuth, async (req, res) => {
     deliveryEvents.emit('admin:orders', 'status_changed', payload);
     if (order.secure_token) deliveryEvents.emit(`token:${order.secure_token}`, 'status_changed', payload);
 
+    res.json(mapOrder(order));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /orders/:id/archive — admin, archive an order
+router.post('/:id/archive', adminAuth, async (req, res) => {
+  try {
+    const { data: order, error } = await supabase
+      .from('delivery_orders')
+      .update({ archived: true, archived_at: new Date().toISOString() })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+    res.json(mapOrder(order));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /orders/:id/unarchive — admin, restore an order to the active list
+router.post('/:id/unarchive', adminAuth, async (req, res) => {
+  try {
+    const { data: order, error } = await supabase
+      .from('delivery_orders')
+      .update({ archived: false, archived_at: null })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(mapOrder(order));
   } catch (err) {
     res.status(500).json({ error: err.message });

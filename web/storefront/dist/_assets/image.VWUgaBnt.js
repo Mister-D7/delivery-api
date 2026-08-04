@@ -1,0 +1,1 @@
+function e(e){return e?/^https?:\/\//i.test(e)?`/api/img?url=${encodeURIComponent(e)}`:e:``}function t(e){return/\.(jpe?g|png|webp|gif|avif)(\?|#|$)/i.test(e||``)}export{t as n,e as t};

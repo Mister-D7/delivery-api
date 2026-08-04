@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Check, Trash2, Upload, Layers, ToggleLeft, ToggleRight } from 'lucide-react';
 import type { ThemeSettings, Category, SelectedElement } from './editorTypes';
 import { FONTS } from './editorTypes';
+import AdminSelect from './AdminSelect';
 
 type Props = {
   rightOpen: boolean;
@@ -72,10 +73,9 @@ export default function EditorSidebarRight(props: Props) {
                     </div>
                     <div>
                       <label className="text-[9px] font-bold block mb-1" style={{ color: 'var(--admin-muted2)' }}>CATÉGORIE</label>
-                      <select value={editForm.categoryId} onChange={e => setEditForm((f: any) => ({ ...f, categoryId: e.target.value }))} className="input-field text-xs w-full">
-                        <option value="">Sans catégorie</option>
-                        {orderedCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <AdminSelect value={editForm.categoryId} onChange={v => setEditForm((f: any) => ({ ...f, categoryId: v }))} className="w-full text-xs"
+                        placeholder="Sans catégorie"
+                        options={[{ value: '', label: 'Sans catégorie' }, ...orderedCategories.map(c => ({ value: c.id, label: c.name }))]} />
                     </div>
                     <div>
                       <label className="text-[9px] font-bold block mb-1" style={{ color: 'var(--admin-muted2)' }}>IMAGE</label>

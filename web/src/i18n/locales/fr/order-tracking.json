@@ -15,5 +15,9 @@
   "timeline": "Chronologie",
   "messages": "Messages",
   "chat_placeholder": "Écrire un message...",
-  "send": "Envoyer"
+  "send": "Envoyer",
+  "tracking_code": "Code de suivi",
+  "tracking_code_hint": "Ce code permet à la boutique de retrouver votre commande.",
+  "copy": "Copier",
+  "copied": "Copié"
 }

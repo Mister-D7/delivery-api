@@ -48,6 +48,7 @@ router.get('/', adminAuth, async (req, res) => {
         if (!productSales[key]) productSales[key] = { name: item.custom_name || item.name, quantity: 0, revenue: 0, cost: 0 };
         productSales[key].quantity += item.quantity || 0;
         productSales[key].revenue += (Number(item.unit_price) || 0) * (item.quantity || 0);
+        productSales[key].cost += (Number(item.cost_price) || 0) * (item.quantity || 0);
       }
     }
 
@@ -57,11 +58,13 @@ router.get('/', adminAuth, async (req, res) => {
 
     let totalCostOfGoods = 0;
     for (const key in productSales) {
-      const meta = costMap.get(key);
-      if (meta) {
-        productSales[key].cost = meta.cost * productSales[key].quantity;
-        totalCostOfGoods += productSales[key].cost;
+      const sold = productSales[key];
+      // Prefer the cost snapshotted at order time; fall back to current catalog cost (legacy orders)
+      if (sold.cost === 0) {
+        const meta = costMap.get(key);
+        if (meta) sold.cost = meta.cost * sold.quantity;
       }
+      totalCostOfGoods += sold.cost;
     }
 
     // RTO / refused

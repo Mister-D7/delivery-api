@@ -1,11 +1,11 @@
 import type { ComponentType } from 'react';
-import nexusGaming from './nexus-gaming';
 import pulsar from './pulsar';
+import greens from './greens';
 import DefaultPage from './ui/DefaultPage';
 
 export const CUSTOM_THEMES_KEY = 'delivery_custom_themes';
 
-export type StoreType = 'tech' | 'gaming' | 'clothes' | 'grocery' | 'food' | 'general';
+export type StoreType = 'tech' | 'gaming' | 'clothes' | 'grocery' | 'food';
 
 export interface ThemeSettings {
   accent: string;
@@ -73,7 +73,6 @@ export const STORE_TYPES: { type: StoreType; label: string; emoji: string }[] = 
   { type: 'clothes', label: 'Vêtements & Mode', emoji: '👔' },
   { type: 'grocery', label: 'Épicerie & Bio', emoji: '🛒' },
   { type: 'food', label: 'Food & Agro', emoji: '🍽️' },
-  { type: 'general', label: 'Autre / Général', emoji: '📦' },
 ];
 
 export function getStoreType(): StoreType {
@@ -81,6 +80,14 @@ export function getStoreType(): StoreType {
     const t = localStorage.getItem('delivery_store_type');
     if (t && STORE_TYPES.some(s => s.type === t)) return t as StoreType;
   } catch {}
+  return 'tech';
+}
+
+export function storeTypeForTheme(theme?: string): StoreType {
+  if (theme) {
+    const t = registry.find(p => p.id === theme);
+    if (t) return t.storeType;
+  }
   return 'tech';
 }
 
@@ -115,11 +122,10 @@ export function storeTypeLabel(type: string): string {
 }
 
 export function filterProductsForStore<T extends { storeType?: string | null }>(products: T[], storeType: StoreType): T[] {
-  if (storeType === 'general') return products;
-  return products.filter(p => !p.storeType || p.storeType === 'general' || p.storeType === storeType);
+  return products.filter(p => !p.storeType || p.storeType === storeType);
 }
 
-const registry: ThemePage[] = [nexusGaming, pulsar];
+const registry: ThemePage[] = [pulsar, greens];
 
 const CUSTOM_BASE_DEFAULTS: ThemeSettings = {
   accent: '#2563eb',
@@ -161,7 +167,7 @@ function customToThemePage(c: CustomTheme): ThemePage {
 export function getThemePages(storeType?: StoreType): ThemePage[] {
   const customs = getCustomThemes().map(customToThemePage);
   const all = [...registry, ...customs];
-  if (!storeType || storeType === 'general') return all;
+  if (!storeType) return all;
   return all.filter(t => t.storeType === storeType);
 }
 

@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Clock, TrendingUp, ChevronDown, ChevronUp, MessageCircle, Send, Search, Printer, CheckCircle, XCircle, Truck, AlertTriangle, Copy, Eye } from 'lucide-react';
+import { Package, Clock, TrendingUp, ChevronDown, ChevronUp, MessageCircle, Send, Search, Printer, CheckCircle, XCircle, Truck, AlertTriangle, Copy, Eye, Archive } from 'lucide-react';
 import api, { apiBaseURL } from '../../services/api';
+import toast from 'react-hot-toast';
 import { useOrderSSE } from '../../hooks/useOrderSSE';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import PrintReceipt, { DownloadPdfButton } from '../../components/PrintReceipt';
@@ -85,6 +86,16 @@ export default function AdminDashboard() {
     await api.patch(`/orders/${id}/status`, { status });
   };
 
+  const archiveOrder = async (id: string) => {
+    try {
+      await api.post(`/orders/${id}/archive`);
+      toast.success('Commande archivée');
+      setOrders(prev => prev.filter(o => o.id !== id));
+    } catch {
+      toast.error('Erreur lors de l\'archivage');
+    }
+  };
+
   const confirmWithFee = async (id: string, fee: number) => {
     await api.patch(`/orders/${id}/status`, { status: 'CONFIRMED', deliveryFee: fee });
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'CONFIRMED', deliveryFee: fee } : o));
@@ -112,6 +123,7 @@ export default function AdminDashboard() {
         onClick: () => updateStatus(o.id, s), color: o.status === s ? 'var(--admin-gold)' : 'var(--admin-muted2)',
       })),
       { divider: true, label: '', onClick: () => {} },
+      { label: 'Archiver', icon: <Archive size={12} />, onClick: () => archiveOrder(o.id), color: '#888' },
       { label: 'Copier l\'ID', icon: <Copy size={12} />, onClick: () => { navigator.clipboard?.writeText(o.id); }, color: '#ccc' },
     ];
   };
@@ -289,12 +301,34 @@ export default function AdminDashboard() {
                                 <div className="flex-1 min-w-0">
                                   <p className="text-xs font-medium truncate">{name}</p>
                                   <p className="text-[10px]" style={{ color: 'var(--admin-muted2)' }}>× {item.quantity} — {Number(item.unitPrice || 0) * item.quantity} DA</p>
+                                  {item.costPrice != null && Number(item.costPrice) > 0 && (
+                                    <p className="text-[10px]" style={{ color: 'var(--admin-muted2)' }}>
+                                      Achat {(Number(item.costPrice) * item.quantity).toLocaleString('fr-FR')} DA · Profit{' '}
+                                      <span style={{ color: '#4ade80' }}>+{((Number(item.unitPrice || 0) - Number(item.costPrice)) * item.quantity).toLocaleString('fr-FR')} DA</span>
+                                    </p>
+                                  )}
                                 </div>
                               </div>
                             );
                           })}
                         </div>
                       )}
+                      {order.items && order.items.length > 0 && (() => {
+                        const itemCost = order.items.reduce((s: number, i: any) => s + (Number(i.costPrice) || 0) * i.quantity, 0);
+                        const itemSell = order.items.reduce((s: number, i: any) => s + (Number(i.unitPrice) || 0) * i.quantity, 0);
+                        const profit = itemSell - itemCost;
+                        return (
+                          <div className="mt-2 p-3 rounded-xl" style={{ background: 'var(--admin-surface2)' }}>
+                            <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--admin-muted)' }}>Coûts & marge</p>
+                            <div className="flex justify-between text-[11px]"><span style={{ color: 'var(--admin-muted)' }}>Achat (coût)</span><span>{itemCost.toLocaleString('fr-FR')} DA</span></div>
+                            <div className="flex justify-between text-[11px]"><span style={{ color: 'var(--admin-muted)' }}>Vente</span><span>{itemSell.toLocaleString('fr-FR')} DA</span></div>
+                            <div className="flex justify-between text-xs font-bold mt-1" style={{ borderTop: '1px solid var(--admin-border2)', paddingTop: 6 }}>
+                              <span style={{ color: 'var(--admin-gold)' }}>Marge (hors livraison)</span>
+                              <span style={{ color: profit >= 0 ? '#4ade80' : 'var(--admin-danger)' }}>{profit >= 0 ? '+' : ''}{profit.toLocaleString('fr-FR')} DA</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
                       {/* Delivery fee section */}
                       <div className="p-3 rounded-xl" style={{ background: 'rgba(191,162,78,0.04)' }}>
                         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--admin-gold)' }}>Livraison</p>

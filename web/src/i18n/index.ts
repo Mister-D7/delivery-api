@@ -20,6 +20,7 @@ import frRevenue from './locales/fr/revenue.json';
 import frDeliveryPricing from './locales/fr/delivery-pricing.json';
 import frBackup from './locales/fr/backup.json';
 import frStorefrontEditor from './locales/fr/storefront-editor.json';
+import frCoupons from './locales/fr/coupons.json';
 import enCommon from './locales/en/common.json';
 import enDashboard from './locales/en/dashboard.json';
 import enCustomize from './locales/en/customize.json';
@@ -39,6 +40,7 @@ import enRevenue from './locales/en/revenue.json';
 import enDeliveryPricing from './locales/en/delivery-pricing.json';
 import enBackup from './locales/en/backup.json';
 import enStorefrontEditor from './locales/en/storefront-editor.json';
+import enCoupons from './locales/en/coupons.json';
 import arCommon from './locales/ar/common.json';
 import arDashboard from './locales/ar/dashboard.json';
 import arCustomize from './locales/ar/customize.json';
@@ -58,6 +60,7 @@ import arRevenue from './locales/ar/revenue.json';
 import arDeliveryPricing from './locales/ar/delivery-pricing.json';
 import arBackup from './locales/ar/backup.json';
 import arStorefrontEditor from './locales/ar/storefront-editor.json';
+import arCoupons from './locales/ar/coupons.json';
 
 export const RTL_LANGUAGES = ['ar'] as const;
 export type AppLanguage = 'fr' | 'en' | 'ar';
@@ -87,6 +90,7 @@ const resources = {
     'delivery-pricing': frDeliveryPricing,
     backup: frBackup,
     'storefront-editor': frStorefrontEditor,
+    coupons: frCoupons,
   },
   en: {
     common: enCommon,
@@ -108,6 +112,7 @@ const resources = {
     'delivery-pricing': enDeliveryPricing,
     backup: enBackup,
     'storefront-editor': enStorefrontEditor,
+    coupons: enCoupons,
   },
   ar: {
     common: arCommon,
@@ -129,6 +134,7 @@ const resources = {
     'delivery-pricing': arDeliveryPricing,
     backup: arBackup,
     'storefront-editor': arStorefrontEditor,
+    coupons: arCoupons,
   },
 };
 

@@ -1632,3 +1632,31 @@ export function getCommuneCoords(wilayaCode: number, communeName: string): [numb
   if (wilaya) return [wilaya.lat, wilaya.lng];
   return null;
 }
+
+export function findNearestCommune(lat: number, lng: number): Commune | null {
+  return nearest(lat, lng, COMMUNES.filter(c => c.lat != null && c.lng != null));
+}
+
+export function findNearestWilaya(lat: number, lng: number): Wilaya | null {
+  return nearest(lat, lng, WILAYAS);
+}
+
+function nearest<T extends { lat?: number; lng?: number }>(lat: number, lng: number, list: T[]): T | null {
+  const rad = Math.PI / 180;
+  const toRad = (d: number) => d * rad;
+  const cosLat = Math.cos(lat * rad);
+  let best: T | null = null;
+  let bestDist = Infinity;
+  for (const item of list) {
+    if (item.lat == null || item.lng == null) continue;
+    const dLat = (item.lat - lat) * rad;
+    const dLng = (item.lng - lng) * rad;
+    const a = Math.sin(dLat / 2) ** 2 + cosLat * Math.cos(item.lat * rad) * Math.sin(dLng / 2) ** 2;
+    const dist = 2 * Math.asin(Math.sqrt(a));
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = item;
+    }
+  }
+  return best;
+}

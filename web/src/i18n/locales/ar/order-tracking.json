@@ -15,5 +15,9 @@
   "timeline": "الجدول الزمني",
   "messages": "الرسائل",
   "chat_placeholder": "اكتب رسالة...",
-  "send": "إرسال"
+  "send": "إرسال",
+  "tracking_code": "رمز التتبع",
+  "tracking_code_hint": "يستخدم هذا الرمز في المتجر للعثور على طلبك.",
+  "copy": "نسخ",
+  "copied": "تم النسخ"
 }

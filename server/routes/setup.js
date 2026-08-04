@@ -86,6 +86,8 @@ CREATE TABLE IF NOT EXISTS delivery_orders (
   voice_order_url TEXT,
   cancelled_at TIMESTAMPTZ,
   delivered_at TIMESTAMPTZ,
+  archived BOOLEAN DEFAULT false,
+  archived_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -156,6 +158,33 @@ CREATE TABLE IF NOT EXISTS delivery_banners (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS delivery_coupons (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  code TEXT NOT NULL UNIQUE,
+  type TEXT NOT NULL CHECK (type IN ('percent','fixed')),
+  value NUMERIC DEFAULT 0,
+  min_order NUMERIC DEFAULT 0,
+  active BOOLEAN DEFAULT true,
+  expires_at TIMESTAMPTZ,
+  max_uses INT DEFAULT 1,
+  used_count INT DEFAULT 0,
+  customer_id TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS delivery_combos (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  description TEXT,
+  price NUMERIC DEFAULT 0,
+  image_url TEXT,
+  is_active BOOLEAN DEFAULT true,
+  products JSONB DEFAULT '[]',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ═══════════════════════════════════════
 -- TRIGGERS
 -- ═══════════════════════════════════════
@@ -185,6 +214,26 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_coupons_updated') THEN
+    CREATE TRIGGER trigger_coupons_updated BEFORE UPDATE ON delivery_coupons FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+END $$;
+
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'trigger_combos_updated') THEN
+    CREATE TRIGGER trigger_combos_updated BEFORE UPDATE ON delivery_combos FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+  END IF;
+END $$;
+
+CREATE OR REPLACE FUNCTION consume_coupon_usage(p_coupon_id UUID)
+RETURNS TABLE (id UUID, used_count INT, max_uses INT) AS $$
+  UPDATE delivery_coupons
+  SET used_count = used_count + 1
+  WHERE id = p_coupon_id AND used_count < max_uses
+  RETURNING id, used_count, max_uses
+$$ LANGUAGE sql VOLATILE;
+
 -- ═══════════════════════════════════════
 -- RLS
 -- ═══════════════════════════════════════
@@ -199,6 +248,8 @@ ALTER TABLE delivery_order_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE delivery_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE delivery_themes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE delivery_banners ENABLE ROW LEVEL SECURITY;
+ALTER TABLE delivery_coupons ENABLE ROW LEVEL SECURITY;
+ALTER TABLE delivery_combos ENABLE ROW LEVEL SECURITY;
 
 DO $$
 DECLARE
@@ -207,7 +258,8 @@ BEGIN
   FOR t IN SELECT unnest(ARRAY[
     'users', 'delivery_customers', 'delivery_categories', 'delivery_products',
     'delivery_orders', 'delivery_order_items', 'delivery_order_status_history',
-    'delivery_order_messages', 'delivery_settings', 'delivery_themes', 'delivery_banners'
+    'delivery_order_messages', 'delivery_settings', 'delivery_themes', 'delivery_banners',
+    'delivery_coupons', 'delivery_combos'
   ]) LOOP
     EXECUTE format('DROP POLICY IF EXISTS "Service role full access" ON %I', t);
     EXECUTE format('CREATE POLICY "Service role full access" ON %I FOR ALL TO service_role USING (true) WITH CHECK (true)', t);
@@ -235,6 +287,8 @@ CREATE POLICY "Public read customers" ON delivery_customers FOR SELECT TO anon U
 GRANT USAGE ON SCHEMA public TO anon;
 GRANT USAGE ON SCHEMA public TO service_role;
 GRANT ALL ON ALL TABLES IN SCHEMA public TO service_role;
+GRANT ALL ON delivery_coupons TO service_role;
+GRANT ALL ON delivery_combos TO service_role;
 GRANT SELECT ON delivery_categories TO anon;
 GRANT SELECT ON delivery_products TO anon;
 GRANT SELECT ON delivery_settings TO anon;
@@ -270,6 +324,7 @@ INSERT INTO delivery_settings (key, value) VALUES
   ('store_subtitle', '"Livraison rapide et fiable"'),
   ('contact_phone', '""'),
   ('whatsapp_number', '""'),
+  ('archive_after_days', '30'),
   ('delivery_pricing', '{"shopLat":36.7538,"shopLng":3.0588,"baseFee":200,"baseKm":5,"extraPerKm":50,"freeThreshold":3000,"maxRadius":30,"shopName":"MISTER-DR"}')
 ON CONFLICT (key) DO NOTHING;
 `;

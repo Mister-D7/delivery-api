@@ -15,6 +15,21 @@
     "location": "Position sur la carte",
     "use_my_location": "Utiliser ma position"
   },
+  "coupon": {
+    "placeholder": "Code promo (ex: FIDEL-XXXXXX)",
+    "apply": "Appliquer",
+    "applied": "Code appliqué",
+    "discount": "Réduction",
+    "remove": "Retirer",
+    "errors": {
+      "NOT_FOUND": "Code invalide",
+      "INACTIVE": "Code désactivé",
+      "EXPIRED": "Code expiré",
+      "MAX_USES": "Code déjà utilisé",
+      "MIN_ORDER": "Commande minimale de {{minOrder}} DA requise",
+      "CUSTOMER_ONLY": "Ce code est réservé à un client précis"
+    }
+  },
   "success": {
     "title": "Commande enregistrée !",
     "track": "Suivre ma commande",

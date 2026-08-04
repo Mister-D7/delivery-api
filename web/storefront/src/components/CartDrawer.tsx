@@ -1,5 +1,6 @@
 import { useCartStore, removeItem, updateQty, clearCart } from '../lib/cart';
 import { formatPrice } from '../lib/format';
+import { imgSrc } from '../lib/image';
 import '../styles/islands.css';
 
 export default function CartDrawer() {
@@ -27,7 +28,7 @@ export default function CartDrawer() {
               {items.map((it) => (
                 <li className="iso-item" key={it.id}>
                   <div className="iso-item-media">
-                    {it.imageUrl ? <img src={it.imageUrl} alt={it.name} /> : null}
+                    {it.imageUrl ? <img src={imgSrc(it.imageUrl)} alt={it.name} /> : null}
                   </div>
                   <div className="iso-item-body">
                     <div className="iso-item-name">{it.name}</div>

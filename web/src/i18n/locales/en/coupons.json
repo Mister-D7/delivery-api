@@ -1,0 +1,57 @@
+{
+  "title": "Coupons",
+  "subtitle": "Loyalty program — promo codes & discounts",
+  "new": "New coupon",
+  "edit": "Edit",
+  "delete": "Delete",
+  "toggle_active": "Enable / Disable",
+  "empty": "No coupons",
+  "table": {
+    "code": "Code",
+    "type": "Type",
+    "value": "Value",
+    "min_order": "Min. order",
+    "expiry": "Expiry",
+    "uses": "Uses",
+    "customer": "Customer",
+    "status": "Status",
+    "actions": "Actions"
+  },
+  "type": {
+    "percent": "Percent",
+    "fixed": "Fixed amount"
+  },
+  "customer": {
+    "all": "All customers",
+    "none": "—"
+  },
+  "form": {
+    "create_title": "New coupon",
+    "edit_title": "Edit coupon",
+    "code": "Code",
+    "code_placeholder": "Ex: FIDEL-XXXXXX",
+    "generate": "Generate",
+    "type": "Type",
+    "value": "Value",
+    "value_percent_hint": "10 = 10% discount",
+    "value_fixed_hint": "Amount in DA",
+    "min_order": "Minimum order (0 = none)",
+    "expiry": "Expiry (optional)",
+    "max_uses": "Max uses (1 = single use)",
+    "customer": "Customer (optional)",
+    "orders": "{{count}} orders",
+    "save": "Save",
+    "cancel": "Cancel",
+    "active": "Active"
+  },
+  "toasts": {
+    "created": "Coupon created",
+    "updated": "Coupon updated",
+    "deleted": "Coupon deleted",
+    "toggled_on": "Coupon enabled",
+    "toggled_off": "Coupon disabled",
+    "error": "Operation failed"
+  },
+  "no_expiry": "Never",
+  "expired_badge": "Expired"
+}

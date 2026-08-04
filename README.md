@@ -1,74 +1,76 @@
 # MISTER-DR Delivery
 
-Standalone admin + customer delivery app.  
-Git remote: `https://github.com/Mister-D7/delivery-api.git` (branch: `master`)
+Application de livraison autonome : **admin SPA + storefront public + pages clientes**.
+Développée par **Driss Djellali** — `© 2026 Driss Djellali. All Rights Reserved.`
+Git remote : `https://github.com/Mister-D7/delivery-api.git` (branch : `master`)
 
 ---
 
-## Project Ecosystem
+## Architecture
 
-| Project | Path | Description |
-|---------|------|-------------|
-| **Delivery** (this repo) | `G:\delivery soft` | Delivery admin + client app (Express + React/Vite) |
-| **ERP** | `G:\drissoftware` | Main ERP — modules, apps, dashboards |
-| ERP apps | `G:\drissoftware\apps` | Sub-modules from the original monolith |
-| ERP → Delivery API | `G:\drissoftware\delivery-api` | Legacy delivery API within ERP |
-| ERP → Delivery App | `G:\drissoftware\delivery-app` | Legacy delivery app within ERP |
-| **AI Surveillance** | `G:\drissoftware\ALONE SURVEILLANCE` | AI surveillance module |
+| Couche | Techno | Emplacement |
+|--------|--------|-------------|
+| **API** | Express (Node) + Supabase (PostgREST) | `server/` |
+| **Admin SPA** | React + Vite + TS | `web/src/pages/admin/` → build `web/dist/` |
+| **Storefront** | Astro + React islands (runtime, polling 8s) | `web/storefront/src/` → build `web/storefront/dist/` |
+| **Pages clientes** | React SPA (shell thème-aware) | `/auth/login`, `/auth/register`, `/track`, `/checkout`, `/profile` |
 
----
+- Le storefront public et l'admin partagent les **mêmes données runtime** (produits, catégories, textes, couleurs) — aucun build par commande, polling 8s + focus/visibility.
+- Le serveur sert le storefront selon le thème actif du blob settings (`delivery_settings` clé `storefront`) : `greens` (actif) ou `pulsar`.
+- **Aucun leak admin** côté client (routes `/admin/*` séparées, auth `delivery_token`).
 
-## Repo Structure
+## Fonctionnalités
+
+- **Storefront multi-thèmes** : greens + pulsar (islands React, CSS vars runtime), mode clair/sombre, recherche header connectée à la grille, dropdown « All Categories » live, bannière promos + combos.
+- **Édition au clic droit** : mode `?edit=1` → `EditCanvas` permet d'éditer textes/produits/canvas 3D depuis l'aperçu admin (textes persistés dans le blob settings).
+- **Suivi de commande** : code de suivi court (`NOM-123456-000001`) partagé client/admin, persistance localStorage, SSE temps réel, notifications (banner + toast + Notification + service worker `web/public/sw.js`).
+- **Archive** : commandes livrées/annulées archivées automatiquement après N jours (`archive_after_days`, défaut 30) ; vue `/admin/archive` groupée par date, action « Archiver »/« Restaurer ».
+- **Combos/Bundles** : admin (onglet Combos dans l'éditeur) — choisir plusieurs produits (ou en ajouter un manquant avec prix), fixer un prix promo final ; affichage storefront `#combos` sur tout thème.
+- **Coupons / Fidélité** : `/admin/coupons` — codes manuels ou générés, % ou montant fixe, minimum de commande, expiration, limites d'usage, assignation à un client « régulier » (avec son historique de commandes) ; saisie du code au checkout avec réduction recalculée (consommation atomique anti double-usage).
+- **Comptes clients** : inscription/connexion, profil, commandes.
+
+## Schéma / Migrations
+
+Fichiers SQL **idempotents** à appliquer dans le Supabase SQL Editor :
+
+| Fichier | Objets |
+|---------|--------|
+| `schema-archive.sql` | colonnes `archived` / `archived_at` sur `delivery_orders` |
+| `schema-coupons.sql` | table `delivery_coupons`, colonnes `coupon_id`/`coupon_code`/`discount_amount` sur orders, RPC `consume_coupon_usage` |
+| `schema-combos.sql` | table `delivery_combos` |
+| `schema-revenue.sql`, `schema-upgrade.sql`, `fix-rls.sql`, etc. | autres migrations / RLS |
+
+## Commandes
+
+```bash
+# Serveur API (port 4000)
+NODE_ENV=production node server/index.js
+
+# Build admin SPA (web/), puis storefront (web/storefront/)
+cd web && node node_modules/vite/bin/vite.js build
+cd web/storefront && node ../node_modules/astro/bin/astro.mjs build
+
+# Typecheck SPA (2 erreurs préexistantes admises : NotificationBell.tsx, Revenue.tsx)
+cd web && node node_modules/typescript/bin/tsc --noEmit -p tsconfig.json
+```
+
+Lanceurs : `start.bat` (production) / `dev.bat` (backend + Vite dev).
+
+## Structure
 
 ```
-G:\delivery soft/
-├── server/              # Express API (index.js, routes/, middleware/, lib/)
-├── web/                 # React/Vite frontend (src/, public/, dist/)
-├── uploads/             # File uploads
-├── backups/             # DB backups
-├── schema-*.sql         # Database migration scripts
-├── setup.js             # Setup script
-├── dev.bat / start.bat  # Dev/start launchers
-├── opencode.json        # opencode AI assistant config
-└── README.md
+server/               Express API (index.js, routes/, middleware/, lib/)
+  routes/orders.js    commandes + archive
+  routes/coupons.js   coupons / fidélité
+  routes/combos.js    combos
+web/src/              React SPA (admin + pages clientes)
+web/storefront/src/   pages Astro (greens.astro, pulsar.astro, index.astro) + islands
+web/themes/           registry des thèmes admin
+schema-*.sql          migrations
 ```
 
----
+## Notes
 
-## Session History (what we've done)
-
-### Template Preset System (commits `4c2c265` → `52a6e52`)
-- 4 template presets with HTML/CSS injection into an iframe editor
-- Templates: NEXUS Gaming (`gaming`), Vestiaire (`clothes`), Organic Bio (`grocery`), Food Broker (`food`)
-- Circular dependency fixed — templates `export default`, `index.ts` registers centrally
-- Store types split: `tech | gaming | clothes | grocery | food | general`
-- Settings page shows 6 store-type cards in 3x2 grid
-- Editor Thèmes panel filters templates by selected store type
-
-### Template Downloads
-- **shop-homepage** (Start Bootstrap, MIT, Bootstrap 5) → extracted OK
-- **zay-shop** (TemplateMo, free, Bootstrap 5) → extracted OK
-- **Electro** (HTML Codex, CC BY 4.0, Bootstrap 5, tech) → corrupted zip, re-downloaded from GitHub mirror (`samjoshuaben-alt/Electronics`)
-- **EShopper** (HTML Codex, CC BY 4.0, Bootstrap 4) → corrupted zip, re-downloaded from GitHub mirror (`rskworld/EShopper-Bootstrap-Shop-Template`)
-
-Extracted zips are at `C:\Users\KeepCool\AppData\Local\Temp\opencode\templates-dl/`.
-
----
-
-## Template Swap: Session 2
-
-We replaced 3 weak templates with modern Bootstrap alternatives:
-
-| Replaced | With | Type |
-|----------|------|------|
-| Food Broker (old 960gs) | FoodMart (Bootstrap 5) | food |
-| MiniStore (basic B5) | Ashion (Bootstrap 4) | general |
-| EShopper (Bootstrap 4) | ColoShop (Bootstrap 4) | general |
-
-Assets extracted to `web/public/templates/{foodmart,ashion,coloshop}/`.
-
-## Next Steps
-
-1. **Verify new templates** — run `npm run dev` in `web/`, check all 8 templates render with proper CSS/images
-2. **Visual refinement** — tweak template CSS if needed for iframe preview
-3. **Optimize** `epicerie-bio.ts` — huge inline SVG icons could be moved to external files
+- `node_modules` hoisté dans `web/` ; installer avec `--legacy-peer-deps` (conflit grapesjs préexistant).
+- Ne jamais relire les fichiers HTML de design originaux — les thèmes sont portés depuis `themes/<name>/` (source TSX/CSS fournie).
+- Voir `SESSION.md` pour l'historique et `AGENTS.md` pour le guide de dev.

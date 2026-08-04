@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShieldCheck, Paintbrush, Settings, DollarSign, LayoutTemplate } from 'lucide-react';
+import { LayoutDashboard, Package, ShieldCheck, Paintbrush, Settings, DollarSign, Archive, Ticket } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
@@ -39,8 +39,9 @@ function AdminLayoutInner() {
     { to: '/admin', label: t('nav.dashboard'), icon: LayoutDashboard, exact: true },
     { to: '/admin/customize', label: t('nav.catalogue'), icon: Package },
     { to: '/admin/editor/full', label: t('nav.boutique'), icon: Paintbrush, newTab: true },
-    { to: '/admin/builder', label: 'Builder', icon: LayoutTemplate, newTab: true },
     { to: '/admin/revenue', label: t('nav.revenue'), icon: DollarSign },
+    { to: '/admin/archive', label: t('nav.archive'), icon: Archive },
+    { to: '/admin/coupons', label: t('nav.coupons'), icon: Ticket },
     { to: '/admin/settings', label: t('nav.settings'), icon: Settings },
   ];
 

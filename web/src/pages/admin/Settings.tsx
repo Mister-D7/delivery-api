@@ -14,7 +14,6 @@ const STORE_TYPE_OPTIONS = [
   { type: 'clothes', label: 'Vêtements & Mode', emoji: '👔', desc: 'Élégance beige & laiton' },
   { type: 'grocery', label: 'Épicerie & Bio', emoji: '🛒', desc: 'Vert nature, Bootstrap' },
   { type: 'food', label: 'Food & Agro', emoji: '🍽️', desc: 'Style vintage food broker' },
-  { type: 'general', label: 'Autre / Général', emoji: '📦', desc: 'Design libre' },
 ] as const;
 
 type Step = { msg: string; ok: boolean };

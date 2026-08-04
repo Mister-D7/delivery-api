@@ -3,6 +3,7 @@ import { HardDrive, Download, Upload, Play, Trash2, ToggleLeft, ToggleRight, Loa
 import { useTranslation } from 'react-i18next';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
+import AdminSelect from '../AdminSelect';
 
 export default function BackupTab() {
   const { t } = useTranslation(['settings', 'backup']);
@@ -142,11 +143,12 @@ export default function BackupTab() {
             <>
               <div>
                 <label className="text-[10px] font-semibold mb-1 block" style={{ color: 'var(--admin-muted2)' }}>Fréquence</label>
-                <select value={bkFrequency} onChange={e => setBkFrequency(e.target.value as any)} className="input-field text-xs w-full">
-                  <option value="hourly">Chaque heure</option>
-                  <option value="daily">Quotidien</option>
-                  <option value="weekly">Hebdomadaire</option>
-                </select>
+                <AdminSelect value={bkFrequency} onChange={v => setBkFrequency(v as any)} className="w-full text-xs"
+                  options={[
+                    { value: 'hourly', label: 'Chaque heure' },
+                    { value: 'daily', label: 'Quotidien' },
+                    { value: 'weekly', label: 'Hebdomadaire' },
+                  ]} />
               </div>
               <div>
                 <label className="text-[10px] font-semibold mb-1 block" style={{ color: 'var(--admin-muted2)' }}>Nombre max de backups</label>

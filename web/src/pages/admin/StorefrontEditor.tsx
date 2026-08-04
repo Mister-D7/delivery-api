@@ -2,22 +2,51 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Save, Palette,
   Package, Layers, PanelRightClose, PanelRightOpen,
-  RefreshCw, Loader2, Plus, Pencil, Trash2, Pin, PinOff,
+  RefreshCw, Loader2, Plus, Pencil, Trash2, Pin, PinOff, Search, Gift,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { RawCatalog, CatalogProduct, Category, ThemeSettings } from './editorTypes';
 import { THEME_DEFAULTS } from './editorTypes';
 import {
-  getThemePages, getActiveTheme, getStoreType, storeTypeLabel,
+  getThemePages, getActiveTheme, getStoreType, storeTypeLabel, storeTypeForTheme,
   selectTheme,
   loadSavedSettings, saveSettingsForTheme, deleteCustomTheme,
   type ThemePage, type StoreType,
 } from '../../themes';
 import ProductForm from './ProductForm';
 import CategoryForm from './CategoryForm';
+import AdminSelect from './AdminSelect';
 
-type Tool = 'themes' | 'products' | 'categories' | null;
+type Tool = 'themes' | 'products' | 'categories' | 'combos' | null;
+
+type ComboProduct = { productId: string; name?: string; price?: number; imageUrl?: string | null; qty: number };
+type ComboRow = {
+  id: string; name: string; description?: string | null; price: number;
+  imageUrl?: string | null; isActive: boolean; products: ComboProduct[];
+  totalValue?: number; savings?: number;
+};
+
+function comboPriceOf(p: CatalogProduct): number {
+  return Number(p.promoPrice ?? p.salePrice ?? 0);
+}
+
+function rawToCatalogProduct(p: any): CatalogProduct {
+  return {
+    id: p.id, name: p.name || 'Produit', salePrice: Number(p.sale_price ?? p.salePrice ?? 0),
+    imageUrl: p.image_url || p.imageUrl || null, modelUrl: p.modelUrl || null,
+    stockQty: Number(p.stock_qty ?? p.stockQty ?? 0), category: null, barcode: p.barcode || null,
+    displayOrder: 0, isActive: true, promoPrice: p.promo_price ?? p.promoPrice ?? null,
+    costPrice: p.cost_price ?? p.costPrice ?? null, customName: p.custom_name || null,
+    customPrice: p.custom_price ?? null, customDescription: p.custom_description || null,
+    productId: p.product_id || null, specs: p.specs || null, description: p.description || null,
+    storeType: 'tech',
+  };
+}
+
+function isVedetteName(name?: string | null) {
+  return String(name || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '') === 'vedette';
+}
 
 export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean }) {
   const [catalog, setCatalog] = useState<CatalogProduct[]>([]);
@@ -31,6 +60,9 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [categoryFormOpen, setCategoryFormOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [combos, setCombos] = useState<ComboRow[]>([]);
+  const [comboFormOpen, setComboFormOpen] = useState(false);
+  const [editingCombo, setEditingCombo] = useState<ComboRow | null>(null);
   const [pinned, setPinned] = useState<string[]>(() => {
     try {
       const raw = localStorage.getItem('delivery_pinned_products');
@@ -38,6 +70,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     } catch { return []; }
   });
   const [showAllProducts, setShowAllProducts] = useState(false);
+  const [productSearch, setProductSearch] = useState('');
   const [dragId, setDragId] = useState<string | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
 
@@ -45,7 +78,18 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     try { localStorage.setItem('delivery_pinned_products', JSON.stringify(pinned)); } catch {}
   }, [pinned]);
 
-  const storeType = useMemo(() => getStoreType(), []);
+  const [storeType, setStoreType] = useState<StoreType>(() => getStoreType());
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const r = await api.get('/storefront/settings/storefront');
+        if (r.data && typeof r.data === 'object' && r.data.theme) {
+          setStoreType(storeTypeForTheme(r.data.theme));
+        }
+      } catch {}
+    })();
+  }, []);
 
   const template = useMemo<ThemePage | undefined>(() => getActiveTheme(storeType as StoreType), [storeType]);
 
@@ -80,15 +124,24 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     fontFamily: settings.fontFamily,
     pinned,
     theme: template?.id,
+    model3d: settings.model3d,
   }), [settings, pinned, template]);
+
+  const saveBlobMerged = useCallback(async () => {
+    try {
+      const r = await api.get('/storefront/settings/storefront');
+      const existing = (r.data && typeof r.data === 'object') ? r.data : {};
+      await api.put('/storefront/settings/storefront', { value: { ...existing, ...buildBlob() } });
+    } catch {}
+  }, [buildBlob]);
 
   useEffect(() => {
     if (!template) return;
     const t = setTimeout(() => {
-      api.put('/storefront/settings/storefront', { value: buildBlob() }).catch(() => {});
+      void saveBlobMerged();
     }, 600);
     return () => clearTimeout(t);
-  }, [template, buildBlob]);
+  }, [template, buildBlob, saveBlobMerged]);
 
   useEffect(() => {
     if (!template) return;
@@ -100,12 +153,13 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     setLoading(true);
     try {
       await Promise.all([
-        api.get('/catalog').then(r => setCatalog((r.data || []).map((raw: RawCatalog): CatalogProduct => {
+        api.get('/catalog/admin', { params: { storeType } }).then(r => setCatalog((r.data || []).map((raw: RawCatalog): CatalogProduct => {
           const p = raw.product;
           return {
             id: raw.id, name: raw.name || p?.name || 'Produit',
             salePrice: raw.salePrice ?? p?.salePrice ?? 0,
             imageUrl: raw.imageUrl || p?.imageUrl || null,
+            modelUrl: raw.modelUrl || null,
             stockQty: raw.stockQty ?? p?.stockQty ?? 0,
             category: raw.category || null,
             barcode: raw.barcode || p?.barcode || null,
@@ -115,12 +169,13 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
             customDescription: raw.customDescription || null,
             productId: raw.productId || null, specs: raw.specs || null,
             description: raw.description ?? p?.description ?? null,
-            storeType: raw.storeType || 'general',
+            storeType: raw.storeType || 'tech',
           };
         }))),
         api.get('/categories', { params: { storeType } }).then(r => setCategories((r.data || []).map((c: any): Category => ({
-          id: c.id, name: c.name, imageUrl: c.image_url || c.imageUrl || null, storeType: c.storeType || 'general',
+          id: c.id, name: c.name, imageUrl: c.image_url || c.imageUrl || null, storeType: c.storeType || 'tech',
         })))),
+        api.get('/combos').then(r => setCombos(r.data?.combos || [])),
       ]);
     } catch {}
     setLoading(false);
@@ -129,6 +184,18 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
   useEffect(() => { loadAll(); }, [loadAll]);
 
   const orderedProducts = useMemo(() => catalog.filter(p => p.isActive !== false), [catalog]);
+
+  const visibleProducts = useMemo(() => {
+    const q = productSearch.trim().toLowerCase();
+    return orderedProducts.filter(p => {
+      const matchCat = !catFilter
+        || (p.category && (String(p.category.id) === String(catFilter) || p.category.name === catFilter));
+      if (!matchCat) return false;
+      if (!q) return true;
+      const hay = [p.name, p.specs, p.description, p.barcode, p.category?.name].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }, [orderedProducts, catFilter, productSearch]);
 
   const togglePin = (id: string) => {
     setPinned(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -170,6 +237,10 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
   };
 
   const handleDeleteCategory = async (c: Category) => {
+    if (isVedetteName(c.name)) {
+      toast.error('La catégorie Vedette est protégée et ne peut pas être supprimée.');
+      return;
+    }
     if (!window.confirm(`Supprimer la catégorie « ${c.name} » ?`)) return;
     try {
       await api.delete(`/categories/${c.id}`);
@@ -180,11 +251,32 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     }
   };
 
+  const handleToggleCombo = async (c: ComboRow) => {
+    try {
+      await api.post(`/combos/${c.id}/toggle`);
+      toast.success(c.isActive ? 'Combo désactivé' : 'Combo activé');
+      loadAll();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur lors de la mise à jour');
+    }
+  };
+
+  const handleDeleteCombo = async (c: ComboRow) => {
+    if (!window.confirm(`Supprimer le combo « ${c.name} » ?`)) return;
+    try {
+      await api.delete(`/combos/${c.id}`);
+      toast.success('Combo supprimé');
+      loadAll();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur lors de la suppression');
+    }
+  };
+
   const saveSettings = async () => {
     if (!template) return;
     try {
       saveSettingsForTheme(template.id, settings);
-      await api.put('/storefront/settings/storefront', { value: buildBlob() });
+      await saveBlobMerged();
       toast.success('Sauvegardé !');
       setPreviewKey(k => k + 1);
     } catch (err: any) {
@@ -192,7 +284,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     }
   };
 
-  const storeTemplates = useMemo(() => getThemePages(storeType as StoreType), [storeType]);
+  const storeTemplates = useMemo(() => getThemePages(), []);
 
   if (loading) return (
     <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
@@ -204,6 +296,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     { key: 'themes', label: 'Thèmes', icon: Palette },
     { key: 'products', label: 'Produits', icon: Package },
     { key: 'categories', label: 'Catégories', icon: Layers },
+    { key: 'combos', label: 'Combos', icon: Gift },
   ];
 
   return (
@@ -301,7 +394,7 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <p className="text-[11px] font-bold tracking-wide" style={{ color: 'var(--admin-gold)' }}>
-                      PRODUITS ({orderedProducts.length}){pinned.length > 0 && !showAllProducts ? ` · épinglés ${pinned.length}` : ''}
+                      PRODUITS {catFilter || productSearch.trim() ? `(${visibleProducts.length}/${orderedProducts.length})` : `(${orderedProducts.length})`}{pinned.length > 0 && !showAllProducts ? ` · épinglés ${pinned.length}` : ''}
                     </p>
                     <div className="flex items-center gap-1">
                       <button onClick={() => setShowAllProducts(!showAllProducts)}
@@ -318,8 +411,30 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                   <p className="text-[10px] mb-2" style={{ color: 'var(--admin-muted2)' }}>
                     Glissez un produit et déposez-le sur l'aperçu pour l'épingler sur la page. Glissez sur un autre produit pour le réordonner.
                   </p>
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <div className="flex-1 flex items-center gap-1.5 px-2 py-1.5 rounded-lg" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border2)' }}>
+                      <Search size={12} style={{ color: 'var(--admin-muted2)', flexShrink: 0 }} />
+                      <input
+                        value={productSearch}
+                        onChange={e => setProductSearch(e.target.value)}
+                        placeholder="Rechercher un produit…"
+                        className="w-full min-w-0 bg-transparent text-[11px] outline-none"
+                        style={{ color: 'var(--admin-text)' }}
+                      />
+                      {productSearch && (
+                        <button onClick={() => setProductSearch('')} className="text-[10px]" style={{ color: 'var(--admin-muted2)' }}>✕</button>
+                      )}
+                    </div>
+                    <AdminSelect
+                      value={catFilter || ''}
+                      onChange={v => setCatFilter(v || null)}
+                      title="Filtrer par catégorie"
+                      className="px-1.5 py-1.5 rounded-lg text-[10px] outline-none"
+                      options={[{ value: '', label: 'Toutes les catégories' }, ...categories.map(c => ({ value: c.id, label: c.name }))]}
+                    />
+                  </div>
                   <div className="space-y-1.5">
-                    {orderedProducts.slice(0, 50).map(p => {
+                    {visibleProducts.map(p => {
                       const isPinned = pinned.includes(String(p.id));
                       const isDrag = dragId === String(p.id);
                       return (
@@ -351,8 +466,15 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                             : <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[9px]" style={{ background: 'var(--admin-bg)', color: 'var(--admin-muted2)' }}>img</div>
                           }
                           <div className="flex-1 min-w-0">
-                            <p className="text-[11px] font-semibold truncate">{p.name}</p>
-                            <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{p.salePrice.toLocaleString()} DA {p.promoPrice ? <span style={{ color: 'var(--admin-gold)' }}>→ {p.promoPrice.toLocaleString()} DA</span> : ''}</p>
+                            <p className="text-[11px] font-semibold truncate">
+                              {p.name}{' '}
+                              {!p.costPrice && (
+                                <span className="ml-1 text-[8px] font-bold px-1 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', verticalAlign: 'middle' }}>
+                                  COÛT MANQUANT
+                                </span>
+                              )}
+                            </p>
+                            <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{p.costPrice ? `Achat ${p.costPrice.toLocaleString()} DA · ` : ''}{p.salePrice.toLocaleString()} DA {p.promoPrice ? <span style={{ color: 'var(--admin-gold)' }}>→ {p.promoPrice.toLocaleString()} DA</span> : ''}</p>
                           </div>
                           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={e => { e.stopPropagation(); togglePin(String(p.id)); }}
@@ -371,8 +493,8 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                         </div>
                       );
                     })}
-                    {orderedProducts.length > 50 && (
-                      <p className="text-[10px] text-center" style={{ color: 'var(--admin-muted2)' }}>+{orderedProducts.length - 50} autres</p>
+                    {visibleProducts.length === 0 && (
+                      <p className="text-[10px] text-center py-3" style={{ color: 'var(--admin-muted2)' }}>Aucun produit ne correspond à ce filtre.</p>
                     )}
                   </div>
                 </div>
@@ -389,28 +511,86 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                   </div>
                   <div className="space-y-1.5">
                     {categories.map(c => (
-                      <div key={c.id} className="group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors" style={{ background: 'var(--admin-surface2)' }}
+                      <div key={c.id} className="group flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors" style={{ background: isVedetteName(c.name) ? 'var(--admin-gold-bg)' : 'var(--admin-surface2)' }}
                         onClick={() => { setEditingCategory(c); setCategoryFormOpen(true); }}>
                         {c.imageUrl
                           ? <img src={c.imageUrl} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
                           : <div className="w-7 h-7 rounded-lg flex items-center justify-center text-[9px]" style={{ background: 'var(--admin-bg)', color: 'var(--admin-muted2)' }}>cat</div>
                         }
                         <div className="flex-1 min-w-0">
-                          <p className="text-[11px] font-semibold truncate">{c.name}</p>
-                          <p className="text-[9px]" style={{ color: 'var(--admin-muted2)' }}>{storeTypeLabel(c.storeType || 'general')}</p>
+                          <p className="text-[11px] font-semibold truncate">{c.name}{isVedetteName(c.name) ? ' 🔒' : ''}</p>
+                          <p className="text-[9px]" style={{ color: 'var(--admin-muted2)' }}>{storeTypeLabel(c.storeType || 'tech')} · toujours en premier</p>
                         </div>
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={e => { e.stopPropagation(); setEditingCategory(c); setCategoryFormOpen(true); }}
                             className="p-1.5 rounded-md" style={{ color: 'var(--admin-muted)' }} title="Modifier">
                             <Pencil size={12} />
                           </button>
-                          <button onClick={e => { e.stopPropagation(); handleDeleteCategory(c); }}
+                          {!isVedetteName(c.name) && (
+                            <button onClick={e => { e.stopPropagation(); handleDeleteCategory(c); }}
+                              className="p-1.5 rounded-md" style={{ color: '#ef4444' }} title="Supprimer">
+                              <Trash2 size={12} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTool === 'combos' && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[11px] font-bold tracking-wide" style={{ color: 'var(--admin-gold)' }}>
+                      COMBOS ({combos.length})
+                    </p>
+                    <button onClick={() => { setEditingCombo(null); setComboFormOpen(true); }}
+                      className="gold-btn px-2.5 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                      <Plus size={12} /> Nouveau
+                    </button>
+                  </div>
+                  <p className="text-[10px] mb-2" style={{ color: 'var(--admin-muted2)' }}>
+                    Composez un pack de plusieurs produits et fixez son prix promo. Il s'affichera dans la section « Offres combinées » de la boutique.
+                  </p>
+                  <div className="space-y-1.5">
+                    {combos.map(c => (
+                      <div key={c.id} className="group flex items-center gap-2 p-2 rounded-lg transition-colors"
+                        style={{ background: 'var(--admin-surface2)', border: `1px solid ${c.isActive ? 'transparent' : 'var(--admin-border2)'}` }}>
+                        {c.imageUrl
+                          ? <img src={c.imageUrl} className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+                          : <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[9px]" style={{ background: 'var(--admin-bg)', color: 'var(--admin-muted2)' }}>combo</div>
+                        }
+                        <div className="flex-1 min-w-0" style={{ cursor: 'pointer' }} onClick={() => { setEditingCombo(c); setComboFormOpen(true); }}>
+                          <p className="text-[11px] font-semibold truncate">
+                            {c.name}
+                            {!c.isActive && <span className="ml-1 text-[8px] font-bold px-1 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', verticalAlign: 'middle' }}>INACTIF</span>}
+                          </p>
+                          <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>
+                            {c.products.length} produit{c.products.length > 1 ? 's' : ''} · {typeof c.totalValue === 'number' ? `${c.totalValue.toLocaleString()} DA ` : ''}
+                            <span style={{ color: 'var(--admin-gold)' }}>→ {c.price.toLocaleString()} DA</span>
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={e => { e.stopPropagation(); handleToggleCombo(c); }}
+                            className="p-1.5 rounded-md" title={c.isActive ? 'Désactiver' : 'Activer'}
+                            style={{ color: c.isActive ? 'var(--admin-gold)' : 'var(--admin-muted)' }}>
+                            {c.isActive ? '●' : '○'}
+                          </button>
+                          <button onClick={e => { e.stopPropagation(); setEditingCombo(c); setComboFormOpen(true); }}
+                            className="p-1.5 rounded-md" style={{ color: 'var(--admin-muted)' }} title="Modifier">
+                            <Pencil size={12} />
+                          </button>
+                          <button onClick={e => { e.stopPropagation(); handleDeleteCombo(c); }}
                             className="p-1.5 rounded-md" style={{ color: '#ef4444' }} title="Supprimer">
                             <Trash2 size={12} />
                           </button>
                         </div>
                       </div>
                     ))}
+                    {combos.length === 0 && (
+                      <p className="text-[10px] text-center py-3" style={{ color: 'var(--admin-muted2)' }}>Aucun combo. Cliquez sur « Nouveau » pour en créer un.</p>
+                    )}
                   </div>
                 </div>
               )}

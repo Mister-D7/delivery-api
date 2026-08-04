@@ -5,9 +5,8 @@ import PulsarCategoryPage from '../../components/PulsarCategoryPage';
 import CartDrawer from '../../components/CartDrawer';
 import ProductModal from '../../components/ProductModal';
 import EditCanvas from '../../components/EditCanvas';
+import TermsGate from '../../components/TermsGate.astro';
 import { slugify } from '../../lib/slug';
-
-const FALLBACK_SEED = ['Chargeurs', 'Smartphones', 'Laptops', 'Composants PC'];
 
 export async function getStaticPaths() {
   let cats: { name: string }[] = [];
@@ -22,7 +21,9 @@ export async function getStaticPaths() {
       cats = arr.map((c: any) => ({ name: c?.name ?? c })).filter((c: any) => c && c.name);
     }
   } catch {}
-  if (!cats.length) cats = FALLBACK_SEED.map((name) => ({ name }));
+  if (!cats.length) {
+    cats = ['Chargeurs', 'Smartphones', 'Laptops', 'Composants PC'].map((name) => ({ name }));
+  }
   return cats.map((c) => ({ params: { slug: slugify(c.name) }, props: { name: c.name } }));
 }
 
@@ -46,6 +47,8 @@ const { name } = Astro.props;
 </head>
 <body>
 
+<TermsGate />
+
 <PulsarHeader />
 
 <section class="cat-page">
@@ -65,7 +68,19 @@ const { name } = Astro.props;
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-col footer-brand">
-        <a href="/" class="brand"><span class="brand-mark"></span>PULSAR</a>
+        <a href="/" class="brand brand-logo">
+          <span class="brand-word">
+            <span class="brand-part">PUL</span>
+            <span class="brand-triangle">
+              <svg viewBox="0 0 100 100" aria-hidden="true">
+                <polygon class="tri-sheen" points="50,80 14,18 86,18" />
+                <polygon class="tri-shape" points="50,88 8,12 92,12" />
+              </svg>
+            </span>
+            <span class="brand-part">SAR</span>
+          </span>
+          <span class="brand-sub">Designed by DjDr</span>
+        </a>
         <p>Écouteurs, chargeurs, téléphones et ordinateurs pensés comme un seul écosystème à charge rapide.</p>
       </div>
       <div class="footer-col">
@@ -78,11 +93,11 @@ const { name } = Astro.props;
       </div>
       <div class="footer-col">
         <h4>Entreprise</h4>
-        <ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="#">Mentions légales</a></li><li><a href="#">CGV</a></li></ul>
+        <ul><li><a href="#">À propos</a></li><li><a href="#">Atelier &amp; tests</a></li><li><a href="/mentions-legales">Mentions légales</a></li><li><a href="/mentions-legales">CGV</a></li></ul>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 PULSAR. Tous droits réservés.</span>
+      <span>© 2026 Driss Djellali. All Rights Reserved.</span>
       <span>Conçu pour la puissance du quotidien</span>
     </div>
   </div>

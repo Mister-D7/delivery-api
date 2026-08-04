@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { CatalogProduct, Category, ThemeSettings, SelectedElement } from './editorTypes';
 import { FONTS, PRESETS } from './editorTypes';
+import AdminSelect from './AdminSelect';
 
 const STORE_KEY = 'delivery_storefront_layout';
 
@@ -166,10 +167,9 @@ export default function EditorSidebarLeft(props: Props) {
                         <Upload size={10} /> {addImageFile ? 'Image sélectionnée' : 'Ajouter une image'}
                       </button>
                       {addImagePreview && <div className="h-16 rounded-lg overflow-hidden" style={{ background: 'var(--admin-bg)' }}><img src={addImagePreview} alt="" className="w-full h-full object-contain" /></div>}
-                      <select value={addCategoryId} onChange={e => setAddCategoryId(e.target.value)} className="input-field text-[10px] w-full py-1.5">
-                        <option value="">Catégorie (optionnel)</option>
-                        {orderedCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <AdminSelect value={addCategoryId} onChange={v => setAddCategoryId(v)} className="w-full text-[10px] py-1.5"
+                        placeholder="Catégorie (optionnel)"
+                        options={[{ value: '', label: 'Catégorie (optionnel)' }, ...orderedCategories.map(c => ({ value: c.id, label: c.name }))]} />
                       <input type="number" value={addStock} onChange={e => setAddStock(e.target.value)} placeholder="Stock" className="input-field text-[10px] w-full py-1.5" />
                       <button onClick={addProductToCatalog} className="w-full py-1.5 rounded-lg text-[10px] font-bold flex items-center justify-center gap-1" style={{ background: 'var(--admin-gold-bg)', color: 'var(--admin-gold)', border: '1px solid rgba(191,162,78,0.2)' }}>
                         <Plus size={10} /> Ajouter à la boutique
@@ -186,8 +186,11 @@ export default function EditorSidebarLeft(props: Props) {
                         {p.imageUrl ? <img src={p.imageUrl} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Package size={10} style={{ color: 'var(--admin-surface3)' }} /></div>}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-medium truncate">{p.name}</p>
-                        <p className="text-[9px]" style={{ color: 'var(--admin-muted2)' }}>{p.salePrice} DA</p>
+                        <p className="text-[11px] font-medium truncate">
+                          {p.name}{' '}
+                          {!p.costPrice && <span className="text-[7px] font-bold px-1 py-0.5 rounded" style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>COÛT</span>}
+                        </p>
+                        <p className="text-[9px]" style={{ color: 'var(--admin-muted2)' }}>{p.costPrice ? `Achat ${p.costPrice} DA · ` : ''}{p.salePrice} DA</p>
                       </div>
                       <span className="text-[8px] font-mono" style={{ color: 'var(--admin-muted3)' }}>#{i + 1}</span>
                     </div>

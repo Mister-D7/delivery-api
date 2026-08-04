@@ -15,5 +15,9 @@
   "timeline": "Timeline",
   "messages": "Messages",
   "chat_placeholder": "Type a message...",
-  "send": "Send"
+  "send": "Send",
+  "tracking_code": "Tracking code",
+  "tracking_code_hint": "This code lets the shop find your order.",
+  "copy": "Copy",
+  "copied": "Copied"
 }

@@ -27,6 +27,28 @@ export function comparePassword(password, hash) {
 }
 
 /* ══════════════════════════════════════════
+   RESILIENT FETCH
+   Retries transient DNS/network failures (e.g. ENOTFOUND) that can
+   otherwise surface as "fetch failed" during Google OAuth exchanges.
+   Only retries when fetch throws (network-level); HTTP responses pass
+   through untouched.
+   ══════════════════════════════════════════ */
+
+export async function fetchWithRetry(url, options, retries = 4) {
+  let lastErr;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fetch(url, options);
+    } catch (err) {
+      lastErr = err;
+      const wait = 250 * (i + 1);
+      await new Promise((r) => setTimeout(r, wait));
+    }
+  }
+  throw lastErr;
+}
+
+/* ══════════════════════════════════════════
    GOOGLE LOGIN — CUSTOMER
    ══════════════════════════════════════════ */
 
@@ -40,7 +62,7 @@ export async function handleGoogleCustomerLogin(code) {
   }
 
   // Exchange code for tokens
-  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+  const tokenRes = await fetchWithRetry('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -60,7 +82,7 @@ export async function handleGoogleCustomerLogin(code) {
   const tokens = await tokenRes.json();
 
   // Get user info
-  const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+  const userRes = await fetchWithRetry('https://www.googleapis.com/oauth2/v2/userinfo', {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
 
@@ -107,7 +129,7 @@ export async function handleGoogleLogin(code) {
   }
 
   // Exchange code for tokens
-  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+  const tokenRes = await fetchWithRetry('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -127,7 +149,7 @@ export async function handleGoogleLogin(code) {
   const tokens = await tokenRes.json();
 
   // Get user info
-  const userRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+  const userRes = await fetchWithRetry('https://www.googleapis.com/oauth2/v2/userinfo', {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
   });
 

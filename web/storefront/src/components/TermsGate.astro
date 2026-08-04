@@ -1,0 +1,113 @@
+---
+// Terms & conditions acceptance gate — blocks access until accepted.
+---
+<script is:inline>
+  (async function () {
+    var KEY = 'djdr_tos_accepted';
+    var accepted = false;
+    try { accepted = localStorage.getItem(KEY) === '1'; } catch (e) {}
+    var isEdit = (window.location.search || '').indexOf('edit=') !== -1;
+    var isAdmin = false;
+    try { isAdmin = !!localStorage.getItem('delivery_token'); } catch (e) {}
+    if (accepted || isEdit || isAdmin) return;
+
+    var brandName = '';
+    var contactEmail = '';
+    var contactPhone = '';
+    try {
+      var r = await fetch('/api/delivery/storefront/settings/storefront');
+      var blob = await r.json();
+      brandName = blob.storeName || (blob.texts && blob.texts.storeName) || '';
+      var texts = blob.texts || {};
+      contactEmail = texts.contactEmail || '';
+      contactPhone = texts.contactPhone || '';
+    } catch (e) {}
+
+    var overlay = document.createElement('div');
+    overlay.id = 'djdr-tos';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', 'Conditions d\'utilisation');
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#08080b;color:#f2f2f5;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto;';
+
+    var card = document.createElement('div');
+    card.style.cssText = 'max-width:620px;width:100%;background:#141419;border:1px solid #2a2a33;border-radius:18px;padding:34px;margin:auto;';
+
+    var h = document.createElement('h1');
+    h.textContent = brandName || 'Bienvenue';
+    h.style.cssText = 'font-size:26px;font-weight:800;letter-spacing:.03em;margin:0 0 2px;';
+
+    var sub = document.createElement('p');
+    sub.textContent = 'Designed by Driss-Djellali \u2014 Terms of Service & Legal Notice';
+    sub.style.cssText = 'font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a8a95;margin:0 0 22px;';
+
+    var p1 = document.createElement('p');
+    p1.textContent = 'LEGAL NOTICE & COPYRIGHT PROTECTION';
+    p1.style.cssText = 'font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 12px;';
+
+    var body = document.createElement('div');
+    body.style.cssText = 'font-size:14px;line-height:1.7;color:#c9c9d2;';
+
+    var paras = [
+      '\u00A9 2026 Driss Djellali. All Rights Reserved.',
+      'All content, code, designs, graphics, and materials created by Driss Djellali are protected under international copyright laws. Strictly no part of this work may be copied, reproduced, republished, uploaded, posted, transmitted, or redistributed in any way without prior explicit written permission from Driss Djellali.',
+      'Unauthorized use, modification, or distribution of this work constitutes a violation of copyright law and will be met with immediate legal action.',
+      'To request permission for reuse, contact me via:'
+    ];
+    paras.forEach(function (t) {
+      var p = document.createElement('p');
+      p.textContent = t;
+      p.style.margin = '0 0 12px';
+      body.appendChild(p);
+    });
+
+    var contact = document.createElement('div');
+    contact.style.cssText = 'background:#1b1b22;border:1px solid #2a2a33;border-radius:12px;padding:14px 16px;margin-bottom:18px;';
+
+    var mail = document.createElement('p');
+    mail.innerHTML = 'Email: <a href="mailto:' + (contactEmail || 'djellalidris02@gmail.com') + '" style="color:#8ab4ff;text-decoration:none;">' + (contactEmail || 'djellalidris02@gmail.com') + '</a>';
+    mail.style.cssText = 'margin:0 0 6px;font-size:14px;';
+
+    var tel = document.createElement('p');
+    tel.textContent = contactPhone ? ('Phone: ' + contactPhone) : 'Telegram: @Phantom_DR';
+    tel.style.cssText = 'margin:0;font-size:14px;';
+
+    contact.appendChild(mail);
+    contact.appendChild(tel);
+    body.appendChild(contact);
+
+    var err = document.createElement('p');
+    err.id = 'djdr-tos-err';
+    err.style.cssText = 'display:none;color:#ff6b5e;font-size:12.5px;margin:0 0 14px;';
+    err.textContent = 'Vous devez accepter les conditions pour acc\u00E9der au site.';
+
+    var row = document.createElement('div');
+    row.style.cssText = 'display:flex;gap:12px;flex-wrap:wrap;';
+
+    var accept = document.createElement('button');
+    accept.textContent = 'J\u2019accepte les conditions';
+    accept.style.cssText = 'flex:1;min-width:150px;padding:13px 18px;border:0;border-radius:12px;background:linear-gradient(120deg,#7c5cff,#ff3b30);color:#fff;font-weight:700;font-size:14px;cursor:pointer;';
+    accept.addEventListener('click', function () {
+      try { localStorage.setItem(KEY, '1'); } catch (e) {}
+      overlay.style.display = 'none';
+    });
+
+    var decline = document.createElement('button');
+    decline.textContent = 'Je refuse';
+    decline.style.cssText = 'flex:1;min-width:130px;padding:13px 18px;border:1px solid #33333c;border-radius:12px;background:transparent;color:#8a8a95;font-weight:600;font-size:14px;cursor:pointer;';
+    decline.addEventListener('click', function () {
+      err.style.display = 'block';
+    });
+
+    row.appendChild(accept);
+    row.appendChild(decline);
+
+    card.appendChild(h);
+    card.appendChild(sub);
+    card.appendChild(p1);
+    card.appendChild(body);
+    card.appendChild(err);
+    card.appendChild(row);
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+  })();
+</script>
