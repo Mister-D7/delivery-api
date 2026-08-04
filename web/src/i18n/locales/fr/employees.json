@@ -1,0 +1,30 @@
+{
+  "title": "Employés",
+  "subtitle": "Salaires & comptabilité",
+  "summary": {
+    "active": "Employés actifs",
+    "gross": "Masse salariale (brut/mois)",
+    "employer": "Coût employeur (×1.26)",
+    "cnas": "Salaire brut + charges patronales CNAS (26%)"
+  },
+  "form": {
+    "title": "Ajouter un employé",
+    "name": "Nom",
+    "gross": "Salaire brut (DA/mois)",
+    "add": "Ajouter",
+    "saved": "Employé enregistré",
+    "error": "Nom et salaire requis"
+  },
+  "row": {
+    "gross": "Brut",
+    "employer": "Coût employeur",
+    "active": "Actif",
+    "inactive": "Inactif"
+  },
+  "actions": {
+    "edit": "Modifier",
+    "delete_confirm": "Supprimer cet employé ?",
+    "deleted": "Employé supprimé"
+  },
+  "empty": "Aucun employé. Ajoutez votre premier employé."
+}

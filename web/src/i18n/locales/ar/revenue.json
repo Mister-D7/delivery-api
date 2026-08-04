@@ -17,7 +17,11 @@
     "delivered_orders": "الطلبات المسلّمة",
     "cancelled_orders": "الطلبات الملغاة",
     "loss_cancelled": "خسائر الإلغاء",
-    "net_profit": "صافي الربح"
+    "net_profit": "صافي الربح",
+    "delivery_revenue": "تحصيلات التوصيل",
+    "driver_cost": "تكلفة السائقين",
+    "delivery_profit": "ربح التوصيل",
+    "employee_cost": "رواتب الموظفين (شهر)"
   },
   "products": {
     "title": "تكاليف المنتجات",
@@ -34,9 +38,13 @@
     "print": "طباعة",
     "delivery_rate": "نسبة التوصيل",
     "detail": "التفاصيل المالية",
-    "gross_revenue": "الإيرادات الإجمالية (التوصيلات)",
+    "gross_revenue": "إجمالي الإيرادات (المنتجات)",
     "cost_of_goods": "تكلفة البضائع",
     "gross_margin": "الهامش الإجمالي",
+    "delivery_collected": "تحصيلات التوصيل",
+    "driver_cost": "تكلفة السائقين",
+    "delivery_profit": "ربح التوصيل",
+    "employee_cost": "رواتب الموظفين (شهر)",
     "cancelled_loss": "خسائر الطلبات الملغاة"
   },
   "date_range": {

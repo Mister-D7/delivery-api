@@ -25,8 +25,13 @@ export default function RevenueReportsTab({ overview, topProducts, products, t }
       ['RAPPORT REVENUE - MISTER-DR', '', '', date], [],
       ['RESUME', ''],
       ["Chiffre d'affaires total", overview.totalRevenue],
-      ['Profit net', overview.netProfit],
       ['Cout des marchandises', overview.totalCostOfGoods],
+      ['Marge brute', overview.grossProfit ?? overview.totalRevenue - overview.totalCostOfGoods],
+      ['Livraisons encaissees', overview.deliveryRevenue || 0],
+      ['Cout livreurs', -(overview.driverCost || 0)],
+      ['Profit livraison', overview.deliveryProfit ?? 0],
+      ['Salaires employes (mois)', -(overview.employeeCost || 0)],
+      ['Profit net', overview.netProfit],
       ['Taux de reussite', `${overview.successRate}%`],
       ['Total commandes', overview.totalOrders],
       ['Livrees', overview.deliveredOrders],
@@ -52,8 +57,13 @@ export default function RevenueReportsTab({ overview, topProducts, products, t }
       ['RAPPORT REVENUE - MISTER-DR', '', '', date], [],
       ['RESUME', ''],
       ["Chiffre d'affaires total", overview.totalRevenue],
-      ['Profit net', overview.netProfit],
       ['Cout des marchandises', overview.totalCostOfGoods],
+      ['Marge brute', overview.grossProfit ?? overview.totalRevenue - overview.totalCostOfGoods],
+      ['Livraisons encaissees', overview.deliveryRevenue || 0],
+      ['Cout livreurs', -(overview.driverCost || 0)],
+      ['Profit livraison', overview.deliveryProfit ?? 0],
+      ['Salaires employes (mois)', -(overview.employeeCost || 0)],
+      ['Profit net', overview.netProfit],
       ['Taux de reussite', `${overview.successRate}%`],
       ['Total commandes', overview.totalOrders],
       ['Livrees', overview.deliveredOrders],
@@ -122,10 +132,14 @@ export default function RevenueReportsTab({ overview, topProducts, products, t }
           {[
             { label: t('reports.gross_revenue'), value: overview.totalRevenue, color: 'var(--admin-success)' },
             { label: t('reports.cost_of_goods'), value: -overview.totalCostOfGoods, color: 'var(--admin-danger)' },
-            { label: t('reports.gross_margin'), value: overview.totalRevenue - overview.totalCostOfGoods, color: 'var(--admin-gold)' },
+            { label: t('reports.gross_margin'), value: overview.grossProfit ?? (overview.totalRevenue - overview.totalCostOfGoods), color: 'var(--admin-gold)' },
+            { label: t('reports.delivery_collected'), value: overview.deliveryRevenue || 0, color: '#0ea5e9' },
+            { label: t('reports.driver_cost'), value: -(overview.driverCost || 0), color: 'var(--admin-danger)' },
+            { label: t('reports.delivery_profit'), value: overview.deliveryProfit ?? 0, color: '#0ea5e9' },
+            { label: t('reports.employee_cost'), value: -(overview.employeeCost || 0), color: '#f59e0b' },
             { label: t('reports.cancelled_loss'), value: -overview.cancelledLoss, color: 'var(--admin-danger)' },
           ].map((row, i) => (
-            <div key={i} className="flex items-center justify-between py-2" style={{ borderBottom: i < 3 ? '1px solid rgba(255,255,255,0.03)' : 'none' }}>
+            <div key={i} className="flex items-center justify-between py-2" style={{ borderBottom: i < 7 ? '1px solid rgba(255,255,255,0.03)' : 'none' }}>
               <span className="text-[11px]" style={{ color: 'var(--admin-muted)' }}>{row.label}</span>
               <span className="text-[11px] font-bold" style={{ color: row.value >= 0 ? 'var(--admin-success)' : 'var(--admin-danger)' }}>
                 {row.value >= 0 ? '+' : ''}{DA(Math.abs(row.value))}

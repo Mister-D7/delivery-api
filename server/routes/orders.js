@@ -44,6 +44,7 @@ function mapOrder(o) {
     customerId: o.customer_id,
     customerName: o.customer_name,
     deliveryFee: o.delivery_fee,
+    driverCost: o.driver_cost,
     couponId: o.coupon_id,
     couponCode: o.coupon_code,
     discountAmount: o.discount_amount,
@@ -478,11 +479,31 @@ router.patch('/:id/status', adminAuth, async (req, res) => {
       status,
     });
 
-    const payload = { orderId: order.id, status: order.status, updatedAt: order.updated_at };
+    const payload = { orderId: order.id, status: order.status, updatedAt: order.updated_at, deliveryFee: order.delivery_fee };
     deliveryEvents.emit(req.params.id, 'status_changed', payload);
     deliveryEvents.emit('admin:orders', 'status_changed', payload);
     if (order.secure_token) deliveryEvents.emit(`token:${order.secure_token}`, 'status_changed', payload);
 
+    res.json(mapOrder(order));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// PATCH /orders/:id/driver-cost — admin, set how much the delivery driver is paid for this order
+router.patch('/:id/driver-cost', adminAuth, async (req, res) => {
+  try {
+    const { driverCost } = req.body;
+    const cost = Math.max(0, Number(driverCost) || 0);
+    const { data: order, error } = await supabase
+      .from('delivery_orders')
+      .update({ driver_cost: cost, updated_at: new Date().toISOString() })
+      .eq('id', req.params.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    if (!order) return res.status(404).json({ error: 'Order not found' });
     res.json(mapOrder(order));
   } catch (err) {
     res.status(500).json({ error: err.message });

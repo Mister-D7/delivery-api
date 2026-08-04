@@ -16,6 +16,8 @@ type Order = {
   customerName?: string; phone?: string; address?: string;
   latitude?: number | null; longitude?: number | null;
   items?: any[]; voiceOrderUrl?: string;
+  couponCode?: string; couponId?: string; discountAmount?: number;
+  driverCost?: number;
   createdAt: string; updatedAt: string;
 };
 
@@ -39,11 +41,12 @@ export default function AdminDashboard() {
   const [ctxOrder, setCtxOrder] = useState<Order | null>(null);
   const [pricing, setPricing] = useState<DeliveryPricing | null>(null);
   const [customFeeInput, setCustomFeeInput] = useState<number | null>(null);
+  const [driverCostInput, setDriverCostInput] = useState<number | null>(null);
 
   useEffect(() => { getDeliveryPricing().then(setPricing); }, []);
 
   // Reset custom fee when expanding a different order
-  useEffect(() => { setCustomFeeInput(null); }, [expandedId]);
+  useEffect(() => { setCustomFeeInput(null); setDriverCostInput(null); }, [expandedId]);
 
   const fetchOrders = useCallback(() => {
     api.get('/orders').then(r => setOrders(r.data.orders || [])).catch(e => {
@@ -101,11 +104,32 @@ export default function AdminDashboard() {
     setOrders(prev => prev.map(o => o.id === id ? { ...o, status: 'CONFIRMED', deliveryFee: fee } : o));
   };
 
+  const saveDriverCost = async (id: string) => {
+    const cost = driverCostInput ?? 0;
+    try {
+      const r = await api.patch(`/orders/${id}/driver-cost`, { driverCost: cost });
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, driverCost: r.data.driverCost ?? cost } : o));
+      setDriverCostInput(null);
+      toast.success('Coût livreur enregistré');
+    } catch {
+      toast.error('Erreur lors de l\'enregistrement');
+    }
+  };
+
   const getSuggestedFee = (order: Order): { fee: number; distance: number } | null => {
     if (!pricing || order.latitude == null || order.longitude == null) return null;
     const result = calcDeliveryFee(pricing, order.total, order.latitude, order.longitude);
     if (result.outOfRange) return null;
     return { fee: result.fee, distance: result.distance };
+  };
+
+  const copyText = async (text: string) => {
+    try {
+      if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(text);
+      toast.success('Copié');
+    } catch {
+      toast.error('Erreur de copie');
+    }
   };
 
   const getOrderMenuItems = (o: Order) => {
@@ -283,7 +307,30 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                     <div className="space-y-2 text-sm">
                       <p><span style={{ color: 'var(--admin-muted)' }}>Adresse: </span>{order.address || '-'}</p>
-                      {order.latitude != null && order.longitude != null && <p><span style={{ color: 'var(--admin-muted)' }}>GPS: </span>{order.latitude.toFixed(5)}, {order.longitude.toFixed(5)}</p>}
+                      <div className="p-3 rounded-xl space-y-2" style={{ background: 'var(--admin-surface2)' }}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold w-24 flex-shrink-0" style={{ color: 'var(--admin-muted)' }}>GPS:</span>
+                          {order.latitude != null && order.longitude != null ? (
+                            <>
+                              <code className="flex-1 min-w-0 text-xs break-all" style={{ color: 'var(--admin-gold)', fontFamily: 'monospace' }}>{order.latitude.toFixed(5)}, {order.longitude.toFixed(5)}</code>
+                              <button onClick={() => copyText(`${order.latitude!.toFixed(5)}, ${order.longitude!.toFixed(5)}`)} className="p-1.5 rounded-lg flex-shrink-0" style={{ background: 'var(--admin-bg)', color: 'var(--admin-gold)' }} title="Copier le GPS">
+                                <Copy size={12} />
+                              </button>
+                            </>
+                          ) : (
+                            <span className="text-xs" style={{ color: 'var(--admin-muted2)' }}>-</span>
+                          )}
+                        </div>
+                        {order.secureToken && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-semibold w-24 flex-shrink-0" style={{ color: 'var(--admin-muted)' }}>Code de suivi:</span>
+                            <code className="flex-1 min-w-0 text-xs break-all" style={{ color: 'var(--admin-gold)', fontFamily: 'monospace' }}>{order.secureToken}</code>
+                            <button onClick={() => copyText(order.secureToken!)} className="p-1.5 rounded-lg flex-shrink-0" style={{ background: 'var(--admin-bg)', color: 'var(--admin-gold)' }} title="Copier le code de suivi">
+                              <Copy size={12} />
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       {order.voiceOrderUrl && <audio controls src={order.voiceOrderUrl} className="mt-2 w-full" style={{ height: 36 }} />}
                       {order.items && (
                         <div className="mt-3 p-3 rounded-xl" style={{ background: 'var(--admin-surface2)' }}>
@@ -322,6 +369,12 @@ export default function AdminDashboard() {
                             <p className="text-xs font-semibold mb-1.5" style={{ color: 'var(--admin-muted)' }}>Coûts & marge</p>
                             <div className="flex justify-between text-[11px]"><span style={{ color: 'var(--admin-muted)' }}>Achat (coût)</span><span>{itemCost.toLocaleString('fr-FR')} DA</span></div>
                             <div className="flex justify-between text-[11px]"><span style={{ color: 'var(--admin-muted)' }}>Vente</span><span>{itemSell.toLocaleString('fr-FR')} DA</span></div>
+                            {order.couponCode && Number(order.discountAmount) > 0 && (
+                              <div className="flex justify-between text-[11px]" style={{ color: 'var(--admin-gold)' }}>
+                                <span>Coupon: {order.couponCode}</span>
+                                <span style={{ color: 'var(--admin-danger)' }}>-{Number(order.discountAmount).toLocaleString('fr-FR')} DA</span>
+                              </div>
+                            )}
                             <div className="flex justify-between text-xs font-bold mt-1" style={{ borderTop: '1px solid var(--admin-border2)', paddingTop: 6 }}>
                               <span style={{ color: 'var(--admin-gold)' }}>Marge (hors livraison)</span>
                               <span style={{ color: profit >= 0 ? '#4ade80' : 'var(--admin-danger)' }}>{profit >= 0 ? '+' : ''}{profit.toLocaleString('fr-FR')} DA</span>
@@ -366,6 +419,28 @@ export default function AdminDashboard() {
                             </>
                           );
                         })()}
+                      </div>
+                      {/* Driver cost section */}
+                      <div className="mt-2 p-3 rounded-xl" style={{ background: 'var(--admin-surface2)' }}>
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-xs font-semibold" style={{ color: 'var(--admin-muted)' }}>Coût livreur</p>
+                          {order.driverCost != null && Number(order.driverCost) > 0 && (
+                            <span className="text-[10px] font-bold" style={{ color: 'var(--admin-gold)' }}>{order.driverCost} DA</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="number" value={driverCostInput ?? order.driverCost ?? ''} onChange={e => setDriverCostInput(Number(e.target.value))}
+                            className="flex-1 px-2 py-1 rounded-lg text-xs outline-none" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border2)', color: 'var(--admin-text)', width: 90 }}
+                            placeholder="0" />
+                          <button onClick={() => saveDriverCost(order.id)} className="px-3 py-1.5 rounded-lg text-[10px] font-bold flex-shrink-0" style={{ background: 'linear-gradient(135deg, #d4b96a 0%, #9c7a3f 100%)', color: 'var(--admin-bg)' }}>
+                            Enregistrer
+                          </button>
+                        </div>
+                        {order.deliveryFee != null && order.driverCost != null && (
+                          <p className="text-[10px] mt-1.5" style={{ color: Number(order.deliveryFee) - Number(order.driverCost) >= 0 ? 'var(--admin-success)' : 'var(--admin-danger)' }}>
+                            Profit livraison: <span style={{ fontWeight: 700 }}>{Number(order.deliveryFee) - Number(order.driverCost)} DA</span> (encaisse {order.deliveryFee} DA - livreur {order.driverCost} DA)
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DollarSign, Package, FileText } from 'lucide-react';
+import { DollarSign, Package, FileText, Truck, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import type { Overview, TopProduct, ProductCost } from './revenueTypes';
@@ -41,12 +41,16 @@ export default function AdminRevenue() {
   useEffect(() => { fetchOverview(); fetchProducts(); }, []);
   useEffect(() => { fetchOverview(); }, [dateFrom, dateTo]);
 
-  const allCardIds = ['today', 'week', 'month', 'total', 'orders', 'cancelled', 'lossCancelled', 'netProfit'];
+  const allCardIds = ['today', 'week', 'month', 'total', 'deliveryRevenue', 'driverCost', 'deliveryProfit', 'employeeCost', 'orders', 'cancelled', 'lossCancelled', 'netProfit'];
   const getCardDefs = useCallback((o: Overview) => [
     { id: 'today', label: tc('time.today'), value: DA(o.todayRevenue), color: 'var(--admin-gold)', icon: DollarSign },
     { id: 'week', label: tc('time.this_week'), value: DA(o.weekRevenue), color: '#3b82f6', icon: DollarSign },
     { id: 'month', label: tc('time.this_month'), value: DA(o.monthRevenue), color: 'var(--admin-success)', icon: DollarSign },
     { id: 'total', label: t('overview.total_revenue'), value: DA(o.totalRevenue), color: '#a855f7', icon: DollarSign },
+    { id: 'deliveryRevenue', label: t('cards.delivery_revenue'), value: DA(o.deliveryRevenue || 0), color: '#0ea5e9', icon: Truck },
+    { id: 'driverCost', label: t('cards.driver_cost'), value: DA(o.driverCost || 0), color: 'var(--admin-danger)', icon: Truck },
+    { id: 'deliveryProfit', label: t('cards.delivery_profit'), value: `${(o.deliveryProfit ?? 0) >= 0 ? '+' : ''}${DA(Math.abs(o.deliveryProfit ?? 0))}`, color: (o.deliveryProfit ?? 0) >= 0 ? 'var(--admin-success)' : 'var(--admin-danger)', icon: Truck },
+    { id: 'employeeCost', label: t('cards.employee_cost'), value: DA(o.employeeCost || 0), color: '#f59e0b', icon: Users },
     { id: 'orders', label: t('cards.delivered_orders'), value: String(o.deliveredOrders), color: 'var(--admin-success)', icon: Package },
     { id: 'cancelled', label: t('cards.cancelled_orders'), value: String(o.cancelledOrders), color: 'var(--admin-danger)', icon: Package },
     { id: 'lossCancelled', label: t('cards.loss_cancelled'), value: DA(o.revenueLossCancelled || o.cancelledLoss), color: 'var(--admin-danger)', icon: DollarSign },

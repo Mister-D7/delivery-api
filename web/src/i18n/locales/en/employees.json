@@ -1,0 +1,30 @@
+{
+  "title": "Employees",
+  "subtitle": "Wages & accounting",
+  "summary": {
+    "active": "Active employees",
+    "gross": "Payroll (gross/month)",
+    "employer": "Employer cost (×1.26)",
+    "cnas": "Gross salary + employer CNAS (26%)"
+  },
+  "form": {
+    "title": "Add an employee",
+    "name": "Name",
+    "gross": "Gross salary (DA/month)",
+    "add": "Add",
+    "saved": "Employee saved",
+    "error": "Name and salary required"
+  },
+  "row": {
+    "gross": "Gross",
+    "employer": "Employer cost",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "edit": "Edit",
+    "delete_confirm": "Delete this employee?",
+    "deleted": "Employee deleted"
+  },
+  "empty": "No employees yet. Add your first employee."
+}

@@ -17,7 +17,11 @@
     "delivered_orders": "Delivered Orders",
     "cancelled_orders": "Cancelled Orders",
     "loss_cancelled": "Cancelled Loss",
-    "net_profit": "Net Profit"
+    "net_profit": "Net Profit",
+    "delivery_revenue": "Deliveries Collected",
+    "driver_cost": "Driver Costs",
+    "delivery_profit": "Delivery Profit",
+    "employee_cost": "Employee Wages (month)"
   },
   "products": {
     "title": "Product Costs",
@@ -34,9 +38,13 @@
     "print": "Print",
     "delivery_rate": "Delivery Rate",
     "detail": "Financial Detail",
-    "gross_revenue": "Gross Revenue (Deliveries)",
+    "gross_revenue": "Gross Revenue (Products)",
     "cost_of_goods": "Cost of Goods",
     "gross_margin": "Gross Margin",
+    "delivery_collected": "Deliveries Collected",
+    "driver_cost": "Driver Costs",
+    "delivery_profit": "Delivery Profit",
+    "employee_cost": "Employee Wages (month)",
     "cancelled_loss": "Cancelled Order Losses"
   },
   "date_range": {

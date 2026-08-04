@@ -19,6 +19,32 @@ type Order = {
 
 type Message = { id: string; text: string; sender: string; createdAt: string; audioUrl?: string; imageUrl?: string };
 
+type HistoryEntry = {
+  token: string;
+  id: string;
+  status: string;
+  total: number;
+  createdAt: string;
+  items?: string;
+};
+
+const HISTORY_KEY = 'delivery_track_history';
+
+function loadHistory(): HistoryEntry[] {
+  try {
+    const raw = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistHistory(list: HistoryEntry[]) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 30)));
+  } catch {}
+}
+
 function notifyViaServiceWorker(title: string, body: string) {
   const payload = { type: 'ORDER_STATUS', title, body };
   try {
@@ -52,8 +78,10 @@ export default function OrderTracking() {
   const [sending, setSending] = useState(false);
   const [myOrders, setMyOrders] = useState<Order[]>([]);
   const [loadingMyOrders, setLoadingMyOrders] = useState(false);
+  const [history, setHistory] = useState<HistoryEntry[]>(() => loadHistory());
   const [statusNotice, setStatusNotice] = useState<string | null>(null);
-  const didMount = useRef(false);
+  const orderTokenRef = useRef<string | null>(null);
+  useEffect(() => { orderTokenRef.current = order?.secureToken || null; }, [order?.secureToken]);
 
   const handleStatusChange = useCallback((status: string) => {
     setOrder(prev => prev ? { ...prev, status } : prev);
@@ -62,6 +90,21 @@ export default function OrderTracking() {
     setStatusNotice(label);
     toast(`${brand.name} — ${label}`, { duration: 4000, id: 'order-status-toast' });
     notifyStatus(brand.name, `Votre commande est: ${label}`);
+    const token = orderTokenRef.current;
+    if (token) {
+      api.get(`/orders/${token}`)
+        .then(r => {
+          if (r.data?.id) {
+            setOrder(prev => prev && prev.id === r.data.id ? { ...prev, ...r.data } : prev);
+            setHistory(prev => {
+              const updated = prev.map(h => h.token === token && r.data ? { ...h, status: r.data.status, total: r.data.total } : h);
+              persistHistory(updated);
+              return updated;
+            });
+          }
+        })
+        .catch(() => {});
+    }
   }, [brand]);
 
   const handleNewMessage = useCallback((msg: any) => {
@@ -86,6 +129,24 @@ export default function OrderTracking() {
   useEffect(() => { fetchMyOrders(); }, [fetchMyOrders]);
 
   useEffect(() => {
+    if (order || customer || history.length === 0) return;
+    let active = true;
+    Promise.all(history.map(h => api.get(`/orders/${h.token}`).then(r => r.data).catch(() => null)))
+      .then(results => {
+        if (!active) return;
+        setHistory(prev => {
+          const updated = prev.map(h => {
+            const fresh = results.find((r: any) => r && r.id === h.id);
+            return fresh ? { ...h, status: fresh.status, total: fresh.total, createdAt: fresh.createdAt } : h;
+          });
+          persistHistory(updated);
+          return updated;
+        });
+      });
+    return () => { active = false; };
+  }, [order, customer, history.length]);
+
+  useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
@@ -102,8 +163,20 @@ export default function OrderTracking() {
       const res = await api.get(`/orders/${clean}`);
       if (res.data && res.data.id) {
         setOrder(res.data);
-        localStorage.setItem('delivery_track_token', clean);
         setStatusNotice(null);
+        const entry: HistoryEntry = {
+          token: clean,
+          id: res.data.id,
+          status: res.data.status,
+          total: res.data.total,
+          createdAt: res.data.createdAt,
+          items: (res.data.items || []).slice(0, 3).map((i: any) => i.customName || i.product?.name || i.name || 'Produit').join(', '),
+        };
+        setHistory(prev => {
+          const next = [entry, ...prev.filter(h => h.token !== clean)];
+          persistHistory(next);
+          return next;
+        });
         try {
           const msgRes = await api.get(`/orders/token/${res.data.secureToken}/messages`);
           setMessages(msgRes.data || []);
@@ -113,9 +186,6 @@ export default function OrderTracking() {
       }
     } catch (err: any) {
       setError(t('search.placeholder'));
-      if (err?.response?.status === 404) {
-        localStorage.removeItem('delivery_track_token');
-      }
     }
     finally { setLoading(false); }
   }, []);
@@ -125,14 +195,7 @@ export default function OrderTracking() {
       const clean = urlToken.replace(/^#/, '');
       setToken(clean);
       searchByToken(clean);
-    } else if (!didMount.current) {
-      const saved = localStorage.getItem('delivery_track_token');
-      if (saved) {
-        setToken(saved);
-        searchByToken(saved);
-      }
     }
-    didMount.current = true;
   }, [urlToken, searchByToken]);
 
   const handleSearch = () => {
@@ -160,12 +223,16 @@ export default function OrderTracking() {
   };
 
   const clearTracking = () => {
-    localStorage.removeItem('delivery_track_token');
     setOrder(null);
     setMessages([]);
     setToken('');
     setStatusNotice(null);
     navigate('/track', { replace: true });
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem(HISTORY_KEY);
+    setHistory([]);
   };
 
   const copyCode = async () => {
@@ -189,7 +256,7 @@ export default function OrderTracking() {
             {/* Show my orders if logged in */}
             {customer && myOrders.length > 0 && !loadingMyOrders && (
               <div className="mb-8 text-left">
-                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('messages')}</p>
+                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('history')}</p>
                 <div className="space-y-2">
                   {myOrders.map(o => (
                     <button key={o.id} onClick={() => navigate(`/track/${o.secureToken}`)} className="w-full surface-card p-4 flex items-center gap-3 text-left hover:opacity-90 transition-opacity">
@@ -221,14 +288,14 @@ export default function OrderTracking() {
 
             {customer && !order && loadingMyOrders && (
               <div className="mb-8 text-left">
-                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('messages')}</p>
+                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('history')}</p>
                 <div className="space-y-2">{[1, 2].map(i => <div key={i} className="surface-card h-16 animate-pulse" style={{ background: 'var(--pt-surface3)' }} />)}</div>
               </div>
             )}
 
             {customer && !order && !loadingMyOrders && myOrders.length === 0 && (
               <div className="mb-8">
-                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('messages')}</p>
+                <p className="text-xs font-bold tracking-wide mb-3" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('history')}</p>
                 <div className="surface-card p-6 text-center">
                   <Package size={28} className="mx-auto mb-3" style={{ color: 'var(--pt-icon-dim)' }} />
                   <p className="text-sm" style={{ color: 'var(--pt-muted)' }}>{t('status.pending')}</p>
@@ -369,7 +436,35 @@ export default function OrderTracking() {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
+            {!customer && history.length > 0 && (
+              <div className="mb-8 text-left">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold tracking-wide" style={{ color: 'var(--pt-accent)', fontFamily: 'var(--pt-mono)' }}>{t('history')}</p>
+                  <button onClick={clearHistory} className="text-[10px] font-semibold px-2 py-1 rounded-lg" style={{ color: 'var(--pt-muted)', background: 'var(--pt-border-faint)' }}>
+                    {t('history_clear')}
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {history.map(h => (
+                    <button key={h.token} onClick={() => navigate(`/track/${h.token}`)} className="w-full surface-card p-4 flex items-center gap-3 text-left hover:opacity-90 transition-opacity">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-semibold">#{(h.id || h.token).slice(0, 8)}</span>
+                          <OrderStatusBadge status={h.status} />
+                        </div>
+                        <p className="text-[11px]" style={{ color: 'var(--pt-muted)' }}>{h.createdAt ? new Date(h.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : h.token}</p>
+                        {h.items && <p className="text-[10px] mt-1 truncate" style={{ color: 'var(--pt-muted2)' }}>{h.items}</p>}
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <p className="text-sm font-bold" style={{ color: 'var(--pt-accent)' }}>{h.total} DA</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex gap-2">
                 <input value={newMsg} onChange={e => setNewMsg(e.target.value)} placeholder={t('chat_placeholder')} className="input-field flex-1" onKeyDown={e => e.key === 'Enter' && sendMessage()} />
                 <button onClick={sendMessage} disabled={sending || !newMsg.trim()} className="gold-btn w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0">
                   <Send size={14} />

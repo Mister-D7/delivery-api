@@ -77,6 +77,7 @@ CREATE TABLE IF NOT EXISTS delivery_orders (
   status TEXT DEFAULT 'PENDING',
   total NUMERIC DEFAULT 0,
   delivery_fee NUMERIC DEFAULT 0,
+  driver_cost NUMERIC DEFAULT 0,
   customer_name TEXT,
   phone TEXT,
   address TEXT,
@@ -88,6 +89,16 @@ CREATE TABLE IF NOT EXISTS delivery_orders (
   delivered_at TIMESTAMPTZ,
   archived BOOLEAN DEFAULT false,
   archived_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS delivery_employees (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  role TEXT DEFAULT 'Employé',
+  gross_salary NUMERIC DEFAULT 0,
+  active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

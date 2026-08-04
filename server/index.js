@@ -25,6 +25,7 @@ import emailRoutes from './routes/email.js';
 import dismissedRoutes from './routes/dismissed.js';
 import couponRoutes from './routes/coupons.js';
 import comboRoutes from './routes/combos.js';
+import employeeRoutes from './routes/employees.js';
 import { startOrderNotifier } from './lib/notifications.js';
 import { startScheduler as startBackupScheduler } from './lib/backup.js';
 import { startArchiveScheduler } from './lib/archive.js';
@@ -60,6 +61,7 @@ app.use('/api/delivery/email', emailRoutes);
 app.use('/api/delivery/dismissed', dismissedRoutes);
 app.use('/api/delivery/coupons', couponRoutes);
 app.use('/api/delivery/combos', comboRoutes);
+app.use('/api/delivery/employees', employeeRoutes);
 
 // Multer error handler — returns proper error messages
 app.use((err, _req, res, next) => {

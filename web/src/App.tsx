@@ -21,6 +21,7 @@ const AdminSettings = lazy(() => import('./pages/admin/Settings'));
 const AdminRevenue = lazy(() => import('./pages/admin/Revenue'));
 const AdminArchive = lazy(() => import('./pages/admin/ArchiveView'));
 const AdminCoupons = lazy(() => import('./pages/admin/Coupons'));
+const AdminEmployees = lazy(() => import('./pages/admin/Employees'));
 
 function PageLoader() {
   return <div style={{ minHeight: '60vh', display: 'grid', placeItems: 'center', color: '#888' }}>Chargement…</div>;
@@ -56,6 +57,7 @@ export default function App() {
                   <Route path="revenue" element={<AdminRevenue />} />
                   <Route path="archive" element={<AdminArchive />} />
                   <Route path="coupons" element={<AdminCoupons />} />
+                  <Route path="employees" element={<AdminEmployees />} />
                   <Route path="settings" element={<AdminSettings />} />
                 </Route>
                 <Route path="/admin/editor/full" element={<StorefrontEditor fullScreen />} />

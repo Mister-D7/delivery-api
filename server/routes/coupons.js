@@ -42,6 +42,23 @@ function mapCoupon(c) {
   };
 }
 
+async function attachCustomers(coupons) {
+  const list = coupons || [];
+  const ids = [...new Set(list.map(c => c.customer_id).filter(Boolean))];
+  const byId = {};
+  if (ids.length) {
+    const { data: customers } = await supabase
+      .from('delivery_customers')
+      .select('id, name, email, phone')
+      .in('id', ids);
+    (customers || []).forEach(c => (byId[c.id] = c));
+  }
+  list.forEach(c => {
+    c.delivery_customers = c.customer_id ? byId[c.customer_id] || null : null;
+  });
+  return list;
+}
+
 export async function resolveCustomerFromRequest(req) {
   try {
     const header = req.headers.authorization;
@@ -101,9 +118,10 @@ router.get('/', adminAuth, async (req, res) => {
   try {
     const { data } = await supabase
       .from('delivery_coupons')
-      .select('*, delivery_customers(name, email, phone)')
+      .select('*')
       .order('created_at', { ascending: false });
-    res.json({ coupons: (data || []).map(mapCoupon) });
+    const coupons = await attachCustomers(data || []);
+    res.json({ coupons: coupons.map(mapCoupon) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -129,11 +147,12 @@ router.post('/', adminAuth, async (req, res) => {
         max_uses: Math.max(1, Number(maxUses) || 1),
         customer_id: customerId || null,
       })
-      .select('*, delivery_customers(name, email, phone)')
+      .select('*')
       .single();
 
     if (error) return res.status(400).json({ error: error.message });
-    res.status(201).json(mapCoupon(data));
+    const [coupon] = await attachCustomers([data]);
+    res.status(201).json(mapCoupon(coupon));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -218,12 +237,13 @@ router.patch('/:id', adminAuth, async (req, res) => {
       .from('delivery_coupons')
       .update(updates)
       .eq('id', req.params.id)
-      .select('*, delivery_customers(name, email, phone)')
+      .select('*')
       .single();
 
     if (error) return res.status(400).json({ error: error.message });
     if (!data) return res.status(404).json({ error: 'Coupon introuvable' });
-    res.json(mapCoupon(data));
+    const [coupon] = await attachCustomers([data]);
+    res.json(mapCoupon(coupon));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -242,10 +262,11 @@ router.post('/:id/toggle', adminAuth, async (req, res) => {
       .from('delivery_coupons')
       .update({ active: !current.active })
       .eq('id', req.params.id)
-      .select('*, delivery_customers(name, email, phone)')
+      .select('*')
       .single();
     if (error) throw error;
-    res.json(mapCoupon(data));
+    const [coupon] = await attachCustomers([data]);
+    res.json(mapCoupon(coupon));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

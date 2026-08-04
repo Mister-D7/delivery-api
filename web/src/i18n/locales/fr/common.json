@@ -7,7 +7,8 @@
     "settings": "Settings",
     "archive": "Archives",
     "coupons": "Coupons",
-    "storefront": "Boutique"
+    "storefront": "Boutique",
+    "employees": "Employés"
   },
   "actions": {
     "save": "Enregistrer",

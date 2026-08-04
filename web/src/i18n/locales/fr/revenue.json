@@ -17,7 +17,11 @@
     "delivered_orders": "Commandes livrees",
     "cancelled_orders": "Commandes annulees",
     "loss_cancelled": "Perte annulations",
-    "net_profit": "Profit net"
+    "net_profit": "Profit net",
+    "delivery_revenue": "Livraisons encaissées",
+    "driver_cost": "Coût livreurs",
+    "delivery_profit": "Profit livraison",
+    "employee_cost": "Salaires employés (mois)"
   },
   "products": {
     "title": "Couts des produits",
@@ -34,9 +38,13 @@
     "print": "Imprimer",
     "delivery_rate": "Taux de livraison",
     "detail": "Detail financier",
-    "gross_revenue": "Revenu brut (livraisons)",
+    "gross_revenue": "Revenu brut (produits)",
     "cost_of_goods": "Cout des marchandises",
     "gross_margin": "Marge brute",
+    "delivery_collected": "Livraisons encaissées",
+    "driver_cost": "Coût livreurs",
+    "delivery_profit": "Profit livraison",
+    "employee_cost": "Salaires employés (mois)",
     "cancelled_loss": "Pertes commandes annulees"
   },
   "date_range": {

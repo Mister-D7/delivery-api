@@ -28,6 +28,21 @@ router.get('/', adminAuth, async (req, res) => {
     // Revenue = sum of delivered orders
     const totalRevenue = delivered.reduce((s, o) => s + (o.total || 0), 0);
 
+    // Delivery: fees collected vs what we pay the driver
+    const deliveryRevenue = delivered.reduce((s, o) => s + (Number(o.delivery_fee) || 0), 0);
+    const driverCost = delivered.reduce((s, o) => s + (Number(o.driver_cost) || 0), 0);
+    const deliveryProfit = deliveryRevenue - driverCost;
+
+    // Employee cost (monthly, active employees): gross salary + employer CNAS (26%)
+    let employeeCost = 0;
+    try {
+      const { data: employees } = await supabase
+        .from('delivery_employees')
+        .select('gross_salary')
+        .eq('active', true);
+      employeeCost = (employees || []).reduce((s, e) => s + (Number(e.gross_salary) || 0) * 1.26, 0);
+    } catch {}
+
     // Cancelled loss = sum of cancelled orders (before delivery)
     const cancelledLoss = cancelled.reduce((s, o) => s + (o.total || 0), 0);
 
@@ -76,8 +91,9 @@ router.get('/', adminAuth, async (req, res) => {
     // Revenue lost from cancelled orders
     const revenueLossCancelled = cancelledLoss;
 
-    // Net profit = revenue from delivered - cost of those goods
-    const netProfit = totalRevenue - totalCostOfGoods;
+    // Net profit = gross margin (products) + delivery profit - monthly employee cost
+    const grossProfit = totalRevenue - totalCostOfGoods;
+    const netProfit = grossProfit + deliveryProfit - employeeCost;
 
     // Top selling products
     const topProducts = Object.values(productSales)
@@ -94,6 +110,11 @@ router.get('/', adminAuth, async (req, res) => {
         rtoLoss,
         damagedLoss,
         totalCostOfGoods,
+        grossProfit,
+        deliveryRevenue,
+        driverCost,
+        deliveryProfit,
+        employeeCost,
         revenueLossCancelled,
         netProfit,
         totalOrders: orders.length,

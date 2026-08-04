@@ -19,5 +19,7 @@
   "tracking_code": "Tracking code",
   "tracking_code_hint": "This code lets the shop find your order.",
   "copy": "Copy",
-  "copied": "Copied"
+  "copied": "Copied",
+  "history": "Tracking history",
+  "history_clear": "Clear"
 }

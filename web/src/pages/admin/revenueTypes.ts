@@ -1,6 +1,7 @@
 export type Overview = {
   totalRevenue: number; todayRevenue: number; weekRevenue: number; monthRevenue: number;
   cancelledLoss: number; rtoLoss: number; damagedLoss: number; totalCostOfGoods: number;
+  grossProfit: number; deliveryRevenue: number; driverCost: number; deliveryProfit: number; employeeCost: number;
   netProfit: number; totalOrders: number; deliveredOrders: number; cancelledOrders: number; successRate: number;
   revenueLossCancelled: number;
 };
