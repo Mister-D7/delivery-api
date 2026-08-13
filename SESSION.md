@@ -44,6 +44,18 @@
 - PDF receipt footer affiche encore "MISTER-DR" (partagé admin) — décision utilisateur pendante sur le suivi du thème.
 - Options : push background réel (VAPID/service worker persistant) si demandé ; vérifier `PulsarCategories` présent sur greens (catégories PLAY/LUMEN = données demo).
 
+## Refactor / nettoyage (2026-08-10) — FAIT, aucune modification git ni README
+- **Supprimé (code mort confirmé, zéro import)** : `web/src/themes/ui/*` (13 fichiers), `themes/ThemeRoot.tsx`, `themes/gaming/page.tsx`, `themes/pulsar/page.mdx` + `skin.css`, `web/src/mdx.d.ts`, `components/theme/GlowWrapper.tsx` + `AdminBgVideo.tsx`, `hooks/useAnimationGate.ts`, `context/ThemeContext.tsx`, `context/AdminBackgroundContext.tsx`, `pages/admin/EditorSidebarLeft.tsx` + `EditorSidebarRight.tsx` (reliques du StorefrontBuilder supprimé).
+- **`web/src/themes/index.ts` réécrit en registre metadata-only** (id/name/storeType/defaults, customs) — plus de `Component`, `preview`, `skinCss`, `ThemeData`. `themes/{pulsar,greens,gaming}/index.ts` = metadata seuls. Le listing thèmes admin utilise `defaults.bg/accent` — intact.
+- **`web/public/templates/` supprimé** (designs legacy ashion/electro/foodmart + previews SVG, non servis).
+- **`Nouveau Document texte.txt` supprimé** (notes obsolètes sur le Builder).
+- **`setup.js` déplacé → `server/setup.js`** (ENV_PATH corrigé vers `..`). `package.json` `npm run setup` et `start.bat` mis à jour.
+- **Tous les `*.sql` racine → `sql/`** (schema-archive, cloud, combos, coupons, employees, fix-storage, fix, nav, revenue, upgrade, fix-rls). Chemins des docs obsolètes = `sql/<nom>.sql`.
+- **`.gitignore`** : ajout `web/storefront/dist/` (le `web/dist/` y était déjà).
+- **⚠ git en suspens (l'utilisateur veut gérer git lui-même)** : `web/dist` + `web/storefront/dist` sont ENCORE trackés (108 fichiers → churn à chaque build). Pour les untracker :
+  `git rm -r --cached web/dist web/storefront/dist` (les fichiers restent sur disque ; `.gitignore` couvre déjà les deux).
+- Note : `backups/` gardé (gitignored, legacy), `themes/pulsar` racine gardé (source-of-truth).
+
 ## Fichiers clés
 - `web/storefront/src/pages/greens.astro` + `components/GreensHeaderSearch.tsx` (nouveau), `GreensFooter.tsx` (nouveau), `OrganicProductGrid.tsx` (écoute `og:search`), `styles/greens.css` (dark-mode logo, `og-brand`).
 - `web/src/pages/OrderTracking.tsx`, `web/src/hooks/useOrderSSE.ts`, `web/public/sw.js` (nouveau), `web/src/main.tsx` (enregistrement SW), `web/src/context/CustomerThemeContext.tsx`, `web/src/components/CustomerShell.tsx`.

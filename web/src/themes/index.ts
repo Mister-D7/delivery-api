@@ -1,9 +1,9 @@
-import type { ComponentType } from 'react';
 import pulsar from './pulsar';
 import greens from './greens';
-import DefaultPage from './ui/DefaultPage';
+import gaming from './gaming';
+import preorder from './preorder';
 
-export const CUSTOM_THEMES_KEY = 'delivery_custom_themes';
+const CUSTOM_THEMES_KEY = 'delivery_custom_themes';
 
 export type StoreType = 'tech' | 'gaming' | 'clothes' | 'grocery' | 'food';
 
@@ -22,41 +22,12 @@ export interface ThemeSettings {
   backgroundType?: 'color' | 'image' | 'video';
 }
 
-export interface ThemeProduct {
-  id: string;
-  name: string;
-  price: number;
-  oldPrice?: number;
-  imageUrl?: string;
-  category?: string;
-  specs?: string;
-  stockQty: number;
-  storeType?: string | null;
-}
-
-export interface ThemeCategory {
-  id: string;
-  name: string;
-  imageUrl?: string;
-}
-
-export interface ThemeData {
-  storeName: string;
-  tagline: string;
-  bannerText: string;
-  products: ThemeProduct[];
-  categories: ThemeCategory[];
-}
-
 export interface ThemePage {
   id: string;
   name: string;
   storeType: StoreType;
   description: string;
-  preview: string;
   defaults: ThemeSettings;
-  skinCss?: string;
-  Component: ComponentType<ThemeData>;
 }
 
 export interface CustomTheme {
@@ -85,13 +56,17 @@ export function getStoreType(): StoreType {
 
 export function storeTypeForTheme(theme?: string): StoreType {
   if (theme) {
-    const t = registry.find(p => p.id === theme);
+    const t = getThemePage(theme);
     if (t) return t.storeType;
   }
   return 'tech';
 }
 
-export function themeSettingsKey(id: string): string {
+export function storeTypeLabel(type: string): string {
+  return STORE_TYPES.find(s => s.type === type)?.label || type;
+}
+
+function themeSettingsKey(id: string): string {
   return `delivery_storefront_theme_${id}`;
 }
 
@@ -109,23 +84,7 @@ export function saveSettingsForTheme(id: string, settings: Record<string, any>) 
   try { localStorage.setItem(themeSettingsKey(id), JSON.stringify(settings)); } catch {}
 }
 
-export function scopeSkinCss(css: string): string {
-  return css
-    .replace(/(^|[\s,])html([\s,{])/g, '$1.theme-root$2')
-    .replace(/(^|[\s,])body([\s,{])/g, '$1.theme-root$2')
-    .replace(/(^|[\s,])body\s+/g, '$1.theme-root ')
-    .replace(/:root\b/g, '.theme-root');
-}
-
-export function storeTypeLabel(type: string): string {
-  return STORE_TYPES.find(s => s.type === type)?.label || type;
-}
-
-export function filterProductsForStore<T extends { storeType?: string | null }>(products: T[], storeType: StoreType): T[] {
-  return products.filter(p => !p.storeType || p.storeType === storeType);
-}
-
-const registry: ThemePage[] = [pulsar, greens];
+const registry: ThemePage[] = [pulsar, greens, gaming, preorder];
 
 const CUSTOM_BASE_DEFAULTS: ThemeSettings = {
   accent: '#2563eb',
@@ -147,20 +106,13 @@ function getCustomThemes(): CustomTheme[] {
   return [];
 }
 
-function saveCustomThemes(list: CustomTheme[]) {
-  try { localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(list)); } catch {}
-}
-
 function customToThemePage(c: CustomTheme): ThemePage {
   return {
     id: c.id,
     name: c.name,
     storeType: c.storeType,
     description: c.description,
-    preview: '',
     defaults: { ...CUSTOM_BASE_DEFAULTS, ...{ skinCss: c.css } },
-    skinCss: c.css,
-    Component: DefaultPage,
   };
 }
 
@@ -192,31 +144,10 @@ export function selectTheme(id: string) {
   try { localStorage.setItem('delivery_selected_template', id); } catch {}
 }
 
-export function importCustomTheme(name: string, storeType: StoreType, description: string, css: string): CustomTheme {
-  const id = `custom-${Date.now().toString(36)}`;
-  const t: CustomTheme = { id, name, storeType, description, css };
-  saveCustomThemes([...getCustomThemes(), t]);
-  return t;
-}
-
 export function deleteCustomTheme(id: string) {
   saveCustomThemes(getCustomThemes().filter(c => c.id !== id));
 }
 
-export function mergeSettings(defaults: ThemeSettings, saved: Record<string, any> | undefined | null): ThemeSettings {
-  const s = saved || {};
-  return {
-    accent: s.accentColor || defaults.accent,
-    bg: s.bgColor || defaults.bg,
-    surface: s.surfaceColor || defaults.surface,
-    ink: s.textColor || defaults.ink,
-    font: s.fontFamily || defaults.font,
-    radius: defaults.radius,
-    glow: s.glowEnabled ?? defaults.glow,
-    glass: s.glassEnabled ?? defaults.glass,
-    animation: s.animationEnabled ?? defaults.animation,
-    skinCss: s.skinCss ?? defaults.skinCss,
-    backgroundImage: s.backgroundImage ?? defaults.backgroundImage,
-    backgroundType: s.backgroundType ?? defaults.backgroundType,
-  };
+function saveCustomThemes(list: CustomTheme[]) {
+  try { localStorage.setItem(CUSTOM_THEMES_KEY, JSON.stringify(list)); } catch {}
 }

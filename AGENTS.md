@@ -2,20 +2,25 @@
 
 ## Project Structure
 - **`web/`** — React/Vite frontend (SPA). Served as a static build by the server (`server/index.js` serves `../web/dist`, SPA fallback to index.html). App URL: `http://localhost:4000`
-- **`server/`** — Express API server (port 4000)
-- **`backups/`** — Old template backups (legacy, do not restore)
+- **`web/storefront/`** — Astro storefront (see below).
+- **`server/`** — Express API server (port 4000). `server/setup.js` = DB setup wizard (writes root `.env`).
+- **`sql/`** — One-time Supabase SQL migrations (`schema-*.sql`, applied manually in the Supabase SQL Editor).
+- **`themes/`** — Source-of-truth TSX folders per design (e.g. `themes/pulsar`). Do not delete.
+- **`qtadmin/`** — Qt Quick/QML desktop admin app (see `PLAN-QT-ADMIN.md`).
+- **`backups/`** — Old template backups (legacy, gitignored, do not restore).
+- **`scripts/`** — repo helper scripts (e.g. `od-mcp.mjs`).
 
 ## Storefront (current — Astro pages + React islands, real-time sync)
 The client page is now **Astro** (`web/storefront/`), served by Express on `/`. The React SPA is the admin only. No iframe/preview bridge for the live page anymore — the admin previews via an iframe of the real `/`.
 
 ### Architecture
-- **Astro page per design**: `web/storefront/src/pages/index.astro` (NEXUS) + `pulsar.astro` (PULSAR, ported from DeepSeek TSX). Design CSS is global (imported or `is:global`); interactive parts are React islands (`client:load`) in `web/storefront/src/components/`.
-- **Runtime store**: `web/storefront/src/lib/storefront.ts` — polls every 8s `/api/delivery/catalog` + `/api/delivery/categories/public?storeType=X` + `/api/delivery/storefront/settings/storefront`; applies CSS vars (`--red/--cyan/--violet/--grad/--bg/--surface/--text/--font`) + pinned order; `storeTypeForTheme()` (pulsar→tech, claro→general, nexus-gaming→gaming); refresh is 2-phase (settings first). React hook `useStorefront()`.
+- **Astro page per design**: `web/storefront/src/pages/index.astro` (MISTER-DR GAMING) + `pulsar.astro` (PULSAR, ported from DeepSeek TSX) + `gaming.astro` (MISTER-DR GAMING, ported from the MaxGaming clone) + `greens.astro` (Greens Market). Design CSS is global (imported or `is:global`); interactive parts are React islands (`client:load`) in `web/storefront/src/components/`.
+- **Runtime store**: `web/storefront/src/lib/storefront.ts` — polls every 8s `/api/delivery/catalog` + `/api/delivery/categories/public?storeType=X` + `/api/delivery/storefront/settings/storefront`; applies CSS vars (`--red/--cyan/--violet/--grad/--bg/--surface/--text/--font`) + pinned order; `storeTypeForTheme()` (pulsar→tech, greens→grocery, gaming→gaming); refresh is 2-phase (settings first). React hook `useStorefront()`.
 - **Data**: `web/storefront/src/lib/data.ts` — `Product`, `StorefrontSettings` (incl. `theme?`), `mapRawProduct(raw, storeType)` (filters store type, maps flat `salePrice`/`promoPrice`).
-- **Islands**: NEXUS (`ProductGrid`, `CartButton`→replaced by `HeaderActions`, `CartDrawer`, `ProductModal`, `Brand`, `HeroText`) + Pulsar (`PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight` + 3D scenes `PulsarHeroScene`, `PulsarSpotlightScene` using `three`) + `HeaderActions` (magnetic cart icon + user globe menu; logout clears `delivery_customer`/`delivery_customer_token` → `/auth/login`). Shared island CSS: `src/styles/islands.css` (drawer/modal/header `hdr-*`/edit-mode `ec-*`, theme-agnostic via CSS vars). `three` is a dependency of `web/` (install with `--legacy-peer-deps`).
+- **Islands**: NEXUS (`ProductGrid`, `CartButton`→replaced by `HeaderActions`, `CartDrawer`, `ProductModal`, `Brand`, `HeroText`) + Pulsar (`PulsarHero`, `PulsarCategories`, `PulsarProductGrid`, `PulsarSpotlight` + 3D scenes `PulsarHeroScene`, `PulsarSpotlightScene` using `three`) + Gaming (`GamingHeader`, `GamingPromos`, `GamingCategories`, `GamingProductGrid`, `GamingProductCard`, `GamingFooter`) + `HeaderActions` (magnetic cart icon + user globe menu; logout clears `delivery_customer`/`delivery_customer_token` → `/auth/login`). Shared island CSS: `src/styles/islands.css` (drawer/modal/header `hdr-*`/edit-mode `ec-*`, theme-agnostic via CSS vars). `three` is a dependency of `web/` (install with `--legacy-peer-deps`).
 - **Edit mode (right-click editing in the admin preview)**: when the storefront URL has `?edit=1`, `EditCanvas` (island on every page) suppresses the browser context menu and shows a custom menu on targets: `[data-edit-text="<settingsKey>"]` (inline text edit → PUT settings blob), `[data-edit-product="<id>"]` (name/price/image modal → POST `/api/delivery/products` with `catalogId`), `[data-edit-3d]` (upload `.glb/.gltf/.fbx/.obj` → POST `/api/delivery/upload/model` → sets blob `model3d`, loaded by `PulsarHeroScene`/`PulsarSpotlightScene` via GLTFLoader). Iframe in `StorefrontEditor.tsx` always uses `?edit=1`. EditCanvas reads `delivery_token` from localStorage (same-origin iframe) for `Authorization: Bearer`.
-- **Server**: `server/index.js` — `/` reads the settings blob; if `blob.theme === 'pulsar'` and `dist/pulsar/index.html` exists it serves Pulsar, else `dist/index.html` (NEXUS). `/_assets` → Astro assets, then SPA fallback. Blob in Supabase `delivery_settings` key `storefront` (`GET` public / `PUT` admin).
-- **Admin editor**: `web/src/pages/admin/StorefrontEditor.tsx` — preview = iframe of live page (`/`), autosave blob 600ms + Sauvegarder, `buildBlob()` includes `theme: template?.id`. Tools limited to **Thèmes / Produits / Catégories** (pin by drag-drop). Theme list shows a color swatch (bg+accent). Admin theme list comes from `web/src/themes/index.ts` registry = **`[pulsar, greens]`** (claro + nexus-gaming removed — the "easy theme" mindset, no more complex MDX themes).
+- **Server**: `server/index.js` — `/` reads the settings blob; if `blob.theme === 'pulsar'` and `dist/pulsar/index.html` exists it serves Pulsar, if `blob.theme === 'greens'` serves `dist/greens/index.html`, if `blob.theme === 'gaming'` serves `dist/gaming/index.html`, else `dist/index.html`. `/_assets` → Astro assets, then SPA fallback. Blob in Supabase `delivery_settings` key `storefront` (`GET` public / `PUT` admin).
+- **Admin editor**: `web/src/pages/admin/StorefrontEditor.tsx` — preview = iframe of live page (`/`), autosave blob 600ms + Sauvegarder, `buildBlob()` includes `theme: template?.id`. Tools: **Thèmes / Produits / Catégories / Combos / ⭐ Catégories spéciales** (pin by drag-drop). Theme list shows a color swatch (bg+accent). Admin theme list comes from `web/src/themes/index.ts` registry = **`[pulsar, greens, gaming]`**. The registry is **metadata-only** (id/name/storeType/defaults) — there are NO page components in `themes/` anymore; the live page is Astro.
 
 ### Theme source method (NEW — no more reading design HTML files)
 - The user supplies a folder with a theme as **TSX** (converted by an external AI, e.g. DeepSeek Vision). Copy it to `G:\delivery soft\themes\<name>\` (CSS + TSX + any readme) — this is the **source of truth**. The user wants a new such folder per theme at the project root. Never re-read the original HTML design files (`G:\DESIGNE DELIVERY FOR CLIENT\...`).
@@ -31,7 +36,7 @@ The client page is now **Astro** (`web/storefront/`), served by Express on `/`. 
 
 ### localStorage keys (admin browser only — the CLIENT page uses the server blob, not localStorage)
 - `delivery_store_type`, `delivery_selected_template`, `delivery_storefront_theme_<themeId>`, `delivery_pinned_products`, `delivery_custom_themes`
-- `web/src/themes/` (MDX React registry) is now **vestigial** — only feeds the admin theme list; the client page does NOT use it.
+- `web/src/themes/` is a **metadata-only** registry (theme id/name/storeType/defaults) that feeds the admin theme list; the client page does NOT use it. The legacy page components (`themes/ui/*`, `ThemeRoot.tsx`, `themes/*/page.*`) were deleted in the cleanup.
 
 ## Open Design (OD) integration — design engine for themes
 OD 0.16.1 installed at `F:\Open Design` (Electron). The daemon runs INSIDE the desktop app (`Open Design.exe`) and is **auth-gated** via a named pipe — there is no fixed port anymore.
@@ -57,8 +62,8 @@ OD 0.16.1 installed at `F:\Open Design` (Electron). The daemon runs INSIDE the d
 - **Never re-read design HTML files** (`G:\DESIGNE DELIVERY FOR CLIENT\...`) — NEXUS and PULSAR are ported. New themes come as TSX folders copied to `themes/<name>/` at repo root. Never re-read files already in context.
 - **Check `SESSION.md` first** in a new session — it holds the current state and next steps.
 - `web` package has a pre-existing peer conflict: `@grapesjs/react@2.0.0` ↔ `grapesjs@^0.23.3` — use `--legacy-peer-deps` when installing.
-- Pre-existing TS errors exist in unrelated files (`Storefront.tsx`, `Revenue.tsx`, `StorefrontBuilder.tsx`, `OrderTracking.tsx`, `Customize.tsx`, `NotificationBell.tsx`) — they never block `npm run build` (Vite doesn't typecheck). Only fix errors in files we touch.
-- `StorefrontBuilder.tsx` (GrapesJS editor) is separate legacy tooling — do not touch unless asked.
+- Pre-existing TS errors exist in unrelated files (`Revenue.tsx`, `OrderTracking.tsx`, `Customize.tsx`, `NotificationBell.tsx`) — they never block `npm run build` (Vite doesn't typecheck). Only fix errors in files we touch.
+- Legacy `StorefrontBuilder.tsx` / `Storefront.tsx` were **deleted** — no GrapesJS builder anymore. Do not recreate it.
 
 ## Commands
 - Build (web): `npm run build` (in `G:\delivery soft\web`) → outputs to `dist/`

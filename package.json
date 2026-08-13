@@ -4,7 +4,7 @@
   "description": "MISTER-DR Delivery — Standalone admin + customer delivery app",
   "type": "module",
   "scripts": {
-    "setup": "node setup.js",
+    "setup": "node server/setup.js",
     "dev": "node server/index.js",
     "build": "cd web && node node_modules/vite/bin/vite.js build && cd storefront && node ../node_modules/astro/bin/astro.mjs build",
     "start": "NODE_ENV=production node server/index.js",

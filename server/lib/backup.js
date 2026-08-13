@@ -24,13 +24,22 @@ const ALL_TABLES = [
   'delivery_settings',
   'delivery_themes',
   'delivery_banners',
+  'delivery_coupons',
+  'delivery_combos',
+  'delivery_employees',
+  'delivery_employee_payments',
 ];
 
-export async function exportAllTables() {
+export async function exportAllTables(exclude = []) {
   const tables = {};
   const rowCounts = {};
 
   for (const tableName of ALL_TABLES) {
+    if (exclude.includes(tableName)) {
+      tables[tableName] = [];
+      rowCounts[tableName] = 0;
+      continue;
+    }
     let allRows = [];
     let from = 0;
     const pageSize = 1000;
@@ -100,6 +109,10 @@ export async function importAllTables(backup) {
     'delivery_settings',
     'delivery_themes',
     'delivery_banners',
+    'delivery_coupons',
+    'delivery_combos',
+    'delivery_employees',
+    'delivery_employee_payments',
     'delivery_orders',
     'delivery_order_items',
     'delivery_order_status_history',

@@ -126,15 +126,15 @@ export default function PulsarSpotlightScene() {
         const model = gltf.scene;
         model.updateMatrixWorld(true);
 
-        const junk: THREE.Object3D[] = [];
-        model.traverse((o) => {
-          if ((o as THREE.Object3D).isLight || (o as THREE.Object3D).isCamera) junk.push(o);
+        const junk: any[] = [];
+        model.traverse((o: any) => {
+          if ((o as any).isLight || (o as any).isCamera) junk.push(o);
         });
         junk.forEach((o) => o.parent?.remove(o));
 
         const box = new THREE.Box3();
-        model.traverse((o) => {
-          if ((o as THREE.Mesh).isMesh) box.expandByObject(o);
+        model.traverse((o: any) => {
+          if ((o as any).isMesh) box.expandByObject(o);
         });
         if (box.isEmpty()) box.setFromObject(model);
         const sizeV = box.getSize(new THREE.Vector3());
@@ -144,11 +144,11 @@ export default function PulsarSpotlightScene() {
         const center = box.getCenter(new THREE.Vector3());
         model.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
 
-        model.traverse((o) => {
-          const mesh = o as THREE.Mesh;
+        model.traverse((o: any) => {
+          const mesh = o as any;
           if (!mesh.isMesh) return;
           const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-          mats.forEach((m) => {
+          mats.forEach((m: any) => {
             if (!m) return;
             m.transparent = false;
             m.opacity = 1;

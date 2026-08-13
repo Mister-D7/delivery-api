@@ -39,7 +39,7 @@ export default function ProductModal() {
           <span className="badge">En stock</span>
         </div>
         <div className="iso-modal-body">
-          <span className="iso-eyebrow">{settings.storeName || 'NEXUS'}</span>
+          <span className="iso-eyebrow">{settings.storeName || 'MISTER-DR GAMING'}</span>
           <h3 className="card-name">{product.name}</h3>
           {specs.length ? (
             <ul className="iso-specs">

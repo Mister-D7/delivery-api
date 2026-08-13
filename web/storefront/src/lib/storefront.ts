@@ -16,6 +16,10 @@ export function storeTypeForTheme(theme?: string): string {
       return 'tech';
     case 'greens':
       return 'grocery';
+    case 'gaming':
+      return 'gaming';
+    case 'preorder':
+      return 'tech';
     default:
       return 'tech';
   }

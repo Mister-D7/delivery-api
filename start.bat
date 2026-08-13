@@ -11,7 +11,7 @@ echo.
 if not exist ".env" (
   echo   [!] No .env found. Running setup wizard...
   echo.
-  node setup.js
+  node server/setup.js
   echo.
 )
 

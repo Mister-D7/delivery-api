@@ -6,42 +6,10 @@ export default function HeaderActions() {
   const { count, openCart } = useCartStore();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const cartRef = useRef<HTMLButtonElement>(null);
   const globeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const btn = cartRef.current;
-    if (!btn) return;
-    let raf = 0;
-    const onMove = (e: PointerEvent) => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
-        const r = btn.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const dx = e.clientX - cx;
-        const dy = e.clientY - cy;
-        const d = Math.hypot(dx, dy);
-        if (d < 110) {
-          btn.style.setProperty('--mx', `${dx * 0.1}px`);
-          btn.style.setProperty('--my', `${dy * 0.1}px`);
-          btn.classList.add('magnetic-on');
-        } else {
-          btn.classList.remove('magnetic-on');
-          btn.style.setProperty('--mx', '0px');
-          btn.style.setProperty('--my', '0px');
-        }
-      });
-    };
-    window.addEventListener('pointermove', onMove);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('pointermove', onMove);
-    };
   }, []);
 
   useEffect(() => {
@@ -72,15 +40,9 @@ export default function HeaderActions() {
 
   return (
     <div className="hdr-actions">
-      <button ref={cartRef} className="hdr-icon hdr-cart" onClick={openCart} aria-label="Panier">
-        <span className="hdr-glow" />
-        <span className="hdr-spark h-s1" />
-        <span className="hdr-spark h-s2" />
-        <span className="hdr-spark h-s3" />
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="9" cy="21" r="1.4" />
-          <circle cx="19" cy="21" r="1.4" />
-          <path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H6" />
+      <button className="hdr-icon hdr-cart" onClick={openCart} aria-label="Panier">
+        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path d="M5.757 1.071a.5.5 0 0 1 .172.686L3.383 6h9.234L10.07 1.757a.5.5 0 1 1 .858-.514L13.783 6H15.5a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H.5a.5.5 0 0 1-.5-.5v-1A.5.5 0 0 1 .5 6h1.717L5.07 1.243a.5.5 0 0 1 .686-.172zM2.468 15.426.943 9h14.114l-1.525 6.426a.75.75 0 0 1-.729.574H3.197a.75.75 0 0 1-.729-.574z"/>
         </svg>
         {mounted && count > 0 ? (
           <span key={count} className="hdr-badge">
@@ -96,14 +58,8 @@ export default function HeaderActions() {
           aria-label="Mon compte"
           aria-expanded={menuOpen}
         >
-          <span className="hdr-glow" />
-          <span className="hdr-spark h-s1" />
-          <span className="hdr-spark h-s2" />
-          <span className="hdr-spark h-s3" />
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="9.4" opacity="0.4" />
-            <circle cx="12" cy="7.8" r="3.9" />
-            <path d="M5.4 19.4a6.6 6.6 0 0 1 13.2 0" />
+          <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/>
           </svg>
         </button>
         {menuOpen ? (

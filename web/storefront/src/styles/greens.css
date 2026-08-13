@@ -630,3 +630,14 @@ a { text-decoration: none; }
   .grid { grid-template-columns: 1fr; }
   .banner-block .banner-content { padding: 1.25rem; }
 }
+
+/* HERO SLIDER - accents greens */
+.slider-hero {
+  --hero-overlay: linear-gradient(90deg, rgba(20,45,20,0.6) 0%, rgba(20,45,20,0.3) 55%, rgba(20,45,20,0.1) 100%);
+  --hero-bullet-active: #4caf50;
+  --hero-badge-bg: rgba(76,175,80,0.22);
+  --hero-badge-border: rgba(76,175,80,0.5);
+  --hero-badge-color: #a5d6a7;
+  --hero-cta-bg: #4caf50;
+  --hero-cta-fg: #fff;
+}

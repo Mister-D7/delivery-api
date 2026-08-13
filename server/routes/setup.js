@@ -5,6 +5,9 @@ import { testToken as testRender, listServices, createWebService, updateServiceE
 import { createClient } from '@supabase/supabase-js';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import bcrypt from 'bcryptjs';
+import supabase from '../lib/supabase.js';
+import { exportAllTables, saveBackupLocal } from '../lib/backup.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -101,6 +104,15 @@ CREATE TABLE IF NOT EXISTS delivery_employees (
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS delivery_employee_payments (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  employee_id UUID NOT NULL REFERENCES delivery_employees(id) ON DELETE CASCADE,
+  amount NUMERIC NOT NULL DEFAULT 0,
+  paid_at TIMESTAMPTZ DEFAULT NOW(),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS delivery_order_items (
@@ -559,6 +571,113 @@ router.get('/render/services', adminAuth, async (req, res) => {
     if (!token) return res.status(400).json({ error: 'Render API key required' });
     const services = await listServices(token);
     res.json(services.map(s => ({ id: s.id, name: s.name, type: s.type, url: s.service?.url || s.url, status: s.status })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ══════════════════════════════════════════
+   RESET STORE — guarded destructive reset
+   Keeps: users, delivery_settings, delivery_themes,
+   delivery_banners, delivery_employees, delivery_employee_payments
+   ══════════════════════════════════════════ */
+
+const RESET_PASSWORD_KEY = 'reset_password';
+
+// PUT /setup/reset-password — set/change the reset guard password
+router.put('/reset-password', adminAuth, async (req, res) => {
+  try {
+    const { current, newPassword } = req.body || {};
+    if (!newPassword || String(newPassword).length < 4) {
+      return res.status(400).json({ error: 'Le mot de passe de réinitialisation doit contenir au moins 4 caractères.' });
+    }
+
+    const { data: existing } = await supabase
+      .from('delivery_settings')
+      .select('value')
+      .eq('key', RESET_PASSWORD_KEY)
+      .maybeSingle();
+
+    const hash = existing?.value?.hash || null;
+    if (hash) {
+      if (!current || !bcrypt.compareSync(String(current), hash)) {
+        return res.status(400).json({ error: 'Mot de passe actuel incorrect.' });
+      }
+    }
+
+    await supabase
+      .from('delivery_settings')
+      .upsert({ key: RESET_PASSWORD_KEY, value: { hash: bcrypt.hashSync(String(newPassword), 10) } }, { onConflict: 'key' });
+
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /setup/reset-status — whether a reset password is configured
+router.get('/reset-status', adminAuth, async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('delivery_settings')
+      .select('value')
+      .eq('key', RESET_PASSWORD_KEY)
+      .maybeSingle();
+    res.json({ configured: !!(data?.value?.hash) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /setup/reset — verify password, optional backup (excluding users), wipe store data
+router.post('/reset', adminAuth, async (req, res) => {
+  try {
+    const { password, doBackup } = req.body || {};
+
+    const { data: stored } = await supabase
+      .from('delivery_settings')
+      .select('value')
+      .eq('key', RESET_PASSWORD_KEY)
+      .maybeSingle();
+    const hash = stored?.value?.hash;
+    if (!hash) return res.status(400).json({ error: 'Aucun mot de passe de réinitialisation configuré.' });
+    if (!password || !bcrypt.compareSync(String(password), hash)) {
+      return res.status(403).json({ error: 'Mot de passe de réinitialisation incorrect.' });
+    }
+
+    let backup = null;
+    if (doBackup) {
+      try {
+        backup = saveBackupLocal(await exportAllTables(['users']), 'manual');
+      } catch (err) {
+        return res.status(500).json({ error: 'Backup échoué: ' + err.message });
+      }
+    }
+
+    // FK-safe deletion order: children before parents
+    const order = [
+      'delivery_order_messages',
+      'delivery_order_status_history',
+      'delivery_order_items',
+      'delivery_orders',
+      'delivery_customers',
+      'delivery_products',
+      'delivery_categories',
+      'delivery_coupons',
+      'delivery_combos',
+    ];
+
+    const deleted = {};
+    for (const table of order) {
+      const { error, count } = await supabase
+        .from(table)
+        .delete({ count: 'exact' })
+        .neq('id', '00000000-0000-0000-0000-000000000000');
+      if (error) return res.status(500).json({ error: `Erreur lors du nettoyage de ${table}: ${error.message}` });
+      deleted[table] = count ?? 0;
+    }
+
+    res.json({ ok: true, deleted, backup });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

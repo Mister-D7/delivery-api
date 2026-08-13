@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Users, Plus, Trash2, Save, X, CheckCircle, XCircle } from 'lucide-react';
+import { Users, Plus, Trash2, Save, X, CheckCircle, XCircle, Wallet, Calendar } from '../../components/adminIcons';
 import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
@@ -9,9 +9,15 @@ type Employee = {
   name: string;
   role: string;
   grossSalary: number;
-  employerCost: number;
   active: boolean;
   createdAt?: string;
+};
+
+type Payment = {
+  id: string;
+  amount: number;
+  paidAt: string;
+  notes?: string;
 };
 
 const ROLES = ['Livreur', 'Vendeur', 'Gérant', 'Autre'];
@@ -20,7 +26,7 @@ export default function AdminEmployees() {
   const { t } = useTranslation('employees');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
-  const [summary, setSummary] = useState<{ activeCount: number; grossTotal: number; employerTotal: number } | null>(null);
+  const [summary, setSummary] = useState<{ activeCount: number; grossTotal: number } | null>(null);
   const [name, setName] = useState('');
   const [role, setRole] = useState('Livreur');
   const [grossSalary, setGrossSalary] = useState('');
@@ -29,6 +35,13 @@ export default function AdminEmployees() {
   const [editName, setEditName] = useState('');
   const [editRole, setEditRole] = useState('');
   const [editSalary, setEditSalary] = useState('');
+
+  const [payEmployee, setPayEmployee] = useState<Employee | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [loadingPayments, setLoadingPayments] = useState(false);
+  const [payAmount, setPayAmount] = useState('');
+  const [payDate, setPayDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [paySaving, setPaySaving] = useState(false);
 
   const fetchAll = useCallback(async () => {
     try {
@@ -43,6 +56,50 @@ export default function AdminEmployees() {
   }, []);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const fetchPayments = useCallback(async (employeeId: string) => {
+    setLoadingPayments(true);
+    try {
+      const r = await api.get(`/employees/${employeeId}/payments`);
+      setPayments(r.data.payments || []);
+    } catch {}
+    finally { setLoadingPayments(false); }
+  }, []);
+
+  const openPayModal = (e: Employee) => {
+    setPayEmployee(e);
+    setPayAmount('');
+    setPayDate(new Date().toISOString().slice(0, 10));
+    fetchPayments(e.id);
+  };
+
+  const recordPayment = async () => {
+    if (!payEmployee) return;
+    if (!Number(payAmount) || Number(payAmount) <= 0) {
+      toast.error(t('pay.error'));
+      return;
+    }
+    setPaySaving(true);
+    try {
+      await api.post(`/employees/${payEmployee.id}/payments`, { amount: Number(payAmount), paidAt: new Date(payDate).toISOString() });
+      setPayAmount('');
+      toast.success(t('pay.saved'));
+      fetchPayments(payEmployee.id);
+      fetchAll();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || t('pay.error'));
+    }
+    finally { setPaySaving(false); }
+  };
+
+  const removePayment = async (p: Payment) => {
+    if (!confirm(t('pay.delete_confirm'))) return;
+    try {
+      await api.delete(`/employees/payments/${p.id}`);
+      setPayments(prev => prev.filter(x => x.id !== p.id));
+      fetchAll();
+    } catch {}
+  };
 
   const createEmployee = async () => {
     if (!name.trim() || !Number(grossSalary)) {
@@ -110,7 +167,7 @@ export default function AdminEmployees() {
       </div>
 
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-3 mb-6">
           <div className="surface-card p-3">
             <p className="text-[10px] font-semibold" style={{ color: 'var(--admin-muted)' }}>{t('summary.active')}</p>
             <p className="text-lg font-bold mt-1" style={{ color: 'var(--admin-gold)' }}>{summary.activeCount}</p>
@@ -118,11 +175,6 @@ export default function AdminEmployees() {
           <div className="surface-card p-3">
             <p className="text-[10px] font-semibold" style={{ color: 'var(--admin-muted)' }}>{t('summary.gross')}</p>
             <p className="text-lg font-bold mt-1" style={{ color: 'var(--admin-text)' }}>{summary.grossTotal.toLocaleString('fr-FR')} DA</p>
-          </div>
-          <div className="surface-card p-3">
-            <p className="text-[10px] font-semibold" style={{ color: 'var(--admin-muted)' }}>{t('summary.employer')}</p>
-            <p className="text-lg font-bold mt-1" style={{ color: 'var(--admin-danger)' }}>{summary.employerTotal.toLocaleString('fr-FR')} DA</p>
-            <p className="text-[9px] mt-1" style={{ color: 'var(--admin-muted2)' }}>{t('summary.cnas')}</p>
           </div>
         </div>
       )}
@@ -167,14 +219,16 @@ export default function AdminEmployees() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-bold flex-shrink-0" style={{ background: 'var(--admin-border2)', color: 'var(--admin-gold)' }}>{e.name.charAt(0).toUpperCase()}</div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-semibold">{e.name}</p>
+                      <p className="text-xs font-semibold" style={{ color: 'var(--admin-text)' }}>{e.name}</p>
                       <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: 'var(--admin-border2)', color: 'var(--admin-muted2)' }}>{e.role}</span>
                     </div>
                     <div className="flex items-center gap-3 mt-0.5">
                       <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{t('row.gross')}: <span style={{ color: 'var(--admin-text)', fontWeight: 600 }}>{e.grossSalary.toLocaleString('fr-FR')} DA</span></p>
-                      <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{t('row.employer')}: <span style={{ color: 'var(--admin-danger)', fontWeight: 600 }}>{e.employerCost.toLocaleString('fr-FR')} DA</span></p>
                     </div>
                   </div>
+                  <button onClick={() => openPayModal(e)} className="text-[10px] font-bold px-2.5 py-1.5 rounded-full flex items-center gap-1" style={{ background: 'rgba(74,222,128,0.1)', color: 'var(--admin-success)' }}>
+                    <Wallet size={12} /> {t('pay.record')}
+                  </button>
                   <button onClick={() => toggleActive(e)} title={e.active ? t('row.active') : t('row.inactive')} className="p-1.5 rounded-lg" style={{ color: e.active ? 'var(--admin-success)' : 'var(--admin-muted2)' }}>
                     {e.active ? <CheckCircle size={15} /> : <XCircle size={15} />}
                   </button>
@@ -184,6 +238,53 @@ export default function AdminEmployees() {
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {payEmployee && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" style={{ background: 'rgba(0,0,0,0.55)' }} onClick={() => setPayEmployee(null)}>
+          <div className="surface-card w-full max-w-md max-h-[85vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-sm font-bold" style={{ color: 'var(--admin-text)' }}>{payEmployee.name}</p>
+                <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{payEmployee.role} · {t('pay.salary')}: {payEmployee.grossSalary.toLocaleString('fr-FR')} DA</p>
+              </div>
+              <button onClick={() => setPayEmployee(null)} className="p-2 rounded-lg" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted)' }}><X size={15} /></button>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-2 mb-4">
+              <div className="flex-1 flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border2)' }}>
+                <Wallet size={14} style={{ color: 'var(--admin-muted)' }} />
+                <input type="number" min={0} value={payAmount} onChange={e => setPayAmount(e.target.value)} placeholder={t('pay.amount')} className="bg-transparent outline-none text-xs w-full" style={{ color: 'var(--admin-text)' }} />
+              </div>
+              <div className="flex-1 flex items-center gap-2 rounded-xl px-3 py-2" style={{ background: 'var(--admin-bg)', border: '1px solid var(--admin-border2)' }}>
+                <Calendar size={14} style={{ color: 'var(--admin-muted)' }} />
+                <input type="date" value={payDate} onChange={e => setPayDate(e.target.value)} className="bg-transparent outline-none text-xs w-full" style={{ color: 'var(--admin-text)' }} />
+              </div>
+              <button onClick={recordPayment} disabled={paySaving} className="gold-btn text-xs font-bold rounded-xl px-4">
+                {t('pay.add')}
+              </button>
+            </div>
+
+            <p className="text-[10px] font-bold tracking-wide mb-2" style={{ color: 'var(--admin-gold)' }}>{t('pay.history')}</p>
+            {loadingPayments ? (
+              <div className="space-y-1.5">{[1, 2].map(i => <div key={i} className="h-10 rounded-lg animate-pulse" style={{ background: 'var(--admin-surface2)' }} />)}</div>
+            ) : payments.length === 0 ? (
+              <p className="text-center text-xs py-6" style={{ color: 'var(--admin-muted)' }}>{t('pay.none')}</p>
+            ) : (
+              <div className="space-y-1.5">
+                {payments.map(p => (
+                  <div key={p.id} className="flex items-center gap-3 rounded-xl px-3 py-2" style={{ background: 'var(--admin-surface2)' }}>
+                    <div className="flex-1">
+                      <p className="text-xs font-bold" style={{ color: 'var(--admin-text)' }}>{p.amount.toLocaleString('fr-FR')} DA</p>
+                      <p className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{new Date(p.paidAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    <button onClick={() => removePayment(p)} className="p-1.5 rounded-lg" style={{ color: 'var(--admin-danger)' }}><Trash2 size={13} /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

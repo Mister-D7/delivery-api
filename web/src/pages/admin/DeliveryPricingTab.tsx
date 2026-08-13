@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Truck, Save, MapPin } from 'lucide-react';
+import { Truck, Save, MapPin } from '../../components/adminIcons';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

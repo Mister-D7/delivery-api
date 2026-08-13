@@ -1,1 +1,0 @@
-function e(e){return Math.round(Number.isFinite(e)?e:0).toLocaleString(`fr-FR`).replace(/\u00a0/g,` `)}export{e as t};

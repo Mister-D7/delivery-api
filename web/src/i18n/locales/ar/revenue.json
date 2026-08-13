@@ -21,7 +21,7 @@
     "delivery_revenue": "تحصيلات التوصيل",
     "driver_cost": "تكلفة السائقين",
     "delivery_profit": "ربح التوصيل",
-    "employee_cost": "رواتب الموظفين (شهر)"
+    "employee_cost": "الرواتب المدفوعة (الفترة)"
   },
   "products": {
     "title": "تكاليف المنتجات",
@@ -44,7 +44,7 @@
     "delivery_collected": "تحصيلات التوصيل",
     "driver_cost": "تكلفة السائقين",
     "delivery_profit": "ربح التوصيل",
-    "employee_cost": "رواتب الموظفين (شهر)",
+    "employee_cost": "الرواتب المدفوعة (الفترة)",
     "cancelled_loss": "خسائر الطلبات الملغاة"
   },
   "date_range": {

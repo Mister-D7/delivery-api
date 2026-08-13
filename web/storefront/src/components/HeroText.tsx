@@ -8,7 +8,7 @@ const DEFAULT_TITLE: ReactNode = (
 );
 
 const DEFAULT_SUB =
-  "Chaque configuration NEXUS est assemblée, câblée et testée en charge dans notre atelier avant expédition. Aucune surprise, aucune attente inutile — juste des performances vérifiées.";
+  "Chaque configuration MISTER-DR GAMING est assemblée, câblée et testée en charge dans notre atelier avant expédition. Aucune surprise, aucune attente inutile — juste des performances vérifiées.";
 
 export default function HeroText() {
   const { settings } = useStorefront();

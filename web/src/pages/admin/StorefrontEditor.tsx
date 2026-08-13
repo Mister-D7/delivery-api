@@ -3,7 +3,8 @@ import {
   Save, Palette,
   Package, Layers, PanelRightClose, PanelRightOpen,
   RefreshCw, Loader2, Plus, Pencil, Trash2, Pin, PinOff, Search, Gift,
-} from 'lucide-react';
+  Star, Upload, ChevronUp, ChevronDown, Clock,
+} from '../../components/adminIcons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { RawCatalog, CatalogProduct, Category, ThemeSettings } from './editorTypes';
@@ -18,13 +19,32 @@ import ProductForm from './ProductForm';
 import CategoryForm from './CategoryForm';
 import AdminSelect from './AdminSelect';
 
-type Tool = 'themes' | 'products' | 'categories' | 'combos' | null;
+type Tool = 'themes' | 'products' | 'categories' | 'combos' | 'specialCats' | 'preorder' | null;
+
+type Slide = {
+  id: string;
+  badge?: string;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+  imageUrl?: string;
+  align?: 'left' | 'center' | 'right';
+};
 
 type ComboProduct = { productId: string; name?: string; price?: number; imageUrl?: string | null; qty: number };
 type ComboRow = {
   id: string; name: string; description?: string | null; price: number;
   imageUrl?: string | null; isActive: boolean; products: ComboProduct[];
   totalValue?: number; savings?: number;
+};
+
+type SpecialCat = {
+  id: string;
+  name: string;
+  imageUrl?: string | null;
+  sections: string[];
+  products: string[];
 };
 
 function comboPriceOf(p: CatalogProduct): number {
@@ -73,6 +93,11 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
   const [productSearch, setProductSearch] = useState('');
   const [dragId, setDragId] = useState<string | null>(null);
   const [previewKey, setPreviewKey] = useState(0);
+  const [slides, setSlides] = useState<Slide[]>([]);
+  const [slideDraft, setSlideDraft] = useState<Slide | null>(null);
+  const [editingSlideId, setEditingSlideId] = useState<string | null>(null);
+  const [dragSlideId, setDragSlideId] = useState<string | null>(null);
+  const [specialCats, setSpecialCats] = useState<SpecialCat[]>([]);
 
   useEffect(() => {
     try { localStorage.setItem('delivery_pinned_products', JSON.stringify(pinned)); } catch {}
@@ -108,7 +133,13 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     (async () => {
       try {
         const r = await api.get('/storefront/settings/storefront');
-        if (r.data && typeof r.data === 'object') setSettings(s => ({ ...s, ...r.data }));
+        if (r.data && typeof r.data === 'object') {
+          setSettings(s => ({ ...s, ...r.data }));
+          const sl = Array.isArray((r.data as any).slides) ? (r.data as any).slides as Slide[] : [];
+          setSlides(sl);
+          const sc = Array.isArray((r.data as any).specialCategories) ? (r.data as any).specialCategories as SpecialCat[] : [];
+          setSpecialCats(sc);
+        }
       } catch {}
     })();
   }, [template]);
@@ -125,6 +156,10 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     pinned,
     theme: template?.id,
     model3d: settings.model3d,
+    preorderStart: settings.preorderStart,
+    preorderWindowDays: settings.preorderWindowDays,
+    preorderPrice: settings.preorderPrice,
+    preorderStrike: settings.preorderStrike,
   }), [settings, pinned, template]);
 
   const saveBlobMerged = useCallback(async () => {
@@ -284,6 +319,159 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     }
   };
 
+  const saveSlides = async (list: Slide[]) => {
+    try {
+      const r = await api.get('/storefront/settings/storefront');
+      const existing = (r.data && typeof r.data === 'object') ? r.data : {};
+      await api.put('/storefront/settings/storefront', { value: { ...existing, slides: list } });
+    } catch {}
+  };
+
+  const startNewSlide = () => {
+    setEditingSlideId(null);
+    setSlideDraft({ id: 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title: '', badge: '', subtitle: '', ctaLabel: '', ctaUrl: '', imageUrl: '', align: 'left' });
+  };
+
+  const saveSlideDraft = async () => {
+    if (!slideDraft) return;
+    const draft: Slide = {
+      id: slideDraft.id,
+      title: slideDraft.title?.trim() || undefined,
+      badge: slideDraft.badge?.trim() || undefined,
+      subtitle: slideDraft.subtitle?.trim() || undefined,
+      ctaLabel: slideDraft.ctaLabel?.trim() || undefined,
+      ctaUrl: slideDraft.ctaUrl?.trim() || undefined,
+      imageUrl: slideDraft.imageUrl?.trim() || undefined,
+      align: slideDraft.align || 'left',
+    };
+    const next = editingSlideId
+      ? slides.map(s => (s.id === editingSlideId ? draft : s))
+      : [...slides, draft];
+    setSlides(next);
+    setSlideDraft(null);
+    setEditingSlideId(null);
+    try {
+      await saveSlides(next);
+      toast.success('Slider mis à jour');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur de sauvegarde');
+    }
+  };
+
+  const uploadSlideImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const fd = new FormData();
+      fd.append('image', file);
+      const r = await api.post('/upload/image', fd);
+      const url = (r.data as any)?.url || (r.data as any)?.imageUrl || '';
+      if (url) setSlideDraft(d => (d ? { ...d, imageUrl: url } : d));
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur lors de l’upload');
+    }
+  };
+
+  const handleDeleteSlide = async (s: Slide) => {
+    if (!window.confirm(`Supprimer la diapositive « ${s.title || s.badge || 'sans titre'} » ?`)) return;
+    const next = slides.filter(x => x.id !== s.id);
+    setSlides(next);
+    if (editingSlideId === s.id) { setSlideDraft(null); setEditingSlideId(null); }
+    try {
+      await saveSlides(next);
+      toast.success('Diapositive supprimée');
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur de suppression');
+    }
+  };
+
+  const reorderSlides = (srcId: string, targetId: string) => {
+    setSlides(prev => {
+      const next = prev.filter(x => x.id !== srcId);
+      const idx = next.findIndex(x => x.id === targetId);
+      const insertAt = idx === -1 ? next.length : idx;
+      const src = prev.find(x => x.id === srcId);
+      if (src) next.splice(insertAt, 0, src);
+      return next;
+    });
+    setDragSlideId(null);
+    void (async () => {
+      const next = slides.filter(x => x.id !== srcId);
+      const idx = next.findIndex(x => x.id === targetId);
+      const insertAt = idx === -1 ? next.length : idx;
+      const src = slides.find(x => x.id === srcId);
+      if (src) next.splice(insertAt, 0, src);
+      await saveSlides(next);
+    })();
+  };
+
+  const saveSpecialCatsBlob = async (next: SpecialCat[]) => {
+    try {
+      const r = await api.get('/storefront/settings/storefront');
+      const existing = (r.data && typeof r.data === 'object') ? r.data : {};
+      await api.put('/storefront/settings/storefront', { value: { ...existing, specialCategories: next } });
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Erreur lors de la sauvegarde');
+    }
+  };
+
+  const specialCatPatch = (id: string, patch: Partial<SpecialCat>) => {
+    setSpecialCats(prev => {
+      const next = prev.map(c => (c.id === id ? { ...c, ...patch } : c));
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+  };
+
+  const specialCatAdd = () => {
+    const id = 'sc' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    setSpecialCats(prev => {
+      const next = [...prev, { id, name: 'Nouvelle catégorie spéciale', imageUrl: '', sections: [], products: [] }];
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+    toast.success('Catégorie spéciale créée');
+  };
+
+  const specialCatDelete = (c: SpecialCat) => {
+    if (!window.confirm(`Supprimer la catégorie spéciale « ${c.name} » ?`)) return;
+    setSpecialCats(prev => {
+      const next = prev.filter(x => x.id !== c.id);
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+    toast.success('Catégorie spéciale supprimée');
+  };
+
+  const specialCatMove = (i: number, dir: number) => {
+    setSpecialCats(prev => {
+      const j = i + dir;
+      if (j < 0 || j >= prev.length) return prev;
+      const next = [...prev];
+      [next[i], next[j]] = [next[j], next[i]];
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+  };
+
+  const specialCatAddProduct = (c: SpecialCat, productId: string) => {
+    if (!productId || c.products.includes(productId)) return;
+    setSpecialCats(prev => {
+      const next = prev.map(x => (x.id === c.id ? { ...x, products: [...x.products, productId] } : x));
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+  };
+
+  const specialCatRemoveProduct = (c: SpecialCat, productId: string) => {
+    setSpecialCats(prev => {
+      const next = prev.map(x => (x.id === c.id ? { ...x, products: x.products.filter(pid => pid !== productId) } : x));
+      void saveSpecialCatsBlob(next);
+      return next;
+    });
+  };
+
   const storeTemplates = useMemo(() => getThemePages(), []);
 
   if (loading) return (
@@ -297,6 +485,8 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
     { key: 'products', label: 'Produits', icon: Package },
     { key: 'categories', label: 'Catégories', icon: Layers },
     { key: 'combos', label: 'Combos', icon: Gift },
+    { key: 'specialCats', label: '⭐ Catégories spéciales', icon: Star },
+    { key: 'preorder', label: 'Précommande', icon: Clock },
   ];
 
   return (
@@ -306,8 +496,8 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
           <button key={t.key} onClick={() => { setActiveTool(t.key); setPanelOpen(true); }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold transition-colors whitespace-nowrap"
             style={{
-              background: activeTool === t.key && panelOpen ? 'var(--admin-gold-bg)' : 'transparent',
-              color: activeTool === t.key && panelOpen ? 'var(--admin-gold)' : 'var(--admin-muted)',
+              background: activeTool === t.key && panelOpen ? 'var(--admin-surface2)' : 'transparent',
+              color: activeTool === t.key && panelOpen ? 'var(--admin-text)' : 'var(--admin-muted)',
             }}>
             <t.icon size={14} /> {t.label}
           </button>
@@ -592,6 +782,181 @@ export default function StorefrontEditor({ fullScreen }: { fullScreen?: boolean 
                       <p className="text-[10px] text-center py-3" style={{ color: 'var(--admin-muted2)' }}>Aucun combo. Cliquez sur « Nouveau » pour en créer un.</p>
                     )}
                   </div>
+                </div>
+              )}
+
+              {activeTool === 'specialCats' && (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[11px] font-bold tracking-wide" style={{ color: 'var(--admin-gold)' }}>
+                      CATÉGORIES SPÉCIALES ({specialCats.length}) · {specialCats.reduce((n, c) => n + c.products.length, 0)} produit{specialCats.reduce((n, c) => n + c.products.length, 0) > 1 ? 's' : ''}
+                    </p>
+                    <button onClick={specialCatAdd}
+                      className="gold-btn px-2.5 py-1.5 rounded-lg text-[10px] font-bold flex items-center gap-1">
+                      <Plus size={12} /> Nouvelle
+                    </button>
+                  </div>
+                  <p className="text-[10px] mb-2" style={{ color: 'var(--admin-muted2)' }}>
+                    Les catégories spéciales regroupent les éléments « ⭐ » de la boutique : leurs propres produits, les sliders et les images.
+                    Pour y ajouter un élément : clic droit dessus dans l'aperçu → « ⭐ Assigner à une catégorie spéciale ». Les produits peuvent aussi être ajoutés ici.
+                  </p>
+                  <div className="space-y-2">
+                    {specialCats.length === 0 && (
+                      <p className="text-[10px] text-center py-3" style={{ color: 'var(--admin-muted2)' }}>
+                        Aucune catégorie spéciale. Créez-en une, puis faites un clic droit sur un slider, une image ou un produit dans l'aperçu pour l'y assigner.
+                      </p>
+                    )}
+                    {specialCats.map((c, i) => {
+                      const assigned = c.products
+                        .map(pid => orderedProducts.find(p => String(p.id) === String(pid)))
+                        .filter((p): p is CatalogProduct => Boolean(p));
+                      const missing = c.products.filter(pid => !orderedProducts.some(p => String(p.id) === String(pid)));
+                      const available = orderedProducts.filter(p => !c.products.some(pid => String(pid) === String(p.id)));
+                      return (
+                        <div key={c.id} className="p-2.5 rounded-xl" style={{ background: 'var(--admin-surface2)', border: '1px solid var(--admin-border2)' }}>
+                          <div className="flex items-center gap-1.5 mb-1.5">
+                            <input
+                              value={c.name}
+                              onChange={e => specialCatPatch(c.id, { name: e.target.value })}
+                              className="flex-1 min-w-0 px-2 py-1 rounded-lg text-[11px] font-semibold outline-none"
+                              style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                            />
+                            <button onClick={() => specialCatMove(i, -1)} disabled={i === 0}
+                              className="p-1.5 rounded-md" style={{ color: 'var(--admin-muted)' }} title="Monter">
+                              <ChevronUp size={12} />
+                            </button>
+                            <button onClick={() => specialCatMove(i, 1)} disabled={i === specialCats.length - 1}
+                              className="p-1.5 rounded-md" style={{ color: 'var(--admin-muted)' }} title="Descendre">
+                              <ChevronDown size={12} />
+                            </button>
+                            <button onClick={() => specialCatDelete(c)}
+                              className="p-1.5 rounded-md" style={{ color: '#ef4444' }} title="Supprimer">
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                          {c.imageUrl && (
+                            <div className="mb-1.5 rounded-lg overflow-hidden" style={{ border: '1px solid var(--admin-border2)' }}>
+                              <img src={c.imageUrl} alt="couverture" className="w-full h-16 object-cover" />
+                            </div>
+                          )}
+                          <label className="block mb-1.5">
+                            <span className="text-[9px] font-semibold" style={{ color: 'var(--admin-muted)' }}>Image de couverture (URL)</span>
+                            <input
+                              value={c.imageUrl || ''}
+                              placeholder="https://… ou /uploads/images/…"
+                              onChange={e => specialCatPatch(c.id, { imageUrl: e.target.value })}
+                              className="w-full mt-0.5 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                              style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                            />
+                          </label>
+                          <p className="text-[9px] font-bold tracking-wide mb-1" style={{ color: 'var(--admin-gold)' }}>
+                            PRODUITS ({c.products.length})
+                          </p>
+                          <div className="space-y-1.5 mb-1.5">
+                            {assigned.map(p => (
+                              <div key={p.id} className="flex items-center gap-1.5 p-1.5 rounded-lg" style={{ background: 'var(--admin-bg)' }}>
+                                {p.imageUrl
+                                  ? <img src={p.imageUrl} className="w-6 h-6 rounded object-cover flex-shrink-0" />
+                                  : <div className="w-6 h-6 rounded flex items-center justify-center text-[8px]" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted2)' }}>img</div>
+                                }
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[10px] font-semibold truncate">{p.name}</p>
+                                  <p className="text-[9px]" style={{ color: 'var(--admin-muted)' }}>
+                                    {p.salePrice.toLocaleString()} DA {p.promoPrice ? <span style={{ color: 'var(--admin-gold)' }}>→ {p.promoPrice.toLocaleString()} DA</span> : ''}
+                                  </p>
+                                </div>
+                                <button onClick={() => specialCatRemoveProduct(c, String(p.id))}
+                                  className="p-1 rounded-md" style={{ color: '#ef4444' }} title="Retirer de la catégorie">
+                                  <Trash2 size={10} />
+                                </button>
+                              </div>
+                            ))}
+                            {missing.length > 0 && (
+                              <p className="text-[9px] px-1" style={{ color: 'var(--admin-muted2)' }}>
+                                {missing.length} produit{missing.length > 1 ? 's' : ''} supprimé{missing.length > 1 ? 's' : ''} (introuvable{missing.length > 1 ? 's' : ''}).
+                              </p>
+                            )}
+                            {assigned.length === 0 && missing.length === 0 && (
+                              <p className="text-[9px] px-1" style={{ color: 'var(--admin-muted2)' }}>
+                                Aucun produit. Choisissez-en un ci-dessous.
+                              </p>
+                            )}
+                          </div>
+                          {available.length > 0 && (
+                            <AdminSelect
+                              value=""
+                              onChange={v => specialCatAddProduct(c, v || '')}
+                              title="Ajouter un produit"
+                              className="w-full px-2 py-1.5 rounded-lg text-[10px] outline-none"
+                              options={[{ value: '', label: '+ Ajouter un produit…' }, ...available.map(p => ({ value: String(p.id), label: p.name }))]}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {activeTool === 'preorder' && (
+                <div>
+                  <p className="text-[11px] font-bold tracking-wide mb-1" style={{ color: 'var(--admin-gold)' }}>PRÉCOMMANDE</p>
+                  <p className="text-[10px] mb-3" style={{ color: 'var(--admin-muted2)' }}>
+                    Réglage du compte à rebours du thème « Mister-D Preorder ». Avant la date de lancement, le bouton reste verrouillé ;
+                    à l’ouverture, il ajoute le produit au panier. La fenêtre dure {Math.max(1, Number(settings.preorderWindowDays) || 6)} jours après le lancement.
+                  </p>
+
+                  <label className="block mb-3">
+                    <span className="text-[9px] font-semibold" style={{ color: 'var(--admin-muted)' }}>Date de lancement (heure locale)</span>
+                    <input
+                      type="datetime-local"
+                      value={(settings.preorderStart || '').slice(0, 16)}
+                      onChange={e => setSettings(s => ({ ...s, preorderStart: e.target.value ? new Date(e.target.value).toISOString() : '' }))}
+                      className="w-full mt-0.5 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                      style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                    />
+                    <span className="text-[9px]" style={{ color: 'var(--admin-muted2)' }}>Laisser vide = lancement dans 15 jours.</span>
+                  </label>
+
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <label className="block">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--admin-muted)' }}>Fenêtre (jours)</span>
+                      <input
+                        type="number"
+                        min={1}
+                        value={Number(settings.preorderWindowDays) || 6}
+                        onChange={e => setSettings(s => ({ ...s, preorderWindowDays: e.target.value ? Math.max(1, Number(e.target.value)) : 6 }))}
+                        className="w-full mt-0.5 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                        style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--admin-muted)' }}>Prix promo ($)</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={Number(settings.preorderPrice) || 5500}
+                        onChange={e => setSettings(s => ({ ...s, preorderPrice: e.target.value ? Number(e.target.value) : 5500 }))}
+                        className="w-full mt-0.5 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                        style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="text-[9px] font-semibold" style={{ color: 'var(--admin-muted)' }}>Prix normal ($)</span>
+                      <input
+                        type="number"
+                        min={0}
+                        value={Number(settings.preorderStrike) || 7500}
+                        onChange={e => setSettings(s => ({ ...s, preorderStrike: e.target.value ? Number(e.target.value) : 7500 }))}
+                        className="w-full mt-0.5 px-2 py-1.5 rounded-lg text-[11px] outline-none"
+                        style={{ background: 'var(--admin-bg)', color: 'var(--admin-text)', border: '1px solid var(--admin-border2)' }}
+                      />
+                    </label>
+                  </div>
+
+                  <p className="text-[9px] p-2 rounded-lg" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted)' }}>
+                    Astuce : pour tester, choisissez une date passée — le bouton « Pré‑commander » se déverrouille immédiatement.
+                  </p>
                 </div>
               )}
             </div>

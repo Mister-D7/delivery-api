@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { EyeOff, GripVertical } from 'lucide-react';
+import { EyeOff, GripVertical } from '../../components/adminIcons';
 import type { Overview, CardDef } from './revenueTypes';
 import { loadLayout, saveLayout, loadHidden, saveHidden } from './revenueUtils';
 

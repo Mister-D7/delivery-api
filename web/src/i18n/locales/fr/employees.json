@@ -1,25 +1,34 @@
 {
   "title": "Employés",
-  "subtitle": "Salaires & comptabilité",
+  "subtitle": "Salaires & paiements",
   "summary": {
     "active": "Employés actifs",
-    "gross": "Masse salariale (brut/mois)",
-    "employer": "Coût employeur (×1.26)",
-    "cnas": "Salaire brut + charges patronales CNAS (26%)"
+    "gross": "Masse salariale (brut/mois)"
   },
   "form": {
     "title": "Ajouter un employé",
     "name": "Nom",
-    "gross": "Salaire brut (DA/mois)",
+    "gross": "Salaire (DA/mois)",
     "add": "Ajouter",
     "saved": "Employé enregistré",
     "error": "Nom et salaire requis"
   },
   "row": {
-    "gross": "Brut",
-    "employer": "Coût employeur",
+    "gross": "Salaire",
     "active": "Actif",
     "inactive": "Inactif"
+  },
+  "pay": {
+    "record": "Payer",
+    "salary": "Salaire",
+    "amount": "Montant (DA)",
+    "date": "Date",
+    "add": "Enregistrer",
+    "history": "Historique des paiements",
+    "none": "Aucun paiement enregistré",
+    "saved": "Paiement enregistré",
+    "error": "Montant requis",
+    "delete_confirm": "Supprimer ce paiement ?"
   },
   "actions": {
     "edit": "Modifier",

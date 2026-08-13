@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Plus, Trash2, Package, Pencil, Upload, Truck } from 'lucide-react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Plus, Trash2, Package, Pencil, Upload, Truck, FileText, X, Loader2 } from '../../components/adminIcons';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 import DeliveryPricingTab from './DeliveryPricingTab';
@@ -9,6 +9,7 @@ import ProductForm from './ProductForm';
 import CategoryForm from './CategoryForm';
 import ContextMenu, { useContextMenu } from '../../components/ContextMenu';
 import { getStoreType, storeTypeForTheme, STORE_TYPES, type StoreType } from '../../themes';
+import { parseImportText, type BulkImportItem } from '../../utils/bulkImport';
 
 type Product = {
   id: string; name: string; salePrice: number; costPrice?: number | null; promoPrice?: number | null;
@@ -131,7 +132,41 @@ function ProductsTab({ products, categories, storeType, refresh }: { products: P
   const [ctxProduct, setCtxProduct] = useState<Product | null>(null);
   const { menu, onContextMenu, closeMenu } = useContextMenu();
 
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState('');
+  const [importItems, setImportItems] = useState<BulkImportItem[] | null>(null);
+  const [importRunning, setImportRunning] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
   const closeAll = () => { closeMenu(); setCtxProduct(null); };
+
+  const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImportText(String(reader.result || ''));
+      try { setImportItems(parseImportText(String(reader.result || ''))); } catch { setImportItems([]); }
+    };
+    reader.readAsText(file);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const analyze = () => {
+    try { setImportItems(parseImportText(importText)); } catch { setImportItems([]); }
+  };
+
+  const runImport = async () => {
+    if (!importItems || importItems.length === 0) return;
+    setImportRunning(true);
+    try {
+      const r = await api.post('/catalog/import', { items: importItems, storeType });
+      toast.success(`Importé : ${r.data.createdProducts} produits, ${r.data.createdCategories} catégories`);
+      setImportOpen(false); setImportText(''); setImportItems(null);
+      refresh();
+    } catch (err: any) { toast.error(err.response?.data?.error || 'Erreur'); }
+    setImportRunning(false);
+  };
 
   const handleDelete = async (p: Product) => {
     if (!confirm(`Supprimer le produit « ${p.name} » ?`)) return;
@@ -144,11 +179,86 @@ function ProductsTab({ products, categories, storeType, refresh }: { products: P
 
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end gap-2 mb-4">
+        <button onClick={() => setImportOpen(true)} className="px-4 py-2 text-xs flex items-center gap-2 rounded-full font-semibold" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted)' }}>
+          <Upload size={13} /> Import
+        </button>
         <button onClick={() => { setEditing(null); setFormOpen(true); }} className="gold-btn px-4 py-2 text-xs flex items-center gap-2 rounded-full">
           <Plus size={13} /> {t('product.add')}
         </button>
       </div>
+
+      {importOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => !importRunning && setImportOpen(false)}>
+          <div className="w-full max-w-xl surface-card p-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-extrabold flex items-center gap-2" style={{ fontFamily: "'Unbounded', sans-serif" }}>
+                <Upload size={16} style={{ color: 'var(--admin-gold)' }} /> Import produits
+              </p>
+              <button onClick={() => !importRunning && setImportOpen(false)} className="p-1 rounded-lg" style={{ color: 'var(--admin-muted2)' }}>
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-[11px] mb-3" style={{ color: 'var(--admin-muted)' }}>
+              Format texte simple — un bloc par produit :
+            </p>
+            <pre className="text-[10px] p-3 rounded-xl mb-3 overflow-x-auto" style={{ background: 'var(--admin-bg)', color: 'var(--admin-muted)', border: '1px solid var(--admin-border3)', whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
+{`Product: Wireless Mouse
+Category: Electronics
+Image: https://example.com
+price buy : 1000
+price sell : 2500
+
+Product: Running Shoes
+Category: Apparel
+price buy : 3000
+price sell : 6500`}
+            </pre>
+            <div className="flex items-center gap-2 mb-3">
+              <button onClick={() => fileRef.current?.click()} className="px-4 py-2 text-[11px] font-semibold rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+                <FileText size={12} /> Choisir un fichier .txt / .csv
+              </button>
+              <input ref={fileRef} type="file" accept=".txt,.csv" onChange={handleFile} className="hidden" />
+              <button onClick={analyze} className="px-4 py-2 text-[11px] font-semibold rounded-lg" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-gold)' }}>
+                Analyser le texte
+              </button>
+            </div>
+            <textarea value={importText} onChange={e => { setImportText(e.target.value); setImportItems(null); }}
+              placeholder="Collez votre texte ici, ou importez un fichier…"
+              rows={6} className="input-field text-xs w-full mb-3" style={{ fontFamily: 'monospace' }} />
+            {importItems !== null && (
+              <div className="text-[11px] mb-3" style={{ color: 'var(--admin-muted)' }}>
+                {importItems.length > 0 ? (
+                  <span style={{ color: 'var(--admin-success)' }}>{importItems.length} produits détectés</span>
+                ) : (
+                  <span style={{ color: 'var(--admin-danger)' }}>Aucun produit détecté — vérifiez le format.</span>
+                )}
+              </div>
+            )}
+            {importItems && importItems.length > 0 && (
+              <div className="max-h-40 overflow-y-auto mb-3 rounded-xl" style={{ background: 'var(--admin-surface2)' }}>
+                {importItems.slice(0, 50).map((it, i) => (
+                  <div key={i} className="flex items-center gap-2 px-3 py-1.5 text-[11px]" style={{ borderBottom: i < Math.min(importItems.length, 50) - 1 ? '1px solid var(--admin-border2)' : 'none' }}>
+                    <Package size={11} style={{ color: 'var(--admin-gold)' }} />
+                    <span className="flex-1 truncate font-medium">{it.name}</span>
+                    {it.category && <span className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{it.category}</span>}
+                    {it.salePrice != null && <span className="font-semibold" style={{ color: 'var(--admin-gold)' }}>{it.salePrice} DA</span>}
+                  </div>
+                ))}
+                {importItems.length > 50 && <p className="text-center text-[10px] py-2" style={{ color: 'var(--admin-muted2)' }}>+ {importItems.length - 50} autres…</p>}
+              </div>
+            )}
+            <div className="flex gap-2 justify-end">
+              <button onClick={() => setImportOpen(false)} disabled={importRunning} className="px-4 py-2 rounded-xl text-xs font-semibold disabled:opacity-40" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted)' }}>
+                Annuler
+              </button>
+              <button onClick={runImport} disabled={importRunning || !importItems || importItems.length === 0} className="gold-btn px-5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 disabled:opacity-40">
+                {importRunning ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />} {importRunning ? 'Import...' : 'Importer'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {formOpen && (
         <ProductForm

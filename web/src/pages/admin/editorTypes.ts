@@ -12,6 +12,10 @@ export type ThemeSettings = {
   backgroundImage: string; backgroundType: 'color' | 'image' | 'video';
   glassEnabled: boolean;
   model3d?: string;
+  preorderStart?: string;
+  preorderWindowDays?: number;
+  preorderPrice?: number;
+  preorderStrike?: number;
 };
 
 export type SelectedElement = { type: 'product' | 'category' | 'theme' | 'section'; id: string; data: any };

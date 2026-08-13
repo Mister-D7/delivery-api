@@ -1,0 +1,37 @@
+---
+import '../styles/gaming.css';
+import '../styles/islands.css';
+import GamingHeader from '../components/GamingHeader.astro';
+import GamingFooter from '../components/GamingFooter.astro';
+import CartDrawer from '../components/CartDrawer';
+import ProductModal from '../components/ProductModal';
+import EditCanvas from '../components/EditCanvas';
+import SpecialSectionBlock from '../components/SpecialSectionBlock';
+import TermsGate from '../components/TermsGate.astro';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulsar Gaming — Catégories spéciales</title>
+</head>
+<body>
+
+<TermsGate />
+
+<GamingHeader />
+
+<main class="g-main">
+  <SpecialSectionBlock variant="gaming" showAll client:load />
+</main>
+
+<GamingFooter />
+
+<CartDrawer client:load />
+<ProductModal client:load />
+<EditCanvas client:load />
+
+</body>
+</html>

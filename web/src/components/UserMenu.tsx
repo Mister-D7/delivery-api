@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { User, LogOut, Settings, Globe, ChevronDown, Moon, Sun, Upload, X } from 'lucide-react';
+import { User, LogOut, Settings, Globe, ChevronDown, Moon, Sun, Upload, X } from '../components/adminIcons';
 import { isRTL } from '../i18n';
 import { useAdminTheme } from '../context/AdminThemeContext';
 import api from '../services/api';

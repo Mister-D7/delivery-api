@@ -21,7 +21,7 @@
     "delivery_revenue": "Deliveries Collected",
     "driver_cost": "Driver Costs",
     "delivery_profit": "Delivery Profit",
-    "employee_cost": "Employee Wages (month)"
+    "employee_cost": "Wages paid (period)"
   },
   "products": {
     "title": "Product Costs",
@@ -44,7 +44,7 @@
     "delivery_collected": "Deliveries Collected",
     "driver_cost": "Driver Costs",
     "delivery_profit": "Delivery Profit",
-    "employee_cost": "Employee Wages (month)",
+    "employee_cost": "Wages paid (period)",
     "cancelled_loss": "Cancelled Order Losses"
   },
   "date_range": {

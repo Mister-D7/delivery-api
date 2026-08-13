@@ -47,9 +47,9 @@ console.log(`tagged ${tagged} existing categories as grocery`);
 // 2) Seed categories for the other store types
 const seeds = [
   { store_type: 'tech', names: ['Smartphones', 'Ordinateurs & PC', 'Laptops & Ultrabooks', 'Composants PC', 'Périphériques', 'Écrans', 'Audio & Casques', 'TV & Home Cinema', 'Accessoires', 'Stockage', 'Réseau & WiFi'] },
-  { store_type: 'gaming', names: ['Consoles', 'Manettes & Pads', 'Jeux Vidéo', 'Casques Gaming', 'Claviers & Souris', 'Chaises Gaming', 'Setup & Stream', 'Cartes Graphiques', 'Refroidissement RGB', 'Cadeaux Gamer'] },
   { store_type: 'clothes', names: ['Homme', 'Femme', 'Enfant', 'Chaussures', 'Sacs & Maroquinerie', 'Vestes & Manteaux', 'Jeans & Pantalons', 'Robes & Jupes', 'Accessoires Mode', 'Sous-vêtements', 'Sportswear'] },
   { store_type: 'food', names: ['Primeurs & Fruits', 'Viandes & Volaille', 'Poissons & Fruits de mer', 'Crèmerie & Yaourts', 'Boulangerie Artisanale', 'Huiles & Épices', 'Miels & Confitures', 'Boissons Artisanales', 'Conserves Bio', 'Snacks & Fruits secs'] },
+  { store_type: 'gaming', names: ['Consoles', 'Manettes & Pads', 'Jeux Vidéo', 'Casques Gaming', 'Claviers & Souris', 'Chaises Gaming', 'Composants PC Gaming', 'Setup & Streaming', 'Carte Cadeau'] },
   { store_type: 'general', names: ['Nouveautés', 'Promotions', 'Best Sellers', 'Cadeaux', 'Destockage'] },
 ];
 

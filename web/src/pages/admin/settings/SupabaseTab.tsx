@@ -1,4 +1,4 @@
-import { Eye, Database, Loader2, CheckCircle, XCircle, Copy } from 'lucide-react';
+import { Eye, Database, Loader2, CheckCircle, XCircle, Copy } from '../../../components/adminIcons';
 
 type Props = {
   t: (k: string) => string;

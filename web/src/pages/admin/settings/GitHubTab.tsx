@@ -1,4 +1,4 @@
-import { Eye, Github, Loader2, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Eye, Github, Loader2, CheckCircle, XCircle, ExternalLink } from '../../../components/adminIcons';
 
 type Props = {
   t: (k: string) => string;

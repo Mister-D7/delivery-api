@@ -85,7 +85,7 @@ export default function OrderTracking() {
 
   const handleStatusChange = useCallback((status: string) => {
     setOrder(prev => prev ? { ...prev, status } : prev);
-    const statusLabels: Record<string, string> = { PENDING: 'En attente', CONFIRMED: 'Confirmee', PREPARING: 'En preparation', ON_THE_WAY: 'En route', DELIVERED: 'Livree', CANCELLED: 'Annulee' };
+    const statusLabels: Record<string, string> = { PENDING: t('status.pending'), CONFIRMED: t('status.confirmed'), PREPARING: t('status.preparing'), ON_THE_WAY: t('status.out_for_delivery'), DELIVERED: t('status.delivered'), CANCELLED: t('status.cancelled') };
     const label = statusLabels[status] || status;
     setStatusNotice(label);
     toast(`${brand.name} — ${label}`, { duration: 4000, id: 'order-status-toast' });

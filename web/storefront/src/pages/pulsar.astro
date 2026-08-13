@@ -1,16 +1,11 @@
 ---
 import '../styles/pulsar.css';
-import PulsarHero from '../components/PulsarHero';
-import PulsarHeroScene from '../components/PulsarHeroScene';
-import PulsarCategories from '../components/PulsarCategories';
-import PulsarProductGrid from '../components/PulsarProductGrid';
-import PulsarSpotlight from '../components/PulsarSpotlight';
-import PulsarSpotlightScene from '../components/PulsarSpotlightScene';
 import PulsarHeader from '../components/PulsarHeader.astro';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import EditCanvas from '../components/EditCanvas';
 import PulsarTexts from '../components/PulsarTexts';
+import PageSections from '../components/PageSections';
 import TermsGate from '../components/TermsGate.astro';
 ---
 
@@ -35,105 +30,13 @@ import TermsGate from '../components/TermsGate.astro';
 
 <PulsarHeader />
 
-<section class="hero">
-  <PulsarHeroScene client:load />
-  <div class="hero-content">
-    <PulsarHero client:load />
-    <div class="hero-ctas">
-      <a href="#shop" class="btn btn-solid">Découvrir la gamme</a>
-      <a href="#featured" class="btn btn-outline">Voir en 3D</a>
-    </div>
-  </div>
-  <div class="scroll-cue"><span>Scroll</span><span class="line"></span></div>
-</section>
-
-<div class="marquee">
-  <div class="marquee-track" data-edit-text="marquee" data-text-key="marquee">
-    <span>Paiement à la livraison</span>
-    <span>Garantie 12 mois</span>
-    <span>Support 7/7</span>
-    <span>Charge rapide</span>
-    <span>Retour sous 14 jours</span>
-    <span>Paiement à la livraison</span>
-    <span>Garantie 12 mois</span>
-    <span>Support 7/7</span>
-    <span>Charge rapide</span>
-    <span>Retour sous 14 jours</span>
-  </div>
-</div>
-
-<section id="shop">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow" data-edit-text="eyebrow-categories" data-text-key="eyebrow-categories">Acheter par catégorie</span>
-        <h2 class="section-title" data-edit-text="title-categories" data-text-key="title-categories">Quatre familles. <span class="accent">Un écosystème.</span></h2>
-      </div>
-      <p class="section-desc" data-edit-text="desc-categories" data-text-key="desc-categories">Chaque appareil partage le même standard de charge rapide — plus jamais de bagarre de câbles.</p>
-    </div>
-    <PulsarCategories client:load />
-  </div>
-</section>
-
-<section id="featured">
-  <div class="wrap">
-    <div class="spotlight" data-edit-vedette>
-      <PulsarSpotlight client:load />
-      <PulsarSpotlightScene client:load />
-    </div>
-  </div>
-</section>
-
-<section id="lineup">
-  <div class="wrap">
-    <div class="section-head">
-      <div>
-        <span class="eyebrow" data-edit-text="eyebrow-lineup" data-text-key="eyebrow-lineup">La gamme</span>
-        <h2 class="section-title" data-edit-text="title-lineup" data-text-key="title-lineup">Tout au <span class="accent">même endroit</span></h2>
-      </div>
-      <p class="section-desc" data-edit-text="desc-lineup" data-text-key="desc-lineup">Filtrez par catégorie — chaque produit est livré chargé et prêt à être associé.</p>
-    </div>
-    <PulsarProductGrid client:load />
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <div class="section-head">
-      <div><span class="eyebrow" data-edit-text="eyebrow-why" data-text-key="eyebrow-why">Pourquoi PULSAR</span><h2 class="section-title" data-edit-text="title-why" data-text-key="title-why">Conçu comme <span class="accent">un seul système</span></h2></div>
-    </div>
-    <div class="features">
-      <div class="feature"><span class="feature-num">01</span><h4 data-edit-text="feature-title-1" data-text-key="feature-title-1">Charge rapide partagée</h4><p data-edit-text="feature-desc-1" data-text-key="feature-desc-1">Chaque appareil — des écouteurs à l'ordinateur — se charge sur le même standard, un seul chargeur suffit.</p></div>
-      <div class="feature"><span class="feature-num">02</span><h4 data-edit-text="feature-title-2" data-text-key="feature-title-2">Passerelle entre appareils</h4><p data-edit-text="feature-desc-2" data-text-key="feature-desc-2">Appels, médias et presse-papiers passent instantanément entre votre téléphone, vos écouteurs et votre ordinateur.</p></div>
-      <div class="feature"><span class="feature-num">03</span><h4 data-edit-text="feature-title-3" data-text-key="feature-title-3">Batterie qui dure</h4><p data-edit-text="feature-desc-3" data-text-key="feature-desc-3">Autonomies testées en conditions réelles, pas des chiffres de laboratoire.</p></div>
-    </div>
-  </div>
-</section>
-
-<div class="stats">
-  <div class="stat"><div class="stat-num" data-edit-text="stat-num-1" data-text-key="stat-num-1">1200+</div><div class="stat-label" data-edit-text="stat-label-1" data-text-key="stat-label-1">Configs livrées</div></div>
-  <div class="stat"><div class="stat-num" data-edit-text="stat-num-2" data-text-key="stat-num-2">4.9/5</div><div class="stat-label" data-edit-text="stat-label-2" data-text-key="stat-label-2">Note clients</div></div>
-  <div class="stat"><div class="stat-num" data-edit-text="stat-num-3" data-text-key="stat-num-3">24/48h</div><div class="stat-label" data-edit-text="stat-label-3" data-text-key="stat-label-3">Livraison</div></div>
-  <div class="stat"><div class="stat-num" data-edit-text="stat-num-4" data-text-key="stat-num-4">7/7</div><div class="stat-label" data-edit-text="stat-label-4" data-text-key="stat-label-4">Support</div></div>
-</div>
-
-<section class="newsletter">
-  <div class="wrap">
-    <span class="eyebrow">Restez branché</span>
-    <h2>Accès anticipé aux nouveautés</h2>
-    <p>Nouveaux produits, restocks et prix membres — directement dans votre boîte mail.</p>
-    <form class="newsletter-form" onsubmit="event.preventDefault(); this.querySelector('button').textContent='Inscrit ✓';">
-      <input type="email" placeholder="Votre adresse email" required>
-      <button type="submit" class="btn btn-solid">S'inscrire</button>
-    </form>
-  </div>
-</section>
+<PageSections variant="pulsar" client:load />
 
 <footer id="tracking">
   <div class="wrap">
     <div class="footer-grid">
       <div class="footer-col footer-brand">
-        <a href="/" class="brand brand-logo">
+        <a href="/" class="brand brand-logo" data-edit-logo>
           <span class="brand-word">
             <span class="brand-part">PUL</span>
             <span class="brand-triangle">

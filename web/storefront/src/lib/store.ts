@@ -4,7 +4,7 @@ import type { Product } from './data';
 let product: Product | null = null;
 let qty = 1;
 let modalListeners = new Set<() => void>();
-let snapshot = { product, qty };
+let snapshot: { product: Product | null; qty: number } = { product, qty };
 
 function emit() {
   snapshot = { product, qty };

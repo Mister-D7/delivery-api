@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Database, Github, Cloud, Rocket, CheckCircle, XCircle, Loader2, HardDrive, Store } from 'lucide-react';
+import { Database, Github, Cloud, Rocket, CheckCircle, XCircle, Loader2, HardDrive, Store } from '../../components/adminIcons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import toast from 'react-hot-toast';

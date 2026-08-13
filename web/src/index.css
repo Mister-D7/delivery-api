@@ -18,6 +18,55 @@
   --font-mono: 'IBM Plex Mono', monospace;
 }
 
+:root {
+  --radius: 0.75rem;
+  --background: #0a0a0a;
+  --foreground: #f5f1e8;
+  --card: #111111;
+  --card-foreground: #f5f1e8;
+  --popover: #141414;
+  --popover-foreground: #f5f1e8;
+  --primary: #bfa24e;
+  --primary-foreground: #0a0a0a;
+  --secondary: #1a1a1a;
+  --secondary-foreground: #f5f1e8;
+  --muted: #1a1a1a;
+  --muted-foreground: #8c8578;
+  --accent: #222222;
+  --accent-foreground: #f5f1e8;
+  --destructive: #d9603b;
+  --destructive-foreground: #ffffff;
+  --border: rgba(191,162,78,0.16);
+  --input: rgba(191,162,78,0.25);
+  --ring: #bfa24e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -93,6 +142,36 @@ body {
 .badge-success { background: rgba(76,175,80,0.15); color: var(--color-success); }
 .badge-danger { background: rgba(217,96,59,0.15); color: var(--color-danger); }
 .badge-warning { background: rgba(255,152,0,0.15); color: var(--color-warning); }
+
+/* ══════ PHOSPHOR DUOTONE ADMIN ICONS ══════ */
+svg[data-admin-duotone] {
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+svg[data-admin-duotone] path[opacity="0.2"] {
+  fill: color-mix(in srgb, var(--admin-gold, #bfa24e) 55%, transparent);
+  opacity: 0.5;
+}
+
+/* Admin nav pill icons — scale + glow in each tab's accent color */
+.admin-nav {
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+.admin-nav-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+.admin-nav:hover .admin-nav-icon {
+  transform: scale(1.12) rotate(-3deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-nav, .admin-nav-icon { transition: none; }
+}
 
 /* ══════ GLOW ANIMATIONS ══════ */
 @keyframes glow-pulse {

@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Package, Clock, TrendingUp, ChevronDown, ChevronUp, MessageCircle, Send, Search, Printer, CheckCircle, XCircle, Truck, AlertTriangle, Copy, Eye, Archive } from 'lucide-react';
+import { Package, Clock, TrendingUp, ChevronDown, ChevronUp, MessageCircle, Send, Search, Printer, CheckCircle, XCircle, Truck, AlertTriangle, Copy, Eye, Archive } from '../../components/adminIcons';
 import api, { apiBaseURL } from '../../services/api';
 import toast from 'react-hot-toast';
 import { useOrderSSE } from '../../hooks/useOrderSSE';
-import OrderStatusBadge from '../../components/OrderStatusBadge';
+import OrderStatusBadge, { useStatusLabel } from '../../components/OrderStatusBadge';
 import PrintReceipt, { DownloadPdfButton } from '../../components/PrintReceipt';
 import ContextMenu, { useContextMenu } from '../../components/ContextMenu';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +25,7 @@ const STATUSES = ['PENDING', 'CONFIRMED', 'PREPARING', 'ON_THE_WAY', 'DELIVERED'
 
 export default function AdminDashboard() {
   const { t } = useTranslation('dashboard');
+  const statusLabel = useStatusLabel();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState(false);
@@ -143,7 +144,7 @@ export default function AdminDashboard() {
       { label: t('order.chat'), icon: <MessageCircle size={12} />, onClick: () => openChat(o.id), color: 'var(--admin-gold)' },
       { divider: true, label: '', onClick: () => {} },
       ...STATUSES.map(s => ({
-        label: s.replace('_', ' '), icon: statusIcons[s],
+        label: statusLabel(s), icon: statusIcons[s],
         onClick: () => updateStatus(o.id, s), color: o.status === s ? 'var(--admin-gold)' : 'var(--admin-muted2)',
       })),
       { divider: true, label: '', onClick: () => {} },
@@ -221,7 +222,7 @@ export default function AdminDashboard() {
         ].map((s, i) => (
           <div key={i} className="surface-card p-3">
             <div className="flex items-center gap-2 mb-1">
-              <s.icon size={14} style={{ color: s.color }} />
+              <s.icon size={16} style={{ color: s.color }} />
               <span className="text-[10px]" style={{ color: 'var(--admin-muted)' }}>{s.label}</span>
             </div>
             <p className="text-sm font-bold">{s.value}</p>
@@ -251,7 +252,7 @@ export default function AdminDashboard() {
       <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide">
         {['ALL', ...STATUSES].map(s => (
           <button key={s} onClick={() => setFilter(s)} className="px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap" style={{ background: filter === s ? 'var(--admin-gold-bg)' : 'var(--admin-surface2)', color: filter === s ? 'var(--admin-gold)' : 'var(--admin-muted)' }}>
-            {s === 'ALL' ? t('filters.all') : s.replace('_', ' ')}
+            {s === 'ALL' ? t('filters.all') : statusLabel(s)}
           </button>
         ))}
       </div>

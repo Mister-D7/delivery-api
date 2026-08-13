@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Package } from 'lucide-react';
+import { Package } from '../../components/adminIcons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import type { ProductCost } from './revenueTypes';

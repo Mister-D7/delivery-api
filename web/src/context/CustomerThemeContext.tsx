@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, type ReactNode } from 'react';
 import api from '../services/api';
 
-export type CustomerTheme = 'pulsar' | 'greens';
+export type CustomerTheme = 'pulsar' | 'greens' | 'gaming' | 'preorder';
 
 type Palette = {
   '--pt-bg': string;
@@ -69,6 +69,8 @@ function readText(v: unknown): string {
 
 const FONT_PULSAR = "'Sora', 'Space Grotesk', 'Segoe UI', sans-serif";
 const FONT_GREENS = "'Inter', 'Segoe UI', system-ui, sans-serif";
+const FONT_GAMING = "'Barlow', 'Segoe UI', system-ui, sans-serif";
+const FONT_PREORDER = "'Inter', 'Segoe UI', system-ui, sans-serif";
 const MONO = "'IBM Plex Mono', ui-monospace, monospace";
 
 const PALETTES: Record<CustomerTheme, { dark: Palette; light: Palette }> = {
@@ -172,24 +174,131 @@ const PALETTES: Record<CustomerTheme, { dark: Palette; light: Palette }> = {
       '--pt-mono': MONO,
     },
   },
+  gaming: {
+    dark: {
+      '--pt-bg': '#ffffff',
+      '--pt-surface': '#262626',
+      '--pt-surface2': '#1d1d1d',
+      '--pt-surface3': '#2f2f2f',
+      '--pt-accent': '#0ea5e9',
+      '--pt-accent2': '#0284c7',
+      '--pt-grad': 'linear-gradient(120deg, #0ea5e9, #0284c7)',
+      '--pt-grad-soft': 'linear-gradient(120deg, rgba(14, 165, 233, 0.2), rgba(2, 132, 199, 0.2))',
+      '--pt-grad-text': '#ffffff',
+      '--pt-muted': '#71717a',
+      '--pt-muted2': '#a1a1aa',
+      '--pt-success': '#22c55e',
+      '--pt-danger': '#ea580c',
+      '--pt-danger-soft': 'rgba(234, 88, 12, 0.12)',
+      '--pt-border': 'rgba(0, 0, 0, 0.09)',
+      '--pt-border-strong': 'rgba(0, 0, 0, 0.18)',
+      '--pt-border-faint': 'rgba(14, 165, 233, 0.16)',
+      '--pt-row-alt': 'rgba(0, 0, 0, 0.03)',
+      '--pt-icon-dim': '#d4d4d8',
+      '--pt-text': '#18181b',
+      '--pt-font': FONT_GAMING,
+      '--pt-mono': MONO,
+    },
+    light: {
+      '--pt-bg': '#ffffff',
+      '--pt-surface': '#f4f4f5',
+      '--pt-surface2': '#e4e4e7',
+      '--pt-surface3': '#d4d4d8',
+      '--pt-accent': '#0284c7',
+      '--pt-accent2': '#0369a1',
+      '--pt-grad': 'linear-gradient(120deg, #0ea5e9, #0284c7)',
+      '--pt-grad-soft': 'linear-gradient(120deg, rgba(14, 165, 233, 0.2), rgba(2, 132, 199, 0.2))',
+      '--pt-grad-text': '#ffffff',
+      '--pt-muted': '#52525b',
+      '--pt-muted2': '#71717a',
+      '--pt-success': '#16a34a',
+      '--pt-danger': '#c2410c',
+      '--pt-danger-soft': 'rgba(234, 88, 12, 0.1)',
+      '--pt-border': 'rgba(0, 0, 0, 0.1)',
+      '--pt-border-strong': 'rgba(0, 0, 0, 0.2)',
+      '--pt-border-faint': 'rgba(14, 165, 233, 0.18)',
+      '--pt-row-alt': 'rgba(0, 0, 0, 0.03)',
+      '--pt-icon-dim': '#a1a1aa',
+      '--pt-text': '#18181b',
+      '--pt-font': FONT_GAMING,
+      '--pt-mono': MONO,
+    },
+  },
+  preorder: {
+    dark: {
+      '--pt-bg': '#0b0d11',
+      '--pt-surface': '#12151c',
+      '--pt-surface2': '#0b0d11',
+      '--pt-surface3': '#1a1e28',
+      '--pt-accent': '#2a7de1',
+      '--pt-accent2': '#7c5cfc',
+      '--pt-grad': 'linear-gradient(120deg, #2a7de1, #7c5cfc)',
+      '--pt-grad-soft': 'linear-gradient(120deg, rgba(42, 125, 225, 0.2), rgba(124, 92, 252, 0.2))',
+      '--pt-grad-text': '#ffffff',
+      '--pt-muted': '#9aa2b1',
+      '--pt-muted2': '#5b6270',
+      '--pt-success': '#4ade80',
+      '--pt-danger': '#f87171',
+      '--pt-danger-soft': 'rgba(248, 113, 113, 0.12)',
+      '--pt-border': 'rgba(42, 125, 225, 0.14)',
+      '--pt-border-strong': 'rgba(42, 125, 225, 0.2)',
+      '--pt-border-faint': 'rgba(42, 125, 225, 0.08)',
+      '--pt-row-alt': 'rgba(255, 255, 255, 0.02)',
+      '--pt-icon-dim': '#262b36',
+      '--pt-text': '#f0f2f6',
+      '--pt-font': FONT_PREORDER,
+      '--pt-mono': MONO,
+    },
+    light: {
+      '--pt-bg': '#f6f7fb',
+      '--pt-surface': '#ffffff',
+      '--pt-surface2': '#eef1f8',
+      '--pt-surface3': '#e6eaf4',
+      '--pt-accent': '#2563eb',
+      '--pt-accent2': '#7c5cfc',
+      '--pt-grad': 'linear-gradient(120deg, #2563eb, #7c5cfc)',
+      '--pt-grad-soft': 'linear-gradient(120deg, rgba(37, 99, 235, 0.15), rgba(124, 92, 252, 0.15))',
+      '--pt-grad-text': '#ffffff',
+      '--pt-muted': '#5b6270',
+      '--pt-muted2': '#8a92a2',
+      '--pt-success': '#16a34a',
+      '--pt-danger': '#dc2626',
+      '--pt-danger-soft': 'rgba(220, 38, 38, 0.08)',
+      '--pt-border': 'rgba(23, 23, 28, 0.1)',
+      '--pt-border-strong': 'rgba(23, 23, 28, 0.2)',
+      '--pt-border-faint': 'rgba(37, 99, 235, 0.16)',
+      '--pt-row-alt': 'rgba(0, 0, 0, 0.03)',
+      '--pt-icon-dim': '#c3c9d4',
+      '--pt-text': '#171a21',
+      '--pt-font': FONT_PREORDER,
+      '--pt-mono': MONO,
+    },
+  },
 };
 
 const BRANDS: Record<CustomerTheme, { name: string; sub: string; logo?: string; mark?: string }> = {
   pulsar: { name: 'PULSAR', sub: 'Designed by DjDr', mark: '▲' },
   greens: { name: 'Organic', sub: 'Le bio, livré chez vous', logo: '/images/logo.svg' },
+  gaming: { name: 'Pulsar Gaming', sub: 'Designed By DjDr' },
+  preorder: { name: 'Mister-D', sub: 'Software Engineering', mark: '◆' },
 };
+
+function themeKey(theme: CustomerTheme): string {
+  if (theme === 'greens') return 'greens_theme';
+  if (theme === 'gaming') return 'gaming_theme';
+  if (theme === 'preorder') return 'preorder_theme';
+  return 'pulsar_theme';
+}
 
 const CustomerThemeContext = createContext<CustomerThemeCtx>(null!);
 
 function getInitialLight(theme: CustomerTheme): boolean {
-  const key = theme === 'greens' ? 'greens_theme' : 'pulsar_theme';
   try {
-    return localStorage.getItem(key) === 'light';
+    return localStorage.getItem(themeKey(theme)) === 'light';
   } catch {
     return theme === 'greens';
   }
 }
-
 export function CustomerThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<CustomerTheme>('pulsar');
   const [light, setLight] = useState<boolean>(() => getInitialLight('pulsar'));
@@ -201,7 +310,8 @@ export function CustomerThemeProvider({ children }: { children: ReactNode }) {
       .then((r) => {
         const data = r.data && typeof r.data === 'object' ? (r.data as Record<string, unknown>) : {};
         setSettings(data);
-        const t: CustomerTheme = data.theme === 'greens' ? 'greens' : 'pulsar';
+        const t: CustomerTheme =
+          data.theme === 'greens' ? 'greens' : data.theme === 'gaming' ? 'gaming' : data.theme === 'preorder' ? 'preorder' : 'pulsar';
         setTheme(t);
         setLight(getInitialLight(t));
       })
@@ -209,7 +319,7 @@ export function CustomerThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    const key = theme === 'greens' ? 'greens_theme' : 'pulsar_theme';
+    const key = themeKey(theme);
     try {
       localStorage.setItem(key, light ? 'light' : 'dark');
     } catch {}

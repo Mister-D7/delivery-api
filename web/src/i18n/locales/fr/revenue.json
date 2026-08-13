@@ -21,7 +21,7 @@
     "delivery_revenue": "Livraisons encaissées",
     "driver_cost": "Coût livreurs",
     "delivery_profit": "Profit livraison",
-    "employee_cost": "Salaires employés (mois)"
+    "employee_cost": "Salaires payés (période)"
   },
   "products": {
     "title": "Couts des produits",
@@ -44,7 +44,7 @@
     "delivery_collected": "Livraisons encaissées",
     "driver_cost": "Coût livreurs",
     "delivery_profit": "Profit livraison",
-    "employee_cost": "Salaires employés (mois)",
+    "employee_cost": "Salaires payés (période)",
     "cancelled_loss": "Pertes commandes annulees"
   },
   "date_range": {

@@ -3,13 +3,11 @@ import '../styles/greens.css';
 import HeaderActions from '../components/HeaderActions';
 import GreensHeaderSearch from '../components/GreensHeaderSearch';
 import GreensFooter from '../components/GreensFooter';
-import PulsarCategories from '../components/PulsarCategories';
-import OrganicProductGrid from '../components/OrganicProductGrid';
-import CombosSection from '../components/CombosSection';
 import CartDrawer from '../components/CartDrawer';
 import ProductModal from '../components/ProductModal';
 import EditCanvas from '../components/EditCanvas';
 import PulsarTexts from '../components/PulsarTexts';
+import PageSections from '../components/PageSections';
 import TermsGate from '../components/TermsGate.astro';
 
 const year = new Date().getFullYear();
@@ -46,7 +44,7 @@ const year = new Date().getFullYear();
       <div class="col-6 col-lg-2 d-flex gap-3 align-items-center">
         <button class="og-burger d-lg-none" id="ogBurger" aria-label="Menu">☰</button>
         <a href="/" class="d-flex align-items-center">
-          <img src="/images/logo.svg" alt="Organic" style="height: 40px;">
+          <img src="/images/logo.svg" alt="Organic" style="height: 40px;" data-edit-logo>
           <span class="og-brand" data-edit-text="storeName" data-text-key="storeName">Organic</span>
         </a>
       </div>
@@ -74,119 +72,15 @@ const year = new Date().getFullYear();
   </nav>
 </header>
 
-<!-- HERO -->
-<section class="og-hero" style="background-image: url('/images/banner-1.jpg');">
-  <div class="container-lg py-5">
-    <div class="row">
-      <div class="col-lg-7 pt-5 mt-5">
-        <h1 class="display-1 hero-title" data-edit-text="tagline" data-text-key="tagline">
-          <span class="text-primary">Organic</span> Foods at your <span class="fw-bold">Doorsteps</span>
-        </h1>
-        <p class="hero-sub mt-4" data-edit-text="tagline_sub" data-text-key="tagline_sub">Des produits frais et bio, livrés chez vous.</p>
-        <div class="d-flex gap-3 flex-wrap mt-4">
-          <a href="/#shop" class="btn btn-primary text-uppercase rounded-pill px-4 py-3">Start Shopping</a>
-          <a href="/#lineup" class="btn btn-dark text-uppercase rounded-pill px-4 py-3">Join Now</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- FEATURES STRIP -->
-<section class="container-lg">
-  <div class="row row-cols-1 row-cols-md-3 g-0 my-4 rounded-3 overflow-hidden shadow-sm">
-    <div class="col bg-primary text-light p-4">
-      <div class="og-feature">
-        <span class="og-feature-icon">🌱</span>
-        <div>
-          <h5 data-edit-text="feature_1_title" data-text-key="feature_1_title">Fresh from farm</h5>
-          <p data-edit-text="feature_1_desc" data-text-key="feature_1_desc">Des fruits et légumes frais, directement de la ferme.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col bg-secondary text-light p-4">
-      <div class="og-feature">
-        <span class="og-feature-icon">🌿</span>
-        <div>
-          <h5 data-edit-text="feature_2_title" data-text-key="feature_2_title">100% Organic</h5>
-          <p data-edit-text="feature_2_desc" data-text-key="feature_2_desc">Une sélection 100% bio et naturelle.</p>
-        </div>
-      </div>
-    </div>
-    <div class="col bg-danger text-light p-4">
-      <div class="og-feature">
-        <span class="og-feature-icon">🚚</span>
-        <div>
-          <h5 data-edit-text="feature_3_title" data-text-key="feature_3_title">Free delivery</h5>
-          <p data-edit-text="feature_3_desc" data-text-key="feature_3_desc">Livraison rapide, offerte dès 5 000 DA.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- CATEGORIES -->
-<section id="shop" class="container-lg py-5">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <div>
-      <span class="eyebrow" data-edit-text="eyebrow-categories" data-text-key="eyebrow-categories">Browse by category</span>
-      <h2 class="section-title mt-1" data-edit-text="title-categories" data-text-key="title-categories">Category</h2>
-    </div>
-    <a href="/#lineup" class="btn btn-primary rounded-pill px-4">View All</a>
-  </div>
-  <PulsarCategories client:load />
-</section>
-
-<!-- PRODUCTS -->
-<section id="lineup" class="container-lg pb-5">
-  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <div>
-      <span class="eyebrow" data-edit-text="eyebrow-lineup" data-text-key="eyebrow-lineup">The lineup</span>
-      <h2 class="section-title mt-1" data-edit-text="title-lineup" data-text-key="title-lineup">Best selling products</h2>
-    </div>
-    <a href="/#shop" class="btn btn-outline-secondary rounded-pill px-4">Shop All</a>
-  </div>
-  <OrganicProductGrid client:load />
-</section>
-
-<!-- COMBOS -->
-<section id="combos" class="container-lg py-4">
-  <CombosSection client:load />
-</section>
-
-<!-- BANNER BLOCKS -->
-<section id="featured" class="container-lg py-4">
-  <div class="banner-blocks">
-    <div class="banner-block" style="background-image: url('/images/banner-ad-1.jpg'); background-size: cover; background-position: center; min-height: 250px;">
-      <div class="banner-content">
-        <h3>Items on SALE</h3>
-        <p>Discounts up to 30%</p>
-        <a href="/#lineup" class="btn btn-light btn-sm rounded-pill px-4">Shop Now</a>
-      </div>
-    </div>
-    <div class="banner-block" style="background-image: url('/images/banner-ad-2.jpg'); background-size: cover; background-position: center; min-height: 250px;">
-      <div class="banner-content">
-        <h3>Combo offers</h3>
-        <p>Discounts up to 50%</p>
-        <a href="/#combos" class="btn btn-light btn-sm rounded-pill px-4">Découvrir</a>
-      </div>
-    </div>
-    <div class="banner-block" style="background-image: url('/images/banner-ad-3.jpg'); background-size: cover; background-position: center; min-height: 250px;">
-      <div class="banner-content">
-        <h3>Discount Coupons</h3>
-        <p>Discounts up to 40%</p>
-        <a href="/#lineup" class="btn btn-light btn-sm rounded-pill px-4">Shop Now</a>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- PAGE SECTIONS (dynamic layout) -->
+<PageSections variant="greens" client:load />
 
 <!-- FOOTER -->
 <footer class="og-footer py-5 mt-4">
   <div class="container-lg">
     <div class="row g-4">
       <div class="col-lg-3">
-        <img src="/images/logo.svg" alt="Organic" style="height: 40px;" class="mb-3">
+        <img src="/images/logo.svg" alt="Organic" style="height: 40px;" class="mb-3" data-edit-logo>
         <p class="text-muted small" data-edit-text="footer_desc" data-text-key="footer_desc">Des produits frais et locaux, livrés directement chez vous.</p>
       </div>
       <div class="col-md-2">

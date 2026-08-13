@@ -1,0 +1,37 @@
+---
+
+const ROW_BIG = [
+  { id: 'pulsar-deals', img: '/images/gaming/pulsar-frontpage-eol-deals-maxgaming.webp', alt: 'Pulsar Gaming Deals' },
+  { id: 'libernova', img: '/images/gaming/libernova-frontpage-banner-large-v2.webp', alt: 'Libernova' },
+  { id: 'feinmann', img: '/images/gaming/Feinmann-F01-Noctua-mini-banner.webp', alt: 'Feinmann F01 Noctua' },
+];
+
+const ROW_MED = [
+  { id: 'back2school', img: '/images/gaming/Back-2-School-2026.png', alt: 'Retour aux études' },
+  { id: 'gamesir', img: '/images/gaming/gamesir-mini-frontpage-banner-maxgaming.webp', alt: 'Gamesir' },
+  { id: 'maxmount', img: '/images/gaming/maxmount-mini-maxgaming-banner-v2.png', alt: 'MaxMount' },
+];
+---
+
+<section class="g-promos" id="promos">
+  <div class="g-container">
+    <div class="g-promo-row g-promo-big">
+      {ROW_BIG.map((b) => (
+        <div class="g-promo" data-edit-banner data-banner={b.id}>
+          <a class="g-promo-card" href="#products">
+            <img src={b.img} alt={b.alt} loading="lazy" />
+          </a>
+        </div>
+      ))}
+    </div>
+    <div class="g-promo-row g-promo-med">
+      {ROW_MED.map((b) => (
+        <div class="g-promo" data-edit-banner data-banner={b.id}>
+          <a class="g-promo-card" href="#products">
+            <img src={b.img} alt={b.alt} loading="lazy" />
+          </a>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

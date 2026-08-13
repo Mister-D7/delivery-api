@@ -36,17 +36,6 @@ const seeds = [
   { store: 'tech', category: 'Stockage', name: 'SSD Samsung 990 Pro 1 To', price: 21500, promo: null, stock: 28 },
   { store: 'tech', category: 'Réseau & WiFi', name: 'Routeur TP-Link Archer AX55', price: 16500, promo: null, stock: 16 },
 
-  { store: 'gaming', category: 'Consoles', name: 'PlayStation 5 Slim', price: 65900, promo: null, stock: 10 },
-  { store: 'gaming', category: 'Consoles', name: 'Xbox Series X', price: 59900, promo: 57900, stock: 8 },
-  { store: 'gaming', category: 'Consoles', name: 'Nintendo Switch OLED', price: 34900, promo: null, stock: 14 },
-  { store: 'gaming', category: 'Manettes & Pads', name: 'Manette DualSense', price: 12500, promo: null, stock: 30 },
-  { store: 'gaming', category: 'Jeux Vidéo', name: 'EA Sports FC 26', price: 9500, promo: null, stock: 50 },
-  { store: 'gaming', category: 'Casques Gaming', name: 'Casque SteelSeries Arctis 5', price: 14500, promo: null, stock: 19 },
-  { store: 'gaming', category: 'Claviers & Souris', name: 'Clavier mécanique Corsair K70', price: 16500, promo: null, stock: 17 },
-  { store: 'gaming', category: 'Chaises Gaming', name: 'Fauteuil gamer DXRacer', price: 38900, promo: 35900, stock: 6 },
-  { store: 'gaming', category: 'Cartes Graphiques', name: 'Carte graphique RTX 4070 Super', price: 89900, promo: null, stock: 5 },
-  { store: 'gaming', category: 'Setup & Stream', name: 'Webcam Elgato Facecam', price: 19900, promo: null, stock: 12 },
-
   { store: 'clothes', category: 'Homme', name: 'Veste en cuir Homme', price: 16500, promo: null, stock: 9 },
   { store: 'clothes', category: 'Homme', name: 'Chemise Oxford Bleue', price: 4500, promo: 3900, stock: 45 },
   { store: 'clothes', category: 'Femme', name: "Robe d'été Fleurie", price: 6500, promo: null, stock: 32 },

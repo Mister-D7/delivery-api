@@ -311,12 +311,21 @@ router.get('/categories', adminAuth, async (req, res) => {
 // POST /categories — admin, create
 router.post('/categories', adminAuth, async (req, res) => {
   try {
-    const { name, imageUrl, sortOrder, storeType } = req.body;
+    const { name, imageUrl, sortOrder, storeType, parentId, isNav, isTop, icon, navOrder } = req.body;
     if (!name) return res.status(400).json({ error: 'Name required' });
 
     const { data, error } = await supabase
       .from('delivery_categories')
-      .insert({ name, image_url: imageUrl || null, sort_order: sortOrder || 0 })
+      .insert({
+        name,
+        image_url: imageUrl || null,
+        sort_order: sortOrder || 0,
+        parent_id: parentId || null,
+        is_nav: isNav === true,
+        is_top: isTop === true,
+        icon: icon || null,
+        nav_order: Number.isInteger(navOrder) ? navOrder : (sortOrder || 0),
+      })
       .select()
       .single();
 
@@ -334,7 +343,7 @@ router.post('/categories', adminAuth, async (req, res) => {
 // PUT /categories/:id — admin, update
 router.put('/categories/:id', adminAuth, async (req, res) => {
   try {
-    const { name, imageUrl, sortOrder, isActive, storeType } = req.body;
+    const { name, imageUrl, sortOrder, isActive, storeType, parentId, isNav, isTop, icon, navOrder } = req.body;
 
     const { data: existing } = await supabase
       .from('delivery_categories')
@@ -351,6 +360,11 @@ router.put('/categories/:id', adminAuth, async (req, res) => {
     if (imageUrl !== undefined) updates.image_url = imageUrl;
     if (sortOrder !== undefined) updates.sort_order = sortOrder;
     if (isActive !== undefined) updates.is_active = isActive;
+    if (parentId !== undefined) updates.parent_id = parentId || null;
+    if (isNav !== undefined) updates.is_nav = isNav === true;
+    if (isTop !== undefined) updates.is_top = isTop === true;
+    if (icon !== undefined) updates.icon = icon || null;
+    if (navOrder !== undefined) updates.nav_order = navOrder;
 
     const { data, error } = await supabase
       .from('delivery_categories')
@@ -584,6 +598,80 @@ router.get('/erp-products', adminAuth, async (req, res) => {
       .order('name');
 
     res.json(data || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /catalog/import — bulk import products + categories from structured items
+router.post('/catalog/import', adminAuth, async (req, res) => {
+  try {
+    const { items, storeType } = req.body || {};
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'No items provided' });
+    }
+
+    const catMap = new Map();
+    const { data: existingCats } = await supabase.from('delivery_categories').select('id, name').limit(1000);
+    for (const c of existingCats || []) catMap.set(String(c.name).trim().toLowerCase(), c.id);
+
+    let createdCats = 0;
+    let createdProducts = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (const raw of items) {
+      try {
+        const name = String(raw.name || '').trim();
+        if (!name) { skipped++; continue; }
+
+        let categoryId = null;
+        const catName = String(raw.category || '').trim();
+        if (catName) {
+          if (isVedetteName(catName)) {
+            const ved = await ensureVedetteCategory();
+            if (ved) categoryId = ved.id;
+          } else {
+            const key = catName.toLowerCase();
+            if (catMap.has(key)) {
+              categoryId = catMap.get(key);
+            } else {
+              const { data: cat, error: catErr } = await supabase
+                .from('delivery_categories')
+                .insert({ name: catName, image_url: null, sort_order: 0, is_active: true })
+                .select()
+                .single();
+              if (catErr) throw catErr;
+              categoryId = cat.id;
+              catMap.set(key, cat.id);
+              createdCats++;
+              if (storeType) await setCategoryStoreType(cat.id, storeType);
+            }
+          }
+        }
+
+        const productData = {
+          name,
+          sale_price: Number(raw.salePrice ?? raw.priceSell ?? 0) || 0,
+          cost_price: Number(raw.costPrice ?? raw.priceBuy ?? 0) || 0,
+          stock_qty: Number(raw.stockQty ?? 0) || 0,
+          image_url: String(raw.imageUrl || '').trim() || null,
+          category_id: categoryId,
+          description: String(raw.description || '').trim() || null,
+          specs: raw.specs ? String(raw.specs) : null,
+          is_custom: true,
+          is_active: true,
+        };
+
+        const { error: pErr } = await supabase.from('delivery_products').insert(productData);
+        if (pErr) throw pErr;
+        createdProducts++;
+      } catch (e) {
+        errors.push({ name: raw.name, error: e.message });
+      }
+    }
+
+    res.json({ ok: true, createdProducts, createdCategories: createdCats, skipped, errors: errors.slice(0, 20) });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

@@ -15,6 +15,7 @@ stdout.log
 
 # Build output
 web/dist/
+web/storefront/dist/
 
 # 3D model uploads (user-generated, keep out of git)
 uploads/models/
@@ -29,3 +30,7 @@ Thumbs.db
 # Project-specific
 .notifier-state.json
 opencode.json
+
+# Desktop Qt admin app (local only, not published)
+qtadmin/
+PLAN-QT-ADMIN.md

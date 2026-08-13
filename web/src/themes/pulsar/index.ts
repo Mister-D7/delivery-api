@@ -1,14 +1,10 @@
-import type { ComponentType } from 'react';
-import type { ThemeData, ThemePage } from '../index';
-import Component from './page.mdx';
-import skinCss from './skin.css?inline';
+import type { ThemePage } from '../index';
 
 const pulsar: ThemePage = {
   id: 'pulsar',
   name: 'Pulsar Tech',
   storeType: 'tech',
   description: 'Tech sombre néon — gradients cyan/violet, hero façon pulsar, porté du design PULSAR.',
-  preview: '/templates/previews/tech-gaming.svg',
   defaults: {
     accent: '#00e5ff',
     bg: '#050508',
@@ -20,8 +16,6 @@ const pulsar: ThemePage = {
     glass: true,
     animation: true,
   },
-  skinCss,
-  Component: Component as unknown as ComponentType<ThemeData>,
 };
 
 export default pulsar;

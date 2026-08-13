@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { HardDrive, Download, Upload, Play, Trash2, ToggleLeft, ToggleRight, Loader2, Check } from 'lucide-react';
+import { HardDrive, Download, Upload, Play, Trash2, ToggleLeft, ToggleRight, Loader2, Check, AlertTriangle, ShieldCheck, X } from '../../../components/adminIcons';
 import { useTranslation } from 'react-i18next';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
@@ -27,12 +27,47 @@ export default function BackupTab() {
   const [emailBackupLoading, setEmailBackupLoading] = useState(false);
   const [emailConfigured, setEmailConfigured] = useState(false);
 
+  const [resetConfigured, setResetConfigured] = useState(false);
+  const [resetPwdCurrent, setResetPwdCurrent] = useState('');
+  const [resetPwdNew, setResetPwdNew] = useState('');
+  const [resetPwdSaving, setResetPwdSaving] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetPwd, setResetPwd] = useState('');
+  const [resetDoBackup, setResetDoBackup] = useState(true);
+  const [resetRunning, setResetRunning] = useState(false);
+
   useEffect(() => {
     loadBackupSettings();
     loadBackupList();
     loadCloudProviders();
     loadEmailSettings();
+    loadResetStatus();
   }, []);
+
+  const loadResetStatus = async () => {
+    try { const r = await api.get('/setup/reset-status'); setResetConfigured(r.data?.configured ?? false); } catch {}
+  };
+  const saveResetPassword = async () => {
+    if (!resetPwdNew || resetPwdNew.length < 4) return toast.error('Le mot de passe doit contenir au moins 4 caractères.');
+    setResetPwdSaving(true);
+    try {
+      await api.put('/setup/reset-password', { current: resetConfigured ? resetPwdCurrent : undefined, newPassword: resetPwdNew });
+      toast.success('Mot de passe de réinitialisation enregistré');
+      setResetPwdCurrent(''); setResetPwdNew('');
+      loadResetStatus();
+    } catch (err: any) { toast.error(err.response?.data?.error || 'Erreur'); }
+    setResetPwdSaving(false);
+  };
+  const performReset = async () => {
+    setResetRunning(true);
+    try {
+      const r = await api.post('/setup/reset', { password: resetPwd, doBackup: resetDoBackup });
+      toast.success(r.data?.backup ? 'Store réinitialisé ! Un backup a été créé.' : 'Store réinitialisé !');
+      setResetOpen(false); setResetPwd('');
+      setTimeout(() => window.location.reload(), 1200);
+    } catch (err: any) { toast.error(err.response?.data?.error || 'Erreur'); }
+    setResetRunning(false);
+  };
 
   const loadBackupSettings = async () => {
     try { const r = await api.get('/backup/settings'); const d = r.data; if (d) { setBkAutoEnabled(d.autoEnabled ?? false); setBkFrequency(d.frequency ?? 'daily'); setBkKeepCount(d.keepCount ?? 10); } } catch {}
@@ -250,6 +285,71 @@ export default function BackupTab() {
           </div>
         )}
       </div>
+      <div className="surface-card p-5" style={{ borderColor: 'rgba(217,96,59,0.25)' }}>
+        <p className="text-xs font-bold tracking-wide mb-1 flex items-center gap-1.5" style={{ color: 'var(--admin-danger)' }}>
+          <ShieldCheck size={13} /> RESET PASSWORD
+        </p>
+        <p className="text-[10px] mb-4" style={{ color: 'var(--admin-muted2)' }}>
+          Mot de passe qui protège la réinitialisation complète du store. Indépendant du login admin — jamais inclus dans un backup.
+        </p>
+        <div className="space-y-2 max-w-md">
+          {resetConfigured && (
+            <input type="password" value={resetPwdCurrent} onChange={e => setResetPwdCurrent(e.target.value)}
+              className="input-field text-xs w-full" placeholder="Mot de passe actuel" />
+          )}
+          <input type="password" value={resetPwdNew} onChange={e => setResetPwdNew(e.target.value)}
+            className="input-field text-xs w-full" placeholder={resetConfigured ? 'Nouveau mot de passe' : 'Mot de passe de réinitialisation'} />
+          <button onClick={saveResetPassword} disabled={resetPwdSaving} className="gold-btn px-4 py-2 text-[11px] font-bold rounded-lg flex items-center gap-1.5 disabled:opacity-40">
+            {resetPwdSaving ? <Loader2 size={12} className="animate-spin" /> : <ShieldCheck size={12} />} Enregistrer
+          </button>
+          {resetConfigured && <p className="text-[10px] flex items-center gap-1" style={{ color: 'var(--admin-success)' }}><Check size={10} /> Mot de passe configuré</p>}
+        </div>
+      </div>
+
+      <div className="surface-card p-5" style={{ borderColor: 'rgba(217,96,59,0.4)', background: 'color-mix(in srgb, var(--admin-danger) 5%, transparent)' }}>
+        <p className="text-xs font-bold tracking-wide mb-1 flex items-center gap-1.5" style={{ color: 'var(--admin-danger)' }}>
+          <AlertTriangle size={13} /> RESET STORE
+        </p>
+        <p className="text-[10px] mb-3" style={{ color: 'var(--admin-muted2)' }}>
+          Supprime TOUTES les données du store pour repartir de zéro : produits, catégories, commandes, revenus, clients, coupons et offres combinées.
+          Le thème, les bannières, les réglages, les employés et le compte admin ne sont pas touchés.
+        </p>
+        <button onClick={() => setResetOpen(true)} className="px-4 py-2 text-[11px] font-bold rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(217,96,59,0.15)', color: 'var(--admin-danger)', border: '1px solid rgba(217,96,59,0.35)' }}>
+          <AlertTriangle size={12} /> Réinitialiser le store
+        </button>
+      </div>
+
+      {resetOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => !resetRunning && setResetOpen(false)}>
+          <div className="w-full max-w-sm surface-card p-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-extrabold flex items-center gap-2" style={{ color: 'var(--admin-danger)', fontFamily: "'Unbounded', sans-serif" }}>
+                <AlertTriangle size={16} /> Réinitialiser le store
+              </p>
+              <button onClick={() => !resetRunning && setResetOpen(false)} className="p-1 rounded-lg" style={{ color: 'var(--admin-muted2)' }}>
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-[11px] mb-4" style={{ color: 'var(--admin-muted)' }}>
+              Action irréversible. Saisissez le mot de passe de réinitialisation pour confirmer.
+            </p>
+            <input type="password" value={resetPwd} onChange={e => setResetPwd(e.target.value)}
+              className="input-field text-xs w-full mb-3" placeholder="Mot de passe de réinitialisation" />
+            <label className="flex items-center gap-2 mb-4 cursor-pointer">
+              <input type="checkbox" checked={resetDoBackup} onChange={e => setResetDoBackup(e.target.checked)} className="accent-[#bfa24e]" />
+              <span className="text-[11px]" style={{ color: 'var(--admin-muted)' }}>Créer un backup complet avant (recommandé, sans données de login)</span>
+            </label>
+            <div className="flex gap-2">
+              <button onClick={performReset} disabled={resetRunning || !resetPwd} className="flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 disabled:opacity-40" style={{ background: 'rgba(217,96,59,0.9)', color: '#fff' }}>
+                {resetRunning ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />} {resetRunning ? 'Réinitialisation...' : 'Réinitialiser'}
+              </button>
+              <button onClick={() => setResetOpen(false)} disabled={resetRunning} className="px-4 py-2 rounded-xl text-xs font-semibold disabled:opacity-40" style={{ background: 'var(--admin-surface2)', color: 'var(--admin-muted)' }}>
+                Annuler
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

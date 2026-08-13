@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useStorefront } from '../lib/storefront';
 import { imgSrc } from '../lib/image';
+import type { CategoryInfo } from '../lib/data';
 
 const ICONS: [RegExp, string][] = [
   [/jeu|game|play|console|playstation|xbox|switch/i, '🎮'],
@@ -17,11 +18,11 @@ function iconFor(name: string): string {
   return '🛒';
 }
 
-const FALLBACK_CATS = [
-  { name: 'Jeux vidéo', imageUrl: null },
-  { name: 'Accessoires', imageUrl: null },
-  { name: 'Téléphones', imageUrl: null },
-  { name: 'PC', imageUrl: null },
+const FALLBACK_CATS: CategoryInfo[] = [
+  { name: 'Jeux vidéo', imageUrl: null, id: '' },
+  { name: 'Accessoires', imageUrl: null, id: '' },
+  { name: 'Téléphones', imageUrl: null, id: '' },
+  { name: 'PC', imageUrl: null, id: '' },
 ];
 
 function isVedette(name: string) {
@@ -29,7 +30,8 @@ function isVedette(name: string) {
 }
 
 export default function PulsarCategories() {
-  const { categories } = useStorefront();
+  const { categories, settings } = useStorefront();
+  const catScale = (((settings as any).layout?.categoryScale) || {}) as Record<string, number>;
   const cats = categories.length
     ? [...categories].sort((a, b) => (isVedette(b.name) ? 1 : 0) - (isVedette(a.name) ? 1 : 0)).slice(0, 20)
     : FALLBACK_CATS;
@@ -129,9 +131,19 @@ export default function PulsarCategories() {
               data-cat-name={c.name}
             >
               {c.imageUrl ? (
-                <img src={imgSrc(c.imageUrl)} alt={c.name} loading="lazy" />
+                <img
+                  src={imgSrc(c.imageUrl)}
+                  alt={c.name}
+                  loading="lazy"
+                  style={c.id && catScale[c.id] ? { transform: 'scale(' + catScale[c.id] + ')' } : undefined}
+                />
               ) : (
-                <span className="cat-emoji">{iconFor(c.name)}</span>
+                <span
+                  className="cat-emoji"
+                  style={c.id && catScale[c.id] ? { transform: 'scale(' + catScale[c.id] + ')' } : undefined}
+                >
+                  {iconFor(c.name)}
+                </span>
               )}
             </button>
             <span className="cat-chip-name">{c.name}</span>

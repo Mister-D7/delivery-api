@@ -1,0 +1,252 @@
+---
+import HeaderActions from './HeaderActions';
+---
+
+<div class="g-topbar">
+  <div class="g-topbar-in">
+    <div class="g-topbar-left">
+      <span data-edit-text="topbarText" data-text-key="topbarText">Livraison partout en Algérie</span>
+      <span class="g-badge-dz">DZ</span>
+    </div>
+    <nav class="g-topbar-nav">
+      <a href="/#products" class="g-topbar-link g-topbar-icon" aria-label="Carte cadeau">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+      </a>
+      <a href="/track" class="g-topbar-link g-topbar-icon" aria-label="Suivi de commande">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 3v5h-7V8z"/><path d="M5.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M18.5 21a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/></svg>
+      </a>
+      <a href="/mentions-legales" class="g-topbar-link g-topbar-icon" aria-label="Service client">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+      </a>
+    </nav>
+  </div>
+</div>
+
+<header class="g-header">
+  <div class="header-main">
+    <a href="/" class="g-logo" aria-label="Pulsar Gaming" data-edit-logo>
+      <span class="g-logo-mark">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 11h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2z"/><path d="M2 8h20l-1.5 8H3.5z"/><path d="M7 6l2-3 3 3 3-3 3 3"/></svg>
+      </span>
+      <span class="g-logo-word">Pulsar <b>Gaming</b></span>
+      <span class="g-logo-sub">Designed By DjDr</span>
+    </a>
+
+    <form class="search-wrapper" id="gamingSearch" role="search">
+      <input type="text" placeholder="Rechercher un produit..." aria-label="Rechercher un produit" />
+      <button type="submit" class="search-icon-btn" aria-label="Rechercher">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      </button>
+    </form>
+
+    <div class="g-actions">
+      <HeaderActions client:load />
+    </div>
+  </div>
+</header>
+
+<nav class="g-nav" aria-label="Navigation boutique">
+  <div class="g-nav-in">
+    <div class="nav-item-has-dropdown mega-wrap">
+      <button type="button" class="g-nav-drop" aria-haspopup="true" aria-expanded="false">Périphériques PC <span class="mega-caret">↓</span></button>
+      <div class="mega-panel" aria-hidden="true">
+        <a class="mega-link" href="/#products" data-cat="Claviers &amp; Accessoires">Claviers &amp; Accessoires</a>
+        <a class="mega-link" href="/#products" data-cat="Souris &amp; Accessoires">Souris &amp; Accessoires</a>
+        <a class="mega-link" href="/#products" data-cat="Tapis de souris">Tapis de souris</a>
+        <a class="mega-link" href="/#products" data-cat="Casques &amp; Audio">Casques &amp; Audio</a>
+        <a class="mega-link" href="/#products" data-cat="Streaming &amp; Enregistrement">Streaming &amp; Enregistrement</a>
+        <a class="mega-link" href="/#products" data-cat="Manettes">Manettes</a>
+        <a class="mega-link" href="/#products" data-cat="Stockage">Stockage</a>
+        <a class="mega-link" href="/#products" data-cat="Câbles &amp; Adaptateurs">Câbles &amp; Adaptateurs</a>
+        <a class="mega-link" href="/#products" data-cat="Routeur &amp; Réseau">Routeur &amp; Réseau</a>
+        <a class="mega-link" href="/#products" data-cat="Ordinateurs &amp; Composants">Ordinateurs &amp; Composants</a>
+        <a class="mega-link" href="/#products" data-cat="Gaming &amp; Lunettes">Gaming &amp; Lunettes</a>
+        <a class="mega-link" href="/#products" data-cat="Sacs PC">Sacs PC</a>
+        <a class="mega-link mega-link-all" href="/#products" data-cat="Périphériques PC">Voir tout Périphériques PC →</a>
+        <div class="mega-brands">
+          <div class="mega-brands-title">Marques</div>
+          <a class="mega-link" href="/#products" data-brand="SteelSeries">SteelSeries</a>
+          <a class="mega-link" href="/#products" data-brand="Logitech">Logitech</a>
+          <a class="mega-link" href="/#products" data-brand="Razer">Razer</a>
+          <a class="mega-link" href="/#products" data-brand="Zowie By BenQ">Zowie By BenQ</a>
+          <a class="mega-link" href="/#products" data-brand="MaxMount">MaxMount</a>
+          <a class="mega-link" href="/#products" data-brand="Xtrfy">Xtrfy</a>
+          <a class="mega-link" href="/#products" data-brand="Corsair">Corsair</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item-has-dropdown mega-wrap">
+      <button type="button" class="g-nav-drop" aria-haspopup="true" aria-expanded="false">Console <span class="mega-caret">↓</span></button>
+      <div class="mega-panel" aria-hidden="true">
+        <a class="mega-link" href="/#products" data-cat="PlayStation">PlayStation</a>
+        <a class="mega-link" href="/#products" data-cat="Xbox">Xbox</a>
+        <a class="mega-link" href="/#products" data-cat="Nintendo">Nintendo</a>
+        <a class="mega-link mega-link-all" href="/#products" data-cat="Console">Voir tout Console →</a>
+        <div class="mega-brands">
+          <div class="mega-brands-title">Marques</div>
+          <a class="mega-link" href="/#products" data-brand="Sony">Sony</a>
+          <a class="mega-link" href="/#products" data-brand="Microsoft">Microsoft</a>
+          <a class="mega-link" href="/#products" data-brand="KontrolFreek">KontrolFreek</a>
+          <a class="mega-link" href="/#products" data-brand="SteelSeries">SteelSeries</a>
+          <a class="mega-link" href="/#products" data-brand="Astro">Astro</a>
+          <a class="mega-link" href="/#products" data-brand="Turtle Beach">Turtle Beach</a>
+          <a class="mega-link" href="/#products" data-brand="Collective Minds">Collective Minds</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item-has-dropdown mega-wrap">
+      <button type="button" class="g-nav-drop" aria-haspopup="true" aria-expanded="false">Chaise Gaming <span class="mega-caret">↓</span></button>
+      <div class="mega-panel" aria-hidden="true">
+        <a class="mega-link" href="/#products" data-cat="DXRacer">DXRacer</a>
+        <a class="mega-link" href="/#products" data-cat="Arozzi">Arozzi</a>
+        <a class="mega-link" href="/#products" data-cat="MaxMount">MaxMount</a>
+        <a class="mega-link" href="/#products" data-cat="Libernova">Libernova</a>
+        <a class="mega-link" href="/#products" data-cat="Noblechairs">Noblechairs</a>
+        <a class="mega-link" href="/#products" data-cat="ThunderX3">ThunderX3</a>
+        <a class="mega-link" href="/#products" data-cat="Racing">Racing</a>
+        <a class="mega-link" href="/#products" data-cat="Simulateur">Simulateur</a>
+        <a class="mega-link mega-link-all" href="/#products" data-cat="Chaise Gaming">Voir tout Chaise Gaming →</a>
+        <div class="mega-brands">
+          <div class="mega-brands-title">Marques</div>
+          <a class="mega-link" href="/#products" data-brand="SteelSeries">SteelSeries</a>
+          <a class="mega-link" href="/#products" data-brand="Logitech">Logitech</a>
+          <a class="mega-link" href="/#products" data-brand="Razer">Razer</a>
+          <a class="mega-link" href="/#products" data-brand="Zowie By BenQ">Zowie By BenQ</a>
+          <a class="mega-link" href="/#products" data-brand="MaxMount">MaxMount</a>
+          <a class="mega-link" href="/#products" data-brand="Xtrfy">Xtrfy</a>
+          <a class="mega-link" href="/#products" data-brand="Corsair">Corsair</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item-has-dropdown mega-wrap">
+      <button type="button" class="g-nav-drop" aria-haspopup="true" aria-expanded="false">Accessoires Mobiles <span class="mega-caret">↓</span></button>
+      <div class="mega-panel" aria-hidden="true">
+        <a class="mega-link" href="/#products" data-cat="Casques Bluetooth">Casques Bluetooth</a>
+        <a class="mega-link" href="/#products" data-cat="Enceintes">Enceintes</a>
+        <a class="mega-link" href="/#products" data-cat="Coques &amp; Protections">Coques &amp; Protections</a>
+        <a class="mega-link" href="/#products" data-cat="Photo &amp; Vidéo">Photo &amp; Vidéo</a>
+        <a class="mega-link" href="/#products" data-cat="Câbles &amp; Adaptateurs">Câbles &amp; Adaptateurs</a>
+        <a class="mega-link" href="/#products" data-cat="Contrôleurs Mobiles">Contrôleurs Mobiles</a>
+        <a class="mega-link" href="/#products" data-cat="Chargement Sans Fil">Chargement Sans Fil</a>
+        <a class="mega-link" href="/#products" data-cat="Supports Téléphone">Supports Téléphone</a>
+        <a class="mega-link" href="/#products" data-cat="Powerbank">Powerbank</a>
+        <a class="mega-link" href="/#products" data-cat="Smartband">Smartband</a>
+        <a class="mega-link" href="/#products" data-cat="Divers">Divers</a>
+        <a class="mega-link mega-link-all" href="/#products" data-cat="Accessoires Mobiles">Voir tout Accessoires Mobiles →</a>
+        <div class="mega-brands">
+          <div class="mega-brands-title">Marques</div>
+          <a class="mega-link" href="/#products" data-brand="Apple">Apple</a>
+          <a class="mega-link" href="/#products" data-brand="8bitdo">8bitdo</a>
+          <a class="mega-link" href="/#products" data-brand="Ugreen">Ugreen</a>
+          <a class="mega-link" href="/#products" data-brand="Razer">Razer</a>
+          <a class="mega-link" href="/#products" data-brand="PopSockets">PopSockets</a>
+          <a class="mega-link" href="/#products" data-brand="Skullcandy">Skullcandy</a>
+          <a class="mega-link" href="/#products" data-brand="Samsung">Samsung</a>
+        </div>
+      </div>
+    </div>
+    <div class="nav-item-has-dropdown mega-wrap">
+      <button type="button" class="g-nav-drop" aria-haspopup="true" aria-expanded="false">Maison &amp; Loisirs <span class="mega-caret">↓</span></button>
+      <div class="mega-panel" aria-hidden="true">
+        <a class="mega-link" href="/#products" data-cat="Boissons &amp; Énergie">Boissons &amp; Énergie</a>
+        <a class="mega-link" href="/#products" data-cat="Jeux de Cartes à Collectionner">Jeux de Cartes à Collectionner</a>
+        <a class="mega-link" href="/#products" data-cat="Figurines de Collection">Figurines de Collection</a>
+        <a class="mega-link" href="/#products" data-cat="Gadgets">Gadgets</a>
+        <a class="mega-link" href="/#products" data-cat="Climatisation &amp; Ventilation">Climatisation &amp; Ventilation</a>
+        <a class="mega-link" href="/#products" data-cat="Maison Connectée">Maison Connectée</a>
+        <a class="mega-link" href="/#products" data-cat="Nettoyage">Nettoyage</a>
+        <a class="mega-link" href="/#products" data-cat="Style de Vie">Style de Vie</a>
+        <a class="mega-link" href="/#products" data-cat="Vêtements">Vêtements</a>
+        <a class="mega-link" href="/#products" data-cat="Piles">Piles</a>
+        <a class="mega-link mega-link-all" href="/#products" data-cat="Maison &amp; Loisirs">Voir tout Maison &amp; Loisirs →</a>
+        <div class="mega-brands">
+          <div class="mega-brands-title">Marques</div>
+          <a class="mega-link" href="/#products" data-brand="Funko">Funko</a>
+          <a class="mega-link" href="/#products" data-brand="Virtus Pro">Virtus Pro</a>
+          <a class="mega-link" href="/#products" data-brand="Fnatic">Fnatic</a>
+          <a class="mega-link" href="/#products" data-brand="Zowie By BenQ">Zowie By BenQ</a>
+          <a class="mega-link" href="/#products" data-brand="Natus Vincere">Natus Vincere</a>
+          <a class="mega-link" href="/#products" data-brand="Xtrfy">Xtrfy</a>
+          <a class="mega-link" href="/#products" data-brand="GadgetMonster">GadgetMonster</a>
+        </div>
+      </div>
+    </div>
+    <a href="/#promos" class="g-nav-hot">Promos</a>
+    <a href="/special" class="g-nav-hot">⭐ Spécial</a>
+    <a href="/#products" class="g-nav-hot">Nouveautés</a>
+  </div>
+</nav>
+
+<script is:inline>
+  (function () {
+    var form = document.getElementById('gamingSearch');
+    if (form) {
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var input = form.querySelector('input');
+        var q = input ? input.value.trim() : '';
+        window.dispatchEvent(new CustomEvent('storefront:search', { detail: { q: q } }));
+        var el = document.getElementById('products');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+
+    var wraps = document.querySelectorAll('.mega-wrap');
+
+    function setMega(wrap, open) {
+      var btn = wrap.querySelector('.g-nav-drop');
+      var panel = wrap.querySelector('.mega-panel');
+      wrap.classList.toggle('mega-open', open);
+      if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      if (panel) panel.setAttribute('aria-hidden', open ? 'false' : 'true');
+    }
+
+    function closeAllMega() {
+      wraps.forEach(function (w) {
+        setMega(w, false);
+      });
+    }
+
+    wraps.forEach(function (wrap) {
+      var btn = wrap.querySelector('.g-nav-drop');
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var isOpen = wrap.classList.contains('mega-open');
+          closeAllMega();
+          if (!isOpen) setMega(wrap, true);
+        });
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      var inside = Array.prototype.some.call(wraps, function (w) {
+        return w.contains(e.target);
+      });
+      if (!inside) closeAllMega();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeAllMega();
+    });
+
+    function fireFilter(el) {
+      var cat = el.getAttribute('data-cat');
+      if (cat) {
+        window.dispatchEvent(new CustomEvent('category:filter', { detail: { name: cat } }));
+      }
+      var brand = el.getAttribute('data-brand');
+      if (brand) {
+        window.dispatchEvent(new CustomEvent('brand:filter', { detail: { brand: brand } }));
+      }
+      closeAllMega();
+      var el2 = document.getElementById('products');
+      if (el2) el2.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    document.querySelectorAll('.mega-link').forEach(function (l) {
+      l.addEventListener('click', function () {
+        fireFilter(l);
+      });
+    });
+  })();
+</script>

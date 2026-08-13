@@ -2,9 +2,9 @@ import { useStorefront } from '../lib/storefront';
 
 export default function Brand() {
   const { settings } = useStorefront();
-  const name = settings.storeName || 'NEXUS';
+  const name = settings.storeName || 'MISTER-DR GAMING';
   return (
-    <a href="#" className="brand">
+    <a href="#" className="brand" data-edit-logo>
       <span className="brand-mark"></span>
       <span className="brand-text">
         <span className="brand-name" data-edit-text="storeName">{name}</span>

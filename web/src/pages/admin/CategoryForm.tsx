@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Upload } from 'lucide-react';
+import { X, Upload } from '../../components/adminIcons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShieldCheck, Paintbrush, Settings, DollarSign, Archive, Ticket, Users } from 'lucide-react';
+import { LayoutDashboard, Package, ShieldCheck, Store, TrendingUp, Settings, Archive, Ticket, Users } from '../../components/adminIcons';
 import { useTranslation } from 'react-i18next';
 import NotificationBell from '../NotificationBell';
 import UserMenu from '../UserMenu';
@@ -36,14 +36,14 @@ function AdminLayoutInner() {
   }, []);
 
   const NAV = [
-    { to: '/admin', label: t('nav.dashboard'), icon: LayoutDashboard, exact: true },
-    { to: '/admin/customize', label: t('nav.catalogue'), icon: Package },
-    { to: '/admin/editor/full', label: t('nav.boutique'), icon: Paintbrush, newTab: true },
-    { to: '/admin/revenue', label: t('nav.revenue'), icon: DollarSign },
-    { to: '/admin/archive', label: t('nav.archive'), icon: Archive },
-    { to: '/admin/coupons', label: t('nav.coupons'), icon: Ticket },
-    { to: '/admin/employees', label: t('nav.employees'), icon: Users },
-    { to: '/admin/settings', label: t('nav.settings'), icon: Settings },
+    { to: '/admin', label: t('nav.dashboard'), icon: LayoutDashboard, exact: true, color: '#d4b96a' },
+    { to: '/admin/customize', label: t('nav.catalogue'), icon: Package, color: '#3b82f6' },
+    { to: '/admin/editor/full', label: t('nav.boutique'), icon: Store, newTab: true, color: '#a855f7' },
+    { to: '/admin/revenue', label: t('nav.revenue'), icon: TrendingUp, color: '#4caf50' },
+    { to: '/admin/archive', label: t('nav.archive'), icon: Archive, color: '#0ea5e9' },
+    { to: '/admin/coupons', label: t('nav.coupons'), icon: Ticket, color: '#ff9800' },
+    { to: '/admin/employees', label: t('nav.employees'), icon: Users, color: '#f43f5e' },
+    { to: '/admin/settings', label: t('nav.settings'), icon: Settings, color: '#94a3b8' },
   ];
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -120,15 +120,17 @@ function AdminLayoutInner() {
         <div className="h-5 w-px" style={{ background: 'rgba(191,162,78,0.12)' }} />
         {NAV.map(n => {
           const active = n.exact ? location.pathname === n.to : location.pathname.startsWith(n.to.replace('/full',''));
-          const cls = "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold no-underline transition-colors";
-          const style = { background: active ? 'var(--admin-gold-bg)' : 'transparent', color: active ? 'var(--admin-gold)' : 'var(--admin-muted)' };
+          const cls = "flex items-center gap-2 px-2 py-1.5 rounded-full text-xs font-semibold no-underline transition-colors admin-nav";
+          const style = { background: active ? 'var(--admin-gold-bg)' : 'transparent', color: active ? 'var(--admin-gold)' : 'var(--admin-muted)', ['--nav-accent' as string]: n.color };
+          const tileStyle = { background: active ? n.color : 'color-mix(in srgb, var(--nav-accent) 16%, transparent)', boxShadow: active ? `0 0 14px ${n.color}66, inset 0 0 0 1px ${n.color}55` : 'inset 0 0 0 1px color-mix(in srgb, var(--nav-accent) 45%, transparent)' };
+          const iconEl = <span className="admin-nav-icon" style={tileStyle}><n.icon size={18} color={active ? '#fff' : n.color} /></span>;
           return n.newTab ? (
             <a key={n.to} href={n.to} target="_blank" rel="noopener noreferrer" className={cls} style={style}>
-              <n.icon size={13} />{n.label}
+              {iconEl}{n.label}
             </a>
           ) : (
             <Link key={n.to} to={n.to} className={cls} style={style}>
-              <n.icon size={13} />{n.label}
+              {iconEl}{n.label}
             </Link>
           );
         })}

@@ -4,20 +4,27 @@ import { adminAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-const CNAS_RATE = 1.26;
-
 function mapEmployee(e) {
   if (!e) return e;
-  const grossSalary = Number(e.gross_salary) || 0;
   return {
     id: e.id,
     name: e.name,
     role: e.role || 'Employé',
-    grossSalary,
-    employerCost: Math.round(grossSalary * CNAS_RATE),
+    grossSalary: Number(e.gross_salary) || 0,
     active: e.active !== false,
     createdAt: e.created_at,
     updatedAt: e.updated_at,
+  };
+}
+
+function mapPayment(p) {
+  return {
+    id: p.id,
+    employeeId: p.employee_id,
+    amount: Number(p.amount) || 0,
+    paidAt: p.paid_at,
+    notes: p.notes,
+    createdAt: p.created_at,
   };
 }
 
@@ -43,7 +50,6 @@ router.get('/summary', adminAuth, async (req, res) => {
     res.json({
       activeCount: list.length,
       grossTotal,
-      employerTotal: Math.round(grossTotal * CNAS_RATE),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -102,6 +108,58 @@ router.patch('/:id', adminAuth, async (req, res) => {
 router.delete('/:id', adminAuth, async (req, res) => {
   try {
     const { error } = await supabase.from('delivery_employees').delete().eq('id', req.params.id);
+    if (error) throw error;
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /employees/:id/payments — payment history for an employee
+router.get('/:id/payments', adminAuth, async (req, res) => {
+  try {
+    const { data } = await supabase
+      .from('delivery_employee_payments')
+      .select('*')
+      .eq('employee_id', req.params.id)
+      .order('paid_at', { ascending: false });
+    res.json({ payments: (data || []).map(mapPayment) });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /employees/:id/payments — record a salary payment
+router.post('/:id/payments', adminAuth, async (req, res) => {
+  try {
+    const { amount, paidAt, notes } = req.body;
+    if (!amount || Number(amount) <= 0) {
+      return res.status(400).json({ error: 'Montant requis' });
+    }
+    const { data, error } = await supabase
+      .from('delivery_employee_payments')
+      .insert({
+        employee_id: req.params.id,
+        amount: Number(amount),
+        paid_at: paidAt || new Date().toISOString(),
+        notes: notes || null,
+      })
+      .select()
+      .single();
+    if (error) return res.status(400).json({ error: error.message });
+    res.status(201).json(mapPayment(data));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE /employees/payments/:paymentId — remove a payment
+router.delete('/payments/:paymentId', adminAuth, async (req, res) => {
+  try {
+    const { error } = await supabase
+      .from('delivery_employee_payments')
+      .delete()
+      .eq('id', req.params.paymentId);
     if (error) throw error;
     res.json({ ok: true });
   } catch (err) {

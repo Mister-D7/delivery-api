@@ -1,0 +1,39 @@
+---
+import '../styles/gaming.css';
+import '../styles/islands.css';
+import GamingHeader from '../components/GamingHeader.astro';
+import GamingFooter from '../components/GamingFooter.astro';
+import CartDrawer from '../components/CartDrawer';
+import ProductModal from '../components/ProductModal';
+import EditCanvas from '../components/EditCanvas';
+import PulsarTexts from '../components/PulsarTexts';
+import PageSections from '../components/PageSections';
+import TermsGate from '../components/TermsGate.astro';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pulsar Gaming — Designed By DjDr</title>
+</head>
+<body>
+
+<TermsGate />
+
+<GamingHeader />
+
+<main class="g-main">
+  <PageSections variant="gaming" client:load />
+</main>
+
+<GamingFooter />
+
+<CartDrawer client:load />
+<ProductModal client:load />
+<EditCanvas client:load />
+<PulsarTexts client:load />
+
+</body>
+</html>

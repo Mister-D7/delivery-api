@@ -1,25 +1,34 @@
 {
   "title": "Employees",
-  "subtitle": "Wages & accounting",
+  "subtitle": "Wages & payments",
   "summary": {
     "active": "Active employees",
-    "gross": "Payroll (gross/month)",
-    "employer": "Employer cost (×1.26)",
-    "cnas": "Gross salary + employer CNAS (26%)"
+    "gross": "Payroll (gross/month)"
   },
   "form": {
     "title": "Add an employee",
     "name": "Name",
-    "gross": "Gross salary (DA/month)",
+    "gross": "Wage (DA/month)",
     "add": "Add",
     "saved": "Employee saved",
-    "error": "Name and salary required"
+    "error": "Name and wage required"
   },
   "row": {
-    "gross": "Gross",
-    "employer": "Employer cost",
+    "gross": "Wage",
     "active": "Active",
     "inactive": "Inactive"
+  },
+  "pay": {
+    "record": "Pay",
+    "salary": "Wage",
+    "amount": "Amount (DA)",
+    "date": "Date",
+    "add": "Save",
+    "history": "Payment history",
+    "none": "No payments recorded",
+    "saved": "Payment saved",
+    "error": "Amount required",
+    "delete_confirm": "Delete this payment?"
   },
   "actions": {
     "edit": "Edit",

@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { useCustomerAuth } from '../context/CustomerAuthContext';
 import api from '../services/api';
 import { useTranslation } from 'react-i18next';
+import { useStatusLabel } from '../components/OrderStatusBadge';
 import { WILAYAS, getCommunesByWilaya } from '../data/algeria';
 
 type Order = { id: string; status: string; total: number; secureToken: string; createdAt: string; items?: any[] };
@@ -13,6 +14,7 @@ type Address = { id: string; label: string; address: string; wilayaCode?: number
 
 export default function CustomerProfile() {
   const { t } = useTranslation('customer-profile');
+  const statusLabel = useStatusLabel();
   const { customer, token, loading, logout, updateProfile } = useCustomerAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -189,7 +191,7 @@ export default function CustomerProfile() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-bold" style={{ color: 'var(--pt-accent)' }}>{o.total} DA</p>
-                      <p className="text-[11px]" style={{ color: 'var(--pt-muted)' }}>{o.status}</p>
+                      <p className="text-[11px]" style={{ color: 'var(--pt-muted)' }}>{statusLabel(o.status)}</p>
                     </div>
                   </button>
                 ))}

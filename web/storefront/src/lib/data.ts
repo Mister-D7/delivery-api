@@ -113,6 +113,146 @@ export interface StorefrontTexts {
   [key: string]: unknown;
 }
 
+export type SliderType = 'horizontal' | 'vertical' | 'fade' | 'cards' | 'coverflow' | 'cube' | 'flip' | 'grid';
+export type SliderWidth = 'full' | 'three-quarters' | 'two-thirds' | 'half' | 'third' | 'quarter' | 'custom';
+
+export type SlideLink =
+  | { linkType: 'category'; categoryName: string }
+  | { linkType: 'product'; productId: string }
+  | { linkType: 'url'; url: string };
+
+export interface SlideBlock {
+  id: string;
+  imageUrl: string;
+  label?: string;
+  link: SlideLink;
+}
+
+export interface SliderSection {
+  id: string;
+  kind: 'slider';
+  type: SliderType;
+  width: SliderWidth;
+  widthPct?: number;
+  hero?: boolean;
+  slides: SlideBlock[];
+}
+
+export interface SpecialCategory {
+  id: string;
+  name: string;
+  imageUrl?: string;
+  sections: string[];
+  products: string[];
+}
+
+export interface SpecialSection {
+  id: string;
+  kind: 'special';
+  categoryId?: string;
+  title?: string;
+}
+
+export type PageSectionKind =
+  | 'slider' | 'hero'
+  | 'features' | 'banners'
+  | 'categories' | 'products' | 'combos'
+  | 'promos' | 'popular' | 'recommended' | 'about'
+  | 'spotlight' | 'marquee' | 'why' | 'stats' | 'newsletter'
+  | 'special';
+
+export type PageSection = SliderSection | SpecialSection | { id: string; kind: Exclude<PageSectionKind, 'slider' | 'special'> };
+
+export const SLIDER_TYPE_LABELS: Record<SliderType, string> = {
+  horizontal: 'Horizontal',
+  vertical: 'Vertical',
+  fade: 'Fondu',
+  cards: 'Cartes',
+  coverflow: 'Coverflow',
+  cube: 'Cube',
+  flip: 'Flip',
+  grid: 'Grille',
+};
+
+export const SLIDER_WIDTH_LABELS: Record<SliderWidth, string> = {
+  full: 'Pleine largeur',
+  'three-quarters': '3/4',
+  'two-thirds': '2/3',
+  half: 'Moitié',
+  third: '1/3',
+  quarter: '1/4',
+  custom: 'Personnalisé…',
+};
+
+export function uid(prefix = 's'): string {
+  return `${prefix}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+}
+
+export function productsOfSpecialCategory(cat: SpecialCategory | undefined, products: Product[]): Product[] {
+  if (!cat) return [];
+  return products.filter((p) => cat.products.includes(p.id));
+}
+
+export function defaultHeroSlide(): SlideBlock {
+  return { id: 'slide-hero-1', imageUrl: '/images/banner-1.jpg', label: '', link: { linkType: 'url', url: '#shop' } };
+}
+
+export function defaultSliderSection(hero = false): SliderSection {
+  return {
+    id: hero ? 'default-hero' : `slider_${Math.random().toString(36).slice(2, 7)}`,
+    kind: 'slider',
+    type: hero ? 'fade' : 'horizontal',
+    width: 'full',
+    hero,
+    slides: [defaultHeroSlide()],
+  };
+}
+
+export type StorefrontVariant = 'greens' | 'gaming' | 'pulsar' | 'preorder';
+
+export function defaultPageSections(variant: StorefrontVariant): PageSection[] {
+  const hero: SliderSection = {
+    id: 'default-hero',
+    kind: 'slider',
+    type: 'fade',
+    width: 'full',
+    hero: true,
+    slides: [defaultHeroSlide()],
+  };
+  if (variant === 'greens') {
+    return [
+      hero,
+      { id: 'sec-features', kind: 'features' },
+      { id: 'sec-categories', kind: 'categories' },
+      { id: 'sec-products', kind: 'products' },
+      { id: 'sec-combos', kind: 'combos' },
+      { id: 'sec-banners', kind: 'banners' },
+    ];
+  }
+  if (variant === 'gaming') {
+    return [
+      hero,
+      { id: 'sec-promos', kind: 'promos' },
+      { id: 'sec-categories', kind: 'categories' },
+      { id: 'sec-popular', kind: 'popular' },
+      { id: 'sec-recommended', kind: 'recommended' },
+      { id: 'sec-products', kind: 'products' },
+      { id: 'sec-about', kind: 'about' },
+      { id: 'sec-newsletter', kind: 'newsletter' },
+    ];
+  }
+  return [
+    hero,
+    { id: 'sec-marquee', kind: 'marquee' },
+    { id: 'sec-categories', kind: 'categories' },
+    { id: 'sec-spotlight', kind: 'spotlight' },
+    { id: 'sec-products', kind: 'products' },
+    { id: 'sec-why', kind: 'why' },
+    { id: 'sec-stats', kind: 'stats' },
+    { id: 'sec-newsletter', kind: 'newsletter' },
+  ];
+}
+
 export interface StorefrontSettings {
   storeName?: string;
   bannerText?: string;
@@ -123,10 +263,17 @@ export interface StorefrontSettings {
   textColor?: string;
   accentColor?: string;
   fontFamily?: string;
+  logoUrl?: string;
   pinned?: string[];
   theme?: string;
   model3d?: string;
+  preorderStart?: string;
+  preorderWindowDays?: number;
+  preorderPrice?: number;
+  preorderStrike?: number;
   texts?: StorefrontTexts;
+  sections?: PageSection[];
+  specialCategories?: SpecialCategory[];
 }
 
 export function mapRawProduct(raw: any, storeType: string): Product | null {

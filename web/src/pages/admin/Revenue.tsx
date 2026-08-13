@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { DollarSign, Package, FileText, Truck, Users } from 'lucide-react';
+import { DollarSign, Package, FileText, Truck, Users } from '../../components/adminIcons';
 import { useTranslation } from 'react-i18next';
 import api from '../../services/api';
 import type { Overview, TopProduct, ProductCost } from './revenueTypes';
@@ -81,7 +81,7 @@ export default function AdminRevenue() {
         <div className="flex gap-2 mb-6">
           {([['overview', tc('nav.revenue'), DollarSign], ['products', t('tabs.products'), Package], ['reports', t('reports.export_csv'), FileText]] as const).map(([k, label, Icon]) => (
             <button key={k} onClick={() => setTab(k as any)} className="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-colors" style={{ background: tab === k ? 'var(--admin-gold-bg)' : 'var(--admin-surface2)', color: tab === k ? 'var(--admin-gold)' : 'var(--admin-muted)' }}>
-              <Icon size={13} /> {label}
+              <Icon size={15} /> {label}
             </button>
           ))}
         </div>

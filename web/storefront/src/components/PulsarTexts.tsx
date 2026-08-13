@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useStorefront } from '../lib/storefront';
 import { escapeHtml, runsToHtml, type MarqueeText, type TextRun } from '../lib/texts';
 
-function applyMarquee(el: HTMLElement, stored: MarqueeText | TextRun[] | string) {
+function applyMarquee(el: HTMLElement, stored: MarqueeText | TextRun[] | string | { runs: TextRun[] }) {
   const rows = Array.isArray(stored)
     ? stored.map((r) => r.text)
     : Array.isArray((stored as MarqueeText)?.rows)

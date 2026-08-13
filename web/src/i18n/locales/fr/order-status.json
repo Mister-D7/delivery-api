@@ -4,5 +4,7 @@
   "preparing": "En préparation",
   "out_for_delivery": "En livraison",
   "delivered": "Livrée",
-  "cancelled": "Annulée"
+  "cancelled": "Annulée",
+  "cancelled_title": "Commande annulée",
+  "current": "Statut actuel"
 }

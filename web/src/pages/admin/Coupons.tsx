@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Ticket, Plus, RefreshCw, Trash2, Sparkles } from 'lucide-react';
+import { Ticket, Plus, RefreshCw, Trash2, Sparkles } from '../../components/adminIcons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { useTranslation } from 'react-i18next';

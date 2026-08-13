@@ -1,6 +1,16 @@
 import { useRef } from 'react';
-import { Printer, FileDown } from 'lucide-react';
+import { Printer, FileDown } from '../components/adminIcons';
 import jsPDF from 'jspdf';
+import i18n from '../i18n';
+
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  PENDING: 'pending', CONFIRMED: 'confirmed', PREPARING: 'preparing',
+  ON_THE_WAY: 'out_for_delivery', DELIVERED: 'delivered', CANCELLED: 'cancelled',
+};
+export function statusLabel(status: string): string {
+  const key = STATUS_LABEL_KEYS[status];
+  return key ? i18n.t(key, { ns: 'order-status' }) : status;
+}
 
 type OrderItem = {
   customName?: string | null;
@@ -52,7 +62,7 @@ function generatePDF(order: Order) {
   doc.text(`Nom: ${order.customerName}`, 14, y); y += 5;
   doc.text(`Telephone: ${order.phone}`, 14, y); y += 5;
   if (order.address) { doc.text(`Adresse: ${order.address}`, 14, y); y += 5; }
-  doc.text(`Statut: ${order.status}`, 14, y); y += 10;
+  doc.text(`Statut: ${statusLabel(order.status)}`, 14, y); y += 10;
 
   // Table header
   doc.setFillColor(245, 240, 224);
@@ -171,7 +181,7 @@ export default function PrintReceipt({ order }: { order: Order }) {
           <div><span>Client: </span><strong>{order.customerName}</strong></div>
           <div><span>Tele: </span><strong>{order.phone}</strong></div>
           <div><span>Adresse: </span><strong>{order.address || '-'}</strong></div>
-          <div><span>Statut: </span><strong>{order.status}</strong></div>
+          <div><span>Statut: </span><strong>{statusLabel(order.status)}</strong></div>
         </div>
         <table>
           <thead>

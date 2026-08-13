@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, ImagePlus, Upload, Trash2, Box } from 'lucide-react';
+import { X, ImagePlus, Upload, Trash2, Box } from '../../components/adminIcons';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import AdminSelect from './AdminSelect';

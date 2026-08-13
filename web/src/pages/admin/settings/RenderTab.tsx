@@ -1,4 +1,4 @@
-import { Cloud, Loader2, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
+import { Cloud, Loader2, CheckCircle, XCircle, ExternalLink } from '../../../components/adminIcons';
 
 type Props = {
   t: (k: string) => string;

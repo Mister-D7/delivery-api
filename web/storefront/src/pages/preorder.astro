@@ -1,0 +1,27 @@
+---
+import '../styles/preorder.css';
+import '../styles/islands.css';
+import PreorderLanding from '../components/PreorderLanding';
+import CartDrawer from '../components/CartDrawer';
+import EditCanvas from '../components/EditCanvas';
+import TermsGate from '../components/TermsGate.astro';
+---
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mister-D — Pré-commande</title>
+</head>
+<body>
+
+<TermsGate />
+
+<PreorderLanding client:load />
+
+<CartDrawer client:load />
+<EditCanvas client:load />
+
+</body>
+</html>

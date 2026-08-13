@@ -65,7 +65,7 @@ export default function PulsarHeroScene() {
       group.add(ring2);
 
       const nodeColors = [0x000000, 0x000000, 0x000000, 0x000000];
-      const nodes: { mesh: THREE.Mesh; radius: number; speed: number; offset: number; tilt: number }[] = [];
+      const nodes: { mesh: any; radius: number; speed: number; offset: number; tilt: number }[] = [];
       for (let i = 0; i < 4; i++) {
         const geo = new THREE.BoxGeometry(0.16, 0.16, 0.16);
         const mat = new THREE.MeshStandardMaterial({ color: nodeColors[i], emissive: nodeColors[i], emissiveIntensity: 0.5, roughness: 0.4 });
@@ -98,8 +98,8 @@ export default function PulsarHeroScene() {
         state.isLight = light;
         core.material.color.setHex(light ? 0xececf2 : 0x0c0c16);
         nodes.forEach((n) => {
-          (n.mesh.material as THREE.MeshStandardMaterial).color.setHex(0x000000);
-          (n.mesh.material as THREE.MeshStandardMaterial).emissive.setHex(0x000000);
+          (n.mesh.material as any).color.setHex(0x000000);
+          (n.mesh.material as any).emissive.setHex(0x000000);
         });
         particleMat.color.setHex(0x000000);
         particleMat.opacity = light ? 0.85 : 0.5;

@@ -216,6 +216,14 @@ app.get('/', async (req, res) => {
     if (blob?.theme === 'greens' && fs.existsSync(greensPath)) {
       return res.sendFile(greensPath);
     }
+    const gamingPath = path.join(storefrontDist, 'gaming', 'index.html');
+    if (blob?.theme === 'gaming' && fs.existsSync(gamingPath)) {
+      return res.sendFile(gamingPath);
+    }
+    const preorderPath = path.join(storefrontDist, 'preorder', 'index.html');
+    if (blob?.theme === 'preorder' && fs.existsSync(preorderPath)) {
+      return res.sendFile(preorderPath);
+    }
   } catch {}
   res.sendFile(path.join(storefrontDist, 'index.html'));
 });
