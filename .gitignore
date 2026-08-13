@@ -17,8 +17,8 @@ stdout.log
 web/dist/
 web/storefront/dist/
 
-# 3D model uploads (user-generated, keep out of git)
-uploads/models/
+# User uploads (user-generated content, keep out of git)
+uploads/
 
 # Legacy backups
 backups/
